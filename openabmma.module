@@ -1,0 +1,67 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * 
+ * Provides an agent based model archive within the Drupal framework.  This
+ * involves the user creation of new model projects, ability to upload new
+ * versions of an ABM project and edit associated metadata.  Members of a
+ * review committee should also be able to "star" an ABM project to signify
+ * its level of maturity and completeness.
+ * 
+ *
+ */
+
+
+/**
+ * Implementation of hook_menu(), providing openabmma URL mappings and
+ * callbacks.
+ */
+function openabmma_menu($may_cache) {
+    $items = array();
+    if ($may_cache) {
+        // admin settings for model archive.  Right now I can only think of
+        // group membership in the review committee as a configurable option.
+        $items[] = array(
+            'path' => 'admin/settings/openabmma',
+            'title' => t('OpenABM Model Archive Settings'),
+            'description' => t('Change model archive settings.'),
+            'callback' => 'drupal_get_form',
+            'callback arguments' => array('openabmma_settings_form'),
+            'access' => user_access('administer site configuration')
+            );
+        $items[] = array(
+            'path' => 'node/add/model',
+            'title' => t('Add new model'),
+            'description' => t('Add a new model to the model archive.'),
+            'callback' => 'drupal_get_form',
+            'callback arguments' => array('openabmma_edit_form'),
+
+            
+
+
+            );
+    }
+    return $items;
+}
+
+function openabmma_settings_form() {
+    $form['openabmma_settings'] = array(
+        '#type' => 'checkboxes',
+        '#title' => t('Testing'),
+        '#options' => node_get_types('names'),
+        '#default_value' => 'story',
+        '#description' => t('Some description'),
+        );
+    $form['array_filter'] = array('#type' => 'hidden');
+    return system_settings_form($form);
+}
+
+function openabmma_edit_form() {
+    global $user;
+
+    return system_settings_form($form);
+}
+
+
