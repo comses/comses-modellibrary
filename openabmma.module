@@ -37,10 +37,6 @@ function openabmma_menu($may_cache) {
             'description' => t('Add a new model to the model archive.'),
             'callback' => 'drupal_get_form',
             'callback arguments' => array('openabmma_edit_form'),
-
-            
-
-
             );
     }
     return $items;
