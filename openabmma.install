@@ -9,33 +9,42 @@ function openabmma_install() {
             // create model project table.  Stores all metadata associated
             // with a model project in the model archive.  Every project has
             // a single associated owner.
-            db_query("CREATE TABLE {openabm_model_project} (
-                id              INT(10) UNSIGNED AUTO_INCREMENT NOT NULL, 
+            db_query("CREATE TABLE openabm_model_project (
                 owner_uid       INT(10) UNSIGNED NOT NULL,
                 name            VARCHAR(255) NOT NULL,
                 description     MEDIUMTEXT NOT NULL,
+		visible		bool default 0,
                 license_id      TINYINT UNSIGNED NOT NULL,
-                PRIMARY KEY(id),
-                FOREIGN KEY owner_uid REFERENCES user(uid),
-                FOREIGN KEY license_id REFERENCES openabm_license(id)
-                ) TYPE=INNODB;");
+                PRIMARY KEY(name),
+                FOREIGN KEY (owner_uid) REFERENCES user(uid),
+                FOREIGN KEY (license_id) REFERENCES openabm_license(id)
+                );");
             // create pivot table for members of an ABM project
-            db_query("CREATE TABLE {openabm_model_project_member} (
-                id              INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
+
+            db_query("CREATE TABLE openabm_model_project_member (
                 project_id      INT(10) UNSIGNED NOT NULL,
                 user_id         INT(10) UNSIGNED NOT NULL,
-                PRIMARY KEY (id),
-                FOREIGN KEY project_id REFERENCES openabm_model_project(id)
+		role		INT NOT NULL,
+                PRIMARY KEY (project_id, user_id),
+                FOREIGN KEY (project_id) REFERENCES openabm_model_project(id)
                     ON DELETE CASCADE,
-                FOREIGN KEY user_id REFERENCES user(uid),
-                ) TYPE=INNODB;");
+                FOREIGN KEY (user_id) REFERENCES user(uid) ON DELETE CASCADE,
+		FOREIGN KEY (role) REFERENCES openabm_roles(id)
+                );");
+
+            db_query("CREATE TABLE openabm_roles (
+		id		INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
+		name		VARCHAR(255) NOT NULL,
+                PRIMARY KEY (id)
+                );");
+
             // create license table
-            db_query("CREATE TABLE {openabm_license} (
+            db_query("CREATE TABLE openabm_license (
                 id INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
                 license MEDIUMTEXT NOT NULL,
-                url     varchar(255),
+                url     TEXT,
                 PRIMARY KEY(id)
-                ) TYPE=INNODB;");
+                );");
             break;
         case 'pgsql':
         default:
