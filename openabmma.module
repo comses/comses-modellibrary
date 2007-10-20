@@ -12,13 +12,30 @@
  * 
  *
  */
+function openabmma_block ($op='list', $delta=0)
+{
+	// listing of blocks, such as on the admin/block page
+	if ($op == "list")
+	{
+		$block[0]["info"] = t("OpenABM Resource Links");
+		return $block;
+	}
+	else if ($op == 'view')
+	{
+		$block_content = l ("My projects", "model/projects/") . "<br/>"
+			. l ("Manage project members", "model/members/") . "<br/>"
+			;
 
+		if (user_access ('administer content'))
+			$block_content .= "<br/>" . l ("Project licenses", "model/licenses") . "<br/>";
+		$block['subject'] = 'OpenABM Links';
+		$block['content'] = $block_content;
+		return $block;
+	}
+}
 
-/**
- * Implementation of hook_menu(), providing openabmma URL mappings and
- * callbacks.
- */
 function openabmma_menu($may_cache) {
+
     $items = array();
     if ($may_cache) {
         // admin settings for model archive.  Right now I can only think of
@@ -29,17 +46,181 @@ function openabmma_menu($may_cache) {
             'description' => t('Change model archive settings.'),
             'callback' => 'drupal_get_form',
             'callback arguments' => array('openabmma_settings_form'),
+            'type' => MENU_CALLBACK,
             'access' => user_access('administer site configuration')
             );
+
         $items[] = array(
-            'path' => 'node/add/model',
-            'title' => t('Add new model'),
+            'path' => 'model/projects/add',
+            'title' => t('Add a new model'),
             'description' => t('Add a new model to the model archive.'),
+            'access' => user_access ('access content'),
             'callback' => 'drupal_get_form',
-            'callback arguments' => array('openabmma_edit_form'),
+            'type' => MENU_CALLBACK,
+            'callback arguments' => array('openabmma_newModel'),
+            );
+
+        $items[] = array(
+            'path' => 'model/projects',
+            'title' => t('My projects'),
+            'description' => "",
+            'access' => user_access ('access content'),
+            'callback' => 'openabmma_showProjects',
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'model/licenses',
+            'title' => t('Manage licenses'),
+            'description' => "",
+            'access' => user_access ('administer content'),
+            'callback' => 'openabmma_showLicenses',
+            'type' => MENU_CALLBACK
+            );
+
+    }
+    else
+    {
+        $items[] = array(
+            'path' => 'model/licenses/delete' . arg(1),
+            'title' => t('Delete license'),
+            'description' => "",
+            'access' => user_access ('administer content'),
+            'callback' => 'openabmma_deleteLicense',
+            'callback arguments' => array(arg(1)),
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'model/' . arg(1),
+            'title' => t('My projects'),
+            'description' => "",
+            'access' => user_access ('access content'),
+            'callback' => 'openabmma_openProject',
+            'callback arguments' => array(arg(1)),
+            'type' => MENU_CALLBACK
             );
     }
+
     return $items;
+}
+
+function openabmma_openProject ($id='')
+{
+	if ($id == '')
+		drupal_goto ("model/projects");
+
+	$output .= "<br/>" . l ("View/download files in this project", "model/projects/" . $id . "/files");
+	$output .= "<br/>" . l ("Add files to this project", "model/projects/" . $id . "/addFiles");
+
+	return $output;
+}
+
+function openabmma_showProjects ()
+{
+	global $user;
+
+	$count = 0;
+	$output .= '<br/>Owned projects:<br/>&nbsp;';
+	$query = "SELECT name, description, visible FROM openabm_model_project WHERE owner_uid=%d";
+	$result = db_query ($query, $user->uid);
+	while ($node = db_fetch_object ($result))
+	{
+		$count++;
+		$output .= "<br/><b>" . l ($node->name, "model/" . $node->name) . "</b>&nbsp;";
+
+		if ($node->visible == 1)	$output .= "[Public]";
+		else				$output .= "[Private]";
+
+		$output .= "&nbsp;<br/><small>" . $node->description . "</small><br/><small>";
+		$output .= "</small><br/>";
+	}
+
+	$output .= "Total " . $count . " owned projects.<br/>&nbsp;<br/>";
+	$count = 0;
+
+	$output .= '<br/>Membered projects:<br/>&nbsp;<br/>';
+	$query = "SELECT A.name, A.description, A.visible, B.role FROM openabm_model_project A JOIN openabm_model_project_member B WHERE B.user_id=%d";
+	$result = db_query ($query, $user->uid);
+	while ($node = db_fetch_object ($result))
+	{
+		$count++;
+		$output .= "<b>" . l ($node->name, "model/" . $node->name) . "</b>&nbsp;";
+
+		if ($node->visible == 1)	$output .= "[Public]";
+		else				$output .= "[Private]";
+
+		$output .= "&nbsp;<br/><small>" . $node->description . "</small><br/><small>";
+		$output .= "</small><br/>";
+	}
+
+	$output .= "Total " . $count . " membered projects.<br/>&nbsp;<br/>";
+	$output .= "<br/>" . l ("To add new project, click here", "model/projects/add");
+	return $output;
+}
+
+function openabmma_showLicenses ()
+{
+	$count = 0;
+	$output = '';
+	$query = "SELECT id, license, url FROM openabm_license";
+	$result = db_query ($query);
+	while ($node = db_fetch_object ($result))
+	{
+		$count++;
+		$output .= "<b>" . $node->license . "</b>&nbsp;<small>" . l ("[delete this]", "model/licenses/delete/" . $node->id) . "<br/>" . l($node->url, $node->url) . "</small><br/>&nbsp;<br/>";
+	}
+
+	return "There are currently " . $count . " license(s). <br/>&nbsp;<br/>" . $output . "<hr/><br/>" . drupal_get_form(openabmma_addLicense_form);
+}
+
+function openabmma_deleteLicense ($id='')
+{
+	drupal_set_message ("*" . $id . "*");
+	return '';
+}
+
+function openabmma_addLicense_form_submit ($formid, $edit)
+{
+	$query = "INSERT INTO openabm_license (license, url) VALUES ('%s', '%s')";
+	db_query ($query, $edit['name'], $edit ['url']);
+}
+
+function openabmma_addLicense_form ()
+{
+	$form["details"] = array(
+		"#type" => 'fieldset',
+		"#collapsible" => FALSE,
+		"#collapsed" => FALSE,
+		"#title" => null,
+		"#description" => t("You can add a new license type here."),
+	);
+
+	$form ["details"]["name"] = array (
+		"#type" => "textfield",
+		"#title" => t("License Name:"),
+		"#default_value" => null,
+		"#description" => t("Name of the license"),
+		"#maxlength" => 210,
+		"#required" => true
+	);
+
+	$form ["details"]["url"] = array (
+		"#type" => "textfield",
+		"#title" => t("URL:"),
+		"#default_value" => null,
+		"#description" => t("Web address of license document"),
+		"#maxlength" => 210,
+		"#required" => true
+	);
+
+	$form ["details"]["submit"] = array (
+		"#type" => "submit",
+		"#value" => t("Submit"),
+		"#submit" => TRUE
+	);
+
+	return ($form);
 }
 
 function openabmma_settings_form() {
@@ -54,10 +235,89 @@ function openabmma_settings_form() {
     return system_settings_form($form);
 }
 
-function openabmma_edit_form() {
-    global $user;
+function openabmma_newModel ($edit=null, $item=0)
+{
+	global $user;
 
-    return system_settings_form($form);
+	$result = (array) db_fetch_object (db_query ("SELECT max(id) FROM openabm_model_project"));
+	$id = $result['max(id)'] + 1;
+
+	$form["details"] = array(
+		"#type" => 'fieldset',
+		"#collapsible" => FALSE,
+		"#collapsed" => FALSE,
+		"#title" => null,
+		"#description" => t("You can set the project properties here."),
+	);
+
+/*	$form ["details"]["proj_id"] = array (
+		"#type" => "item",
+		"#title" => t("Project ID:"),
+		"#value" => $id,
+		"#description" => t("Unique id for this project"),
+	);
+*/
+	$form ["details"]["proj_ownerId"] = array (
+		"#type" => "item",
+		"#title" => t("Owner ID:"),
+		"#value" => "#" . $user->uid . " - " . $user->name,
+		"#description" => t("Information about the owner of this project"),
+	);
+
+	$form ["details"]["proj_name"] = array (
+		"#type" => "textfield",
+		"#title" => t("Project Name:"),
+		"#default_value" => $edit ["proj_name"],
+		"#description" => null,
+		"#maxlength" => 210,
+//		'#autocomplete_path' => 'user/autocomplete',
+		"#required" => true
+	);
+
+	$form ["details"]["proj_description"] = array (
+		"#type" => "textarea",
+		"#title" => t("Description of project:"),
+		"#default_value" => $edit ["proj_description"],
+		"#description" => null,
+		"#required" => false
+	);
+
+	$licenseTypes = array ();
+	$result = db_query ("SELECT id, license, url FROM openabm_license");
+	while ($node = db_fetch_object ($result))
+		$licenseTypes [$node->id] = $node->license . " [" . $node->url . "]";
+
+	$form ["details"]["proj_licenseId"] = array (
+		"#type" => "select",
+		"#title" => t("License:"),
+		"#default_value" => $edit ["proj_licenseId"],
+		"#options" => $licenseTypes,
+		"#description" => null
+	);
+
+	$form["details"]["proj_visibility"] = array(
+	'#type' => 'checkboxes',
+	'#title' => t(''),
+	'#default_value' => "false",
+	'#options' => array(
+		'visibility' => t('I want to make my project visible to all'),
+		),
+	'#description' => t('Enabling this option will make your project visible to all registered users of this site.'),
+	);
+
+	$form ["details"]["submit"] = array (
+		"#type" => "submit",
+		"#value" => t("Submit"),
+		"#submit" => TRUE
+	);
+
+	return $form;
 }
 
-
+function openabmma_newModel_submit ($form_id, $edit)
+{
+	global $user;
+	$query = "INSERT INTO openabm_model_project (owner_uid, name, description, visible, license_id) VALUES (%d, '%s', '%s', %d, %d)";
+	db_query ($query, $user->uid, $edit ['proj_name'], $edit ['proj_description'], $edit ["proj_visibility"], $edit ['proj_licenseId']);
+	drupal_goto ("model/projects");
+}
