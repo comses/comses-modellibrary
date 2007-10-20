@@ -22,12 +22,15 @@ function openabmma_block ($op='list', $delta=0)
 	}
 	else if ($op == 'view')
 	{
-		$block_content = l ("My projects", "model/projects/") . "<br/>"
-			. l ("Manage project members", "model/members/") . "<br/>"
+		$block_content = l ("My projects", "models/") . "<br/>"
+			. l ("Manage project members", "models/members/") . "<br/>"
 			;
 
 		if (user_access ('administer content'))
-			$block_content .= "<br/>" . l ("Project licenses", "model/licenses") . "<br/>";
+		{
+			$block_content .= "<br/>" . l ("Project licenses", "licenses") . "<br/>";
+			$block_content .= "<br/>" . l ("Member roles", "roles") . "<br/>";
+		}
 		$block['subject'] = 'OpenABM Links';
 		$block['content'] = $block_content;
 		return $block;
@@ -51,7 +54,7 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'model/projects/add',
+            'path' => 'models/add',
             'title' => t('Add a new model'),
             'description' => t('Add a new model to the model archive.'),
             'access' => user_access ('access content'),
@@ -61,7 +64,7 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'model/projects',
+            'path' => 'models',
             'title' => t('My projects'),
             'description' => "",
             'access' => user_access ('access content'),
@@ -70,7 +73,16 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'model/licenses',
+            'path' => 'roles',
+            'title' => t('User roles'),
+            'description' => "",
+            'access' => user_access ('access content'),
+            'callback' => 'openabmma_showRoles',
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'licenses',
             'title' => t('Manage licenses'),
             'description' => "",
             'access' => user_access ('administer content'),
@@ -82,17 +94,47 @@ function openabmma_menu($may_cache) {
     else
     {
         $items[] = array(
-            'path' => 'model/licenses/delete' . arg(1),
+            'path' => 'roles/delete/' . arg(2),
+            'title' => t('Delete role'),
+            'description' => "",
+            'access' => user_access ('administer content'),
+            'callback' => 'openabmma_deleteRole',
+            'callback arguments' => array(arg(2)),
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'licenses/delete/' . arg(2),
             'title' => t('Delete license'),
             'description' => "",
             'access' => user_access ('administer content'),
             'callback' => 'openabmma_deleteLicense',
+            'callback arguments' => array(arg(2)),
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'mymodels/' . arg(1) . '/addFiles',
+            'title' => t('Files'),
+            'description' => "",
+            'access' => user_access ('access content'),
+            'callback' => 'openabmma_addFiles',
             'callback arguments' => array(arg(1)),
             'type' => MENU_CALLBACK
             );
 
         $items[] = array(
-            'path' => 'model/' . arg(1),
+            'path' => 'mymodels/' . arg(1) . '/members',
+            'title' => t('Project members'),
+            'description' => "",
+            'access' => user_access ('access content'),
+            'callback' => 'openabmma_manageMembers',
+            'callback arguments' => array(arg(1)),
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'mymodels/' . arg(1),
             'title' => t('My projects'),
             'description' => "",
             'access' => user_access ('access content'),
@@ -105,13 +147,54 @@ function openabmma_menu($may_cache) {
     return $items;
 }
 
+function openabmma_addFiles ($id='')
+{
+	return "";
+}
+
+function openabmma_manageMembers ($id='')
+{
+	if ($id == '')
+		drupal_goto ("models");
+
+	$output = "<br/><u>Owner</u>: " . openabmma_getModelOwner ($id);
+
+	$members = openabmma_getModelMembers ($id);
+	return $output;
+}
+
+function openabmma_getModelMembers ($id='')
+{
+	if ($id == '')
+		return "";
+
+
+	$result = db_query ("SELECT name FROM users A WHERE uid IN (SELECT user_id FROM openabm_model_project_member B WHERE id= (SELECT id FROM openabm_model_project WHERE name='%s'))", $id);
+	while ($node = db_fetch_object ($result))
+	{
+		$output .= $node->name . "+" . $node->role . "-";
+	}
+	return $output;
+}
+
+function openabmma_getModelOwner ($id='')
+{
+	if ($id == '')
+		return "";
+
+	$result = (array) db_fetch_object (db_query ("SELECT name FROM users WHERE uid = (SELECT owner_uid FROM openabm_model_project WHERE name='%s')", $id));
+	$owner = $result['name'];
+	return $owner;
+}
+
 function openabmma_openProject ($id='')
 {
 	if ($id == '')
-		drupal_goto ("model/projects");
+		drupal_goto ("models");
 
-	$output .= "<br/>" . l ("View/download files in this project", "model/projects/" . $id . "/files");
-	$output .= "<br/>" . l ("Add files to this project", "model/projects/" . $id . "/addFiles");
+	$output .= "<br/>" . l ("View/download files in this project", "mymodels/" . $id . "/files");
+	$output .= "<br/>" . l ("Add files to this project", "mymodels/" . $id . "/addFiles");
+	$output .= "<br/>" . l ("Manage members in this project", "mymodels/" . $id . "/members");
 
 	return $output;
 }
@@ -121,13 +204,13 @@ function openabmma_showProjects ()
 	global $user;
 
 	$count = 0;
-	$output .= '<br/>Owned projects:<br/>&nbsp;';
+	$output .= '<br/><u>Owned projects:</u><br/>&nbsp;';
 	$query = "SELECT name, description, visible FROM openabm_model_project WHERE owner_uid=%d";
 	$result = db_query ($query, $user->uid);
 	while ($node = db_fetch_object ($result))
 	{
 		$count++;
-		$output .= "<br/><b>" . l ($node->name, "model/" . $node->name) . "</b>&nbsp;";
+		$output .= "<br/><b>" . l ($node->name, "mymodels/" . $node->name) . "</b>&nbsp;";
 
 		if ($node->visible == 1)	$output .= "[Public]";
 		else				$output .= "[Private]";
@@ -139,13 +222,13 @@ function openabmma_showProjects ()
 	$output .= "Total " . $count . " owned projects.<br/>&nbsp;<br/>";
 	$count = 0;
 
-	$output .= '<br/>Membered projects:<br/>&nbsp;<br/>';
+	$output .= '<br/><u>Membered projects:<br/></u>&nbsp;<br/>';
 	$query = "SELECT A.name, A.description, A.visible, B.role FROM openabm_model_project A JOIN openabm_model_project_member B WHERE B.user_id=%d";
 	$result = db_query ($query, $user->uid);
 	while ($node = db_fetch_object ($result))
 	{
 		$count++;
-		$output .= "<b>" . l ($node->name, "model/" . $node->name) . "</b>&nbsp;";
+		$output .= "<b>" . l ($node->name, "mymodels/" . $node->name) . "</b>&nbsp;";
 
 		if ($node->visible == 1)	$output .= "[Public]";
 		else				$output .= "[Private]";
@@ -155,8 +238,58 @@ function openabmma_showProjects ()
 	}
 
 	$output .= "Total " . $count . " membered projects.<br/>&nbsp;<br/>";
-	$output .= "<br/>" . l ("To add new project, click here", "model/projects/add");
+	$output .= "<br/>" . l ("To add new project, click here", "models/add");
 	return $output;
+}
+
+function openabmma_showRoles ()
+{
+	$count = 0;
+	$query = "SELECT id, name FROM openabm_role";
+	$result = db_query ($query);
+	while ($node = db_fetch_object ($result))
+	{
+		$count++;
+		$output .= "<br/><b>" . $node->name . "</b>&nbsp;" . l ("[delete]", "roles/delete/" . $node->id);
+	}
+
+	$output = "<br/>Total " . $count . " role(s).<br/>" . $output . "<br/>&nbsp;" . drupal_get_form (openabmma_add_role);
+	return $output;
+}
+
+function openabmma_add_role_submit ($form_id, $edit)
+{
+	$query = "INSERT INTO openabm_role (name) VALUES ('%s')";
+	db_query ($query, $edit ['name']);
+	drupal_goto ("roles");
+}
+
+function openabmma_add_role ()
+{
+	$form["details"] = array(
+		"#type" => 'fieldset',
+		"#collapsible" => FALSE,
+		"#collapsed" => FALSE,
+		"#title" => null,
+		"#description" => t("You can add a new member role here."),
+	);
+
+	$form ["details"]["name"] = array (
+		"#type" => "textfield",
+		"#title" => t("Role name:"),
+		"#default_value" => null,
+		"#description" => "",
+		"#maxlength" => 210,
+		"#required" => true
+	);
+
+	$form ["details"]["submit"] = array (
+		"#type" => "submit",
+		"#value" => t("Submit"),
+		"#submit" => TRUE
+	);
+
+	return ($form);
 }
 
 function openabmma_showLicenses ()
@@ -168,7 +301,7 @@ function openabmma_showLicenses ()
 	while ($node = db_fetch_object ($result))
 	{
 		$count++;
-		$output .= "<b>" . $node->license . "</b>&nbsp;<small>" . l ("[delete this]", "model/licenses/delete/" . $node->id) . "<br/>" . l($node->url, $node->url) . "</small><br/>&nbsp;<br/>";
+		$output .= "<b>" . $node->license . "</b>&nbsp;<small>" . l ("[delete this]", "licenses/delete/" . $node->id) . "<br/>" . l($node->url, $node->url) . "</small><br/>&nbsp;<br/>";
 	}
 
 	return "There are currently " . $count . " license(s). <br/>&nbsp;<br/>" . $output . "<hr/><br/>" . drupal_get_form(openabmma_addLicense_form);
@@ -176,7 +309,25 @@ function openabmma_showLicenses ()
 
 function openabmma_deleteLicense ($id='')
 {
-	drupal_set_message ("*" . $id . "*");
+	if ($id != "")
+	{
+		$query = "DELETE FROM openabm_license WHERE id=%d";
+		db_query ($query, $id);
+	}
+
+	drupal_goto ("licenses");	
+	return '';
+}
+
+function openabmma_deleteRole ($id='')
+{
+	if ($id != "")
+	{
+		$query = "DELETE FROM openabm_role WHERE id=%d";
+		db_query ($query, $id);
+	}
+
+	drupal_goto ("roles");
 	return '';
 }
 
@@ -319,5 +470,5 @@ function openabmma_newModel_submit ($form_id, $edit)
 	global $user;
 	$query = "INSERT INTO openabm_model_project (owner_uid, name, description, visible, license_id) VALUES (%d, '%s', '%s', %d, %d)";
 	db_query ($query, $user->uid, $edit ['proj_name'], $edit ['proj_description'], $edit ["proj_visibility"], $edit ['proj_licenseId']);
-	drupal_goto ("model/projects");
+	drupal_goto ("models");
 }
