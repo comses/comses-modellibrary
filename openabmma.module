@@ -57,7 +57,7 @@ function openabmma_menu($may_cache) {
             'path' => 'models/add',
             'title' => t('Add a new model'),
             'description' => t('Add a new model to the model archive.'),
-            'access' => user_access ('access content'),
+            'access' => user_access ('logged in'),
             'callback' => 'drupal_get_form',
             'type' => MENU_CALLBACK,
             'callback arguments' => array('openabmma_newModel'),
@@ -67,7 +67,7 @@ function openabmma_menu($may_cache) {
             'path' => 'models',
             'title' => t('My projects'),
             'description' => "",
-            'access' => user_access ('access content'),
+            'access' => user_access ('logged in'),
             'callback' => 'openabmma_showProjects',
             'type' => MENU_CALLBACK
             );
@@ -76,7 +76,7 @@ function openabmma_menu($may_cache) {
             'path' => 'roles',
             'title' => t('User roles'),
             'description' => "",
-            'access' => user_access ('access content'),
+            'access' => user_access ('administer content'),
             'callback' => 'openabmma_showRoles',
             'type' => MENU_CALLBACK
             );
@@ -117,9 +117,29 @@ function openabmma_menu($may_cache) {
             'path' => 'mymodels/' . arg(1) . '/addFiles',
             'title' => t('Files'),
             'description' => "",
-            'access' => user_access ('access content'),
+            'access' => user_access ('logged in'),
             'callback' => 'openabmma_addFiles',
             'callback arguments' => array(arg(1)),
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'mymodels/' . arg(1) . '/metadata',
+            'title' => t('Meta data'),
+            'description' => "",
+            'access' => user_access ('logged in'),
+            'callback' => 'drupal_get_form',
+            'callback arguments' => array('openabmma_metadata'),
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'mymodels/' . arg(1) . '/members/delete',
+            'title' => t('Delete members'),
+            'description' => "",
+            'access' => user_access ('logged in'),
+            'callback' => 'openabmma_deleteMember',
+            'callback arguments' => array(arg(1), arg(4)),
             'type' => MENU_CALLBACK
             );
 
@@ -127,7 +147,7 @@ function openabmma_menu($may_cache) {
             'path' => 'mymodels/' . arg(1) . '/members',
             'title' => t('Project members'),
             'description' => "",
-            'access' => user_access ('access content'),
+            'access' => user_access ('logged in'),
             'callback' => 'openabmma_manageMembers',
             'callback arguments' => array(arg(1)),
             'type' => MENU_CALLBACK
@@ -135,7 +155,7 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'mymodels/' . arg(1),
-            'title' => t('My projects'),
+            'title' => arg(1),
             'description' => "",
             'access' => user_access ('access content'),
             'callback' => 'openabmma_openProject',
@@ -147,54 +167,349 @@ function openabmma_menu($may_cache) {
     return $items;
 }
 
+function openabmma_metadata_submit ($form_id, $edit)
+{
+	if ($edit ["proj_visibility"] == 1)	$edit ["proj_visibility"] = "true";
+	else					$edit ["proj_visibility"] = "false";
+
+	$query = "UPDATE openabm_model_project SET description='%s', visible=%d, license_id=%d WHERE id=%d";
+	db_query ($query, $edit["proj_description"], $edit ["proj_visibility"], $edit ["proj_licenseId"], $edit ["projId"]);
+	drupal_goto ("mymodels/" . arg(1));
+}
+
+function openabmma_metadata ()
+{
+	global $user;
+
+	$name = arg(1);
+
+	if ($name == '')
+		drupal_goto ("mymodels");
+
+	if ($user->name != openabmma_getModelOwner ($name))
+	{
+		$form["details"] = array(
+			"#type" => 'fieldset',
+			"#collapsible" => FALSE,
+			"#collapsed" => FALSE,
+			"#title" => null,
+			"#description" => ""
+		);
+
+		$form ["details"]["msg"] = array (
+			'#type' => "item",
+			'#value' => "This feature is only available to model owners."
+		);
+
+		return $form;
+	}
+
+	$query = "SELECT description, visible, license_id FROM openabm_model_project WHERE name='%s'";
+	$result = (array) db_fetch_object (db_query ($query, $name));
+
+	$visibility = $result ["visible"];
+	if ($visibility == "1")	$visibility = "checked";
+	else			$visibility = "false";
+
+	$form["details"] = array(
+		"#type" => 'fieldset',
+		"#collapsible" => FALSE,
+		"#collapsed" => FALSE,
+		"#title" => null,
+		"#description" => t("You can change options for this project here."),
+	);
+
+	$form ["details"]["projId"] = array (
+		'#type' => "hidden",
+		'#value' => openabmma_getProjectId ($name)
+	);
+
+	$form ["details"]["proj_description"] = array (
+		"#type" => "textarea",
+		"#title" => t("Description of project:"),
+		"#default_value" => $result ["description"],
+		"#description" => null,
+		"#required" => false
+	);
+
+	$licenseTypes = array ();
+	$result2 = db_query ("SELECT id, license, url FROM openabm_license");
+	while ($node = db_fetch_object ($result2))
+		$licenseTypes [$node->id] = $node->license . " [" . $node->url . "]";
+
+	$form ["details"]["proj_licenseId"] = array (
+		"#type" => "select",
+		"#title" => t("License:"),
+		"#value" => $result ["license_id"],
+		"#options" => $licenseTypes,
+		"#description" => null
+	);
+
+	$form["details"]["proj_visibility"] = array(
+	'#type' => 'checkboxes',
+	'#title' => t(''),
+	'#value' => array(true),
+	'#options' => array(
+		'visibility' => t('I want to make my project visible to all'),
+		),
+	'#description' => t('Enabling this option will make your project visible to all registered users of this site.'),
+	);
+
+	$form ["details"]["submit"] = array (
+		"#type" => "submit",
+		"#value" => t("Submit"),
+		"#submit" => TRUE
+	);
+
+	return ($form);
+}
+
+function openabmma_deleteMember ($name, $uid)
+{
+	global $user;
+	// check if user is owner of this project
+	$owner = openabmma_getModelOwner ($name);
+	if ($owner != $user->name)
+		return "Only the project owner can perform this function.";
+
+	$query = "DELETE FROM openabm_model_project_member WHERE project_id=%d AND user_id=%d";
+
+	$projectId = openabmma_getProjectId ($name);
+
+	if ($projectId == -1)
+		return "Invalid project name";
+
+	db_query ($query, $projectId, $uid);
+	drupal_goto ("mymodels/" . $name . "/members");
+	return "";
+}
+
+function openabmma_perm ()
+{
+	return array ('logged in');
+}
+
 function openabmma_addFiles ($id='')
 {
 	return "";
 }
 
-function openabmma_manageMembers ($id='')
+function openabmma_manageMembers ($name='')
 {
-	if ($id == '')
+	global $user;
+	if ($name == '')
 		drupal_goto ("models");
 
-	$output = "<br/><u>Owner</u>: " . openabmma_getModelOwner ($id);
+	$query = "SELECT visible FROM openabm_model_project WHERE name='%s'";
+	$result = (array) db_fetch_object (db_query ($query, $name));
+	if ($result ["visible"] == 0 || $result ["visible"] == "0" /* && in (model_member_list, $user->name) */)
+		return "This is a privately managed project.";
 
-	$members = openabmma_getModelMembers ($id);
+	$owner = openabmma_getModelOwner ($name);
+	$output = "<br/><u>Owner</u>: " . $owner;
+
+	$members = openabmma_getModelMembers ($name);
+
+	if ($members != "")	$output .= "<br/>&nbsp;<br/><u>Members</u>: " . $members;
+	else			$output .= "<br/>&nbsp;<br/>Currently there are no members in this project.";
+
+	if ($user->name == $owner)
+		$output .= "<br/>&nbsp;<br/>" . drupal_get_form (openabmma_addMember);
+
 	return $output;
 }
 
-function openabmma_getModelMembers ($id='')
+function openabmma_addMember ()
 {
-	if ($id == '')
-		return "";
+	global $user;
 
+	$projName = arg (1);
+	if ($projName == "")
+		return null;
 
-	$result = db_query ("SELECT name FROM users A WHERE uid IN (SELECT user_id FROM openabm_model_project_member B WHERE id= (SELECT id FROM openabm_model_project WHERE name='%s'))", $id);
-	while ($node = db_fetch_object ($result))
+	if ($user->name != openabmma_getProjectOwner ($name))
 	{
-		$output .= $node->name . "+" . $node->role . "-";
+		$form["details"] = array(
+			"#type" => 'fieldset',
+			"#collapsible" => FALSE,
+			"#collapsed" => FALSE,
+			"#title" => null,
+			"#description" => ""
+		);
+
+		$form ["details"]["msg"] = array (
+			'#type' => "item",
+			'#value' => "This feature is only available to model owners."
+		);
+
+		return $form;
 	}
+
+	$form["details"] = array(
+		"#type" => 'fieldset',
+		"#collapsible" => FALSE,
+		"#collapsed" => FALSE,
+		"#title" => null,
+		"#description" => t("You can add a new member for this project here."),
+	);
+
+	$form ["details"]["projName"] = array (
+		"#type" => "hidden",
+		"#value" => $projName
+	);
+
+	$form ["details"]["name"] = array (
+		"#type" => "textfield",
+		"#title" => t("User name:"),
+		'#autocomplete_path' => 'user/autocomplete',
+		"#default_value" => null,
+		"#description" => "",
+		"#maxlength" => 210,
+		"#required" => true
+	);
+
+/*	$roleTypes = array ();
+	$result = db_query ("SELECT id, name FROM openabm_role");
+	while ($node = db_fetch_object ($result))
+		$roleTypes [$node->id] = $node->name;
+
+	$form ["details"]["role"] = array (
+		"#type" => "select",
+		"#title" => t("Role:"),
+		"#default_value" => "1",
+		"#options" => $roleTypes,
+		"#description" => null
+	);
+*/
+	$form ["details"]["submit"] = array (
+		"#type" => "submit",
+		"#value" => t("Submit"),
+		"#submit" => TRUE
+	);
+
+	return ($form);
+}
+
+function openabmma_addMember_submit ($form_id, $edit)
+{
+	global $user;
+	$username = $edit ["name"];
+	if ($username == $user->name)
+	{
+		drupal_set_message ("You already have owner privileges. You cannot add yourself as a Developer for this project.");
+		return;
+	}
+
+	$userid = openabmma_getUserId ($username);
+	if ($userid == -1)
+	{
+		drupal_set_message ("Invalid user name specified.");
+		return;
+	}
+
+	$projName = $edit ["projName"];
+	// get identifier (number) of the project
+	$proj_id = openabmma_getProjectid ($projName);
+
+	$query = "INSERT INTO openabm_model_project_member (project_id, user_id, role) VALUES (%d, '%s', 3)";
+	db_query ($query, $proj_id, $userid);
+//	drupal_goto ("roles");
+}
+
+function openabmma_getProjectId ($name)
+{
+	if ($name == '')
+		return -1;
+
+	$result = (array) db_fetch_object (db_query ("SELECT id FROM openabm_model_project WHERE name='%s'", $name));
+	$pId = $result ['id'];
+	return $pId;
+}
+
+function openabmma_getUserId ($name)
+{
+	if ($name == '')
+		return -1;
+
+	$result = (array) db_fetch_object (db_query ("SELECT uid FROM users WHERE name='%s'", $name));
+	$id = $result['uid'];
+
+	if ($id == "")
+		$id = -1;
+
+	return $id;
+}
+
+function openabmma_getModelMembers ($name='')
+{
+	if ($name == '')
+		return "";
+
+	// get identifier (number) of the project
+	$result = (array) db_fetch_object (db_query ("SELECT id FROM openabm_model_project WHERE name='%s'", $name));
+	$proj_id = $result ["id"];
+
+	$query = "SELECT user_id, role FROM openabm_model_project_member WHERE project_id=%d";
+	$result = db_query ($query, $proj_id);
+	while ($users = db_fetch_object ($result))
+		$output .= "<br/>" . openabmma_getUserName ($users->user_id) . "&nbsp;<small>[" . openabmma_getRoleName ($users->role) . "] - " . l ("Remove this user from my project", "mymodels/" . $name . "/members/delete/" . $users->user_id) . "</small>";
+
 	return $output;
 }
 
-function openabmma_getModelOwner ($id='')
+function openabmma_getUserName ($uid)
 {
-	if ($id == '')
+	if ($uid == '')
 		return "";
 
-	$result = (array) db_fetch_object (db_query ("SELECT name FROM users WHERE uid = (SELECT owner_uid FROM openabm_model_project WHERE name='%s')", $id));
+	$result = (array) db_fetch_object (db_query ("SELECT name FROM users WHERE uid=%d", $uid));
+	$name = $result['name'];
+
+	return $name;
+}
+
+function openabmma_getRoleName ($rid)
+{
+	if ($rid == '')
+		return "";
+
+	$result = (array) db_fetch_object (db_query ("SELECT name FROM openabm_role WHERE id=%d", $rid));
+	$name = $result['name'];
+
+	return $name;
+}
+
+function openabmma_getModelOwner ($name='')
+{
+	if ($name == '')
+		return "";
+
+	$result = (array) db_fetch_object (db_query ("SELECT name FROM users WHERE uid = (SELECT owner_uid FROM openabm_model_project WHERE name='%s')", $name));
 	$owner = $result['name'];
 	return $owner;
 }
 
 function openabmma_openProject ($id='')
 {
+	global $user;
 	if ($id == '')
 		drupal_goto ("models");
 
+	$owner = openabmma_getModelOwner ($id);
+
+	$query = "SELECT visible FROM openabm_model_project WHERE name='%s'";
+	$result = (array) db_fetch_object (db_query ($query, $id));
+	if ($result ["visible"] == 0 || $result ["visible"] == "0" && $user->name != $owner /* && in (model_member_list, $user->name) */)
+		return "This is a privately managed project.";
+
 	$output .= "<br/>" . l ("View/download files in this project", "mymodels/" . $id . "/files");
 	$output .= "<br/>" . l ("Add files to this project", "mymodels/" . $id . "/addFiles");
-	$output .= "<br/>" . l ("Manage members in this project", "mymodels/" . $id . "/members");
+
+	if ($owner == $user->uid)
+	{
+		$output .= "<br/>&nbsp;<br/>" . l ("Manage members in this project", "mymodels/" . $id . "/members");
+		$output .= "<br/>" . l ("Change project meta-data", "mymodels/" . $id . "/metadata");
+	}
 
 	return $output;
 }
@@ -223,18 +538,19 @@ function openabmma_showProjects ()
 	$count = 0;
 
 	$output .= '<br/><u>Membered projects:<br/></u>&nbsp;<br/>';
-	$query = "SELECT A.name, A.description, A.visible, B.role FROM openabm_model_project A JOIN openabm_model_project_member B WHERE B.user_id=%d";
+	$query = "SELECT A.owner_uid, A.name, A.description, A.visible, B.role FROM openabm_model_project A, openabm_model_project_member B WHERE B.user_id=%d AND A.id = B.project_id";
 	$result = db_query ($query, $user->uid);
 	while ($node = db_fetch_object ($result))
 	{
 		$count++;
+		$owner = openabmma_getUserName ($node->owner_uid);
 		$output .= "<b>" . l ($node->name, "mymodels/" . $node->name) . "</b>&nbsp;";
 
 		if ($node->visible == 1)	$output .= "[Public]";
 		else				$output .= "[Private]";
 
-		$output .= "&nbsp;<br/><small>" . $node->description . "</small><br/><small>";
-		$output .= "</small><br/>";
+		$output .= "&nbsp;<br/><small>" . $node->description . "<br/>";
+		$output .= "Owned by: <b>" . $owner . "</b></small><br/>&nbsp;<br/>";
 	}
 
 	$output .= "Total " . $count . " membered projects.<br/>&nbsp;<br/>";
