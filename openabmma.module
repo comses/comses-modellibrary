@@ -1,4 +1,6 @@
 <?php
+$p = 'notWorryingTooMuch';
+
 // $Id$
 
 /**
@@ -23,15 +25,15 @@ function openabmma_block ($op='list', $delta=0)
 	else if ($op == 'view')
 	{
 		$block_content = l ("My projects", "models/") . "<br/>"
-			. l ("Manage project members", "models/members/") . "<br/>"
+			. l ("Search projects", "models/search") . "<br/>"
 			;
 
 		if (user_access ('administer content'))
 		{
-			$block_content .= "<br/>" . l ("Project licenses", "licenses") . "<br/>";
-			$block_content .= "<br/>" . l ("Member roles", "roles") . "<br/>";
+			$block_content .= "<br/>" . l ("Project licenses", "licenses");
+			$block_content .= "<br/>" . l ("Member roles", "roles");
 		}
-		$block['subject'] = 'OpenABM Links';
+		$block['subject'] = 'Model Archive';
 		$block['content'] = $block_content;
 		return $block;
 	}
@@ -61,6 +63,15 @@ function openabmma_menu($may_cache) {
             'callback' => 'drupal_get_form',
             'type' => MENU_CALLBACK,
             'callback arguments' => array('openabmma_newModel'),
+            );
+
+        $items[] = array(
+            'path' => 'models/search',
+            'title' => t('Search projects'),
+            'description' => "",
+            'access' => user_access ('logged in'),
+            'callback' => 'openabmma_searchProjects',
+            'type' => MENU_CALLBACK
             );
 
         $items[] = array(
@@ -104,6 +115,15 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
+            'path' => 'models/search/' . arg (2),
+            'title' => t('Search projects'),
+            'description' => "",
+            'access' => user_access ('logged in'),
+            'callback' => 'openabmma_searchProjects',
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
             'path' => 'licenses/delete/' . arg(2),
             'title' => t('Delete license'),
             'description' => "",
@@ -114,11 +134,21 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'mymodels/' . arg(1) . '/addFiles',
+            'path' => 'mymodels/' . arg(1) . '/files',
             'title' => t('Files'),
             'description' => "",
             'access' => user_access ('logged in'),
-            'callback' => 'openabmma_addFiles',
+            'callback' => 'openabmma_showFiles',
+            'callback arguments' => array(arg(1)),
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'mymodels/' . arg(1) . '/files/' . arg(3),
+            'title' => t('Files'),
+            'description' => "",
+            'access' => user_access ('logged in'),
+            'callback' => 'openabmma_showFiles',
             'callback arguments' => array(arg(1)),
             'type' => MENU_CALLBACK
             );
@@ -167,13 +197,78 @@ function openabmma_menu($may_cache) {
     return $items;
 }
 
+function openabmma_searchProjects ()
+{
+	$searchText = arg(2);
+	$output = drupal_get_form (openabmma_getSearchText);
+
+	if ($searchText != '')
+		$output .= "<br/>" . openabmma_doSearch ($searchText);
+	return $output;
+}
+
+function openabmma_doSearch ($searchText='')
+{
+	if ($searchText == '')
+		return "";
+
+	$count=0;
+
+	$ltext = strtolower ($searchText);
+	$query = "SELECT name, description from openabm_model_project WHERE visible=1 AND (lower(name) LIKE '%%%s%%' OR lower(description) LIKE '%%%s%%' OR lower(reference_url) LIKE '%%%s%%' OR lower(keywords) LIKE '%%%s%%')";
+	$result = db_query ($query, $ltext, $ltext, $ltext, $ltext);
+	$count = count ($result);
+
+	while ($proj = db_fetch_object ($result))
+	{
+		$count++;
+		$output .= l ($proj->name, "mymodels/" . $proj->name) . "<br/><small>" . $proj->description . "</small><br/>&nbsp;<br/>";
+	}
+
+	$output = $count-1 . " result(s) matched your query.<br/>&nbsp;<br/>" . $output;
+	return $output;
+}
+
+function openabmma_getSearchText_submit ($form_id, $edit)
+{
+	drupal_goto ("models/search/" . $edit ["text"]);
+}
+
+function openabmma_getSearchText ()
+{
+	$form["details"] = array(
+		"#type" => 'fieldset',
+		"#collapsible" => FALSE,
+		"#collapsed" => FALSE,
+		"#title" => null,
+		"#description" => NULL,
+	);
+
+	$form ["details"]["text"] = array (
+		"#type" => "textfield",
+		"#title" => t("Search for:"),
+		"#default_value" => null,
+		"#description" => "",
+		"#maxlength" => 210,
+		"#required" => true
+	);
+
+	$form ["details"]["submit"] = array (
+		"#type" => "submit",
+		"#value" => t("Submit"),
+		"#submit" => TRUE
+	);
+
+	return ($form);
+}
+
 function openabmma_metadata_submit ($form_id, $edit)
 {
-	if ($edit ["proj_visibility"] == 1)	$edit ["proj_visibility"] = "true";
-	else					$edit ["proj_visibility"] = "false";
+//	if ($edit ["proj_visibility"] == 1)	$edit ["proj_visibility"] = "true";
+//	else					$edit ["proj_visibility"] = "false";
 
-	$query = "UPDATE openabm_model_project SET description='%s', visible=%d, license_id=%d WHERE id=%d";
-	db_query ($query, $edit["proj_description"], $edit ["proj_visibility"], $edit ["proj_licenseId"], $edit ["projId"]);
+	$query = "UPDATE openabm_model_project SET description='%s', visible=%d, license_id=%d, reference_url='%s', keywords='%s' WHERE id=%d";
+	db_query ($query, $edit["proj_description"], $edit ["proj_visibility"], $edit ["proj_licenseId"], $edit ["ref_url"], $edit ["key"], $edit ["projId"]);
 	drupal_goto ("mymodels/" . arg(1));
 }
 
@@ -204,7 +299,7 @@ function openabmma_metadata ()
 		return $form;
 	}
 
-	$query = "SELECT description, visible, license_id FROM openabm_model_project WHERE name='%s'";
+	$query = "SELECT description, visible, license_id, reference_url, keywords FROM openabm_model_project WHERE name='%s'";
 	$result = (array) db_fetch_object (db_query ($query, $name));
 
 	$visibility = $result ["visible"];
@@ -229,6 +324,24 @@ function openabmma_metadata ()
 		"#title" => t("Description of project:"),
 		"#default_value" => $result ["description"],
 		"#description" => null,
+		"#required" => false
+	);
+
+	$form ["details"]["ref_url"] = array (
+		"#type" => "textfield",
+		"#title" => t("Reference URL:"),
+		"#default_value" => $result ["reference_url"],
+		"#description" => t("If your project is hosted on another website, put the website address here"),
+		"#maxlength" => 210,
+		"#required" => false
+	);
+
+	$form ["details"]["key"] = array (
+		"#type" => "textfield",
+		"#title" => t("Keywords:"),
+		"#default_value" => $result ["keywords"],
+		"#description" => t("Key words in your project to help us search among projects"),
+		"#maxlength" => 210,
 		"#required" => false
 	);
 
@@ -289,9 +402,39 @@ function openabmma_perm ()
 	return array ('logged in');
 }
 
-function openabmma_addFiles ($id='')
+function openabmma_showFiles ($projName='', $path='')
 {
-	return "";
+	$path = "";
+	for ($i=3; arg($i) != ""; $i++)
+		$path .= arg($i) . "/";
+
+//	return $projName . "|" . $path;
+	$connection = ssh2_connect ('libai.la.asu.edu');
+	ssh2_auth_password($connection, 'asrane', 'notWorryingTooMuch');
+
+	//$stream = ssh2_exec($connection, 'cd new/newTrialRep; svn update &> /home/asrane/ofile');
+	$stream = ssh2_exec($connection, 'svn list -v file:///home/asrane/' . $projName . '/' . $path . ' &> /home/asrane/ofile');
+
+	$stream = ssh2_exec($connection, 'cat /home/asrane/ofile');
+	stream_set_blocking($stream, true);
+ 
+	// The command may not finish properly if the stream is not read to end
+	$fileContent = stream_get_contents($stream);
+	$files = explode ("\n", $fileContent);
+	foreach ($files as $value)
+	{
+		if ($value == null)
+			break;
+		for ($i=strlen ($value)-1; $value[$i] != ' '; $i--)
+			;
+
+		if (substr ($value, -1) == "/")
+			$output .= substr($value, 0, $i) . " " . l (substr($value, $i+1), "mymodels/" . $projName . "/files/" . $path . substr($value, $i+1)) . "<br/>";
+		else
+			$output .= $value . "<br/>";
+	}
+
+	return $output;
 }
 
 function openabmma_manageMembers ($name='')
@@ -300,12 +443,12 @@ function openabmma_manageMembers ($name='')
 	if ($name == '')
 		drupal_goto ("models");
 
+	$owner = openabmma_getModelOwner ($name);
 	$query = "SELECT visible FROM openabm_model_project WHERE name='%s'";
 	$result = (array) db_fetch_object (db_query ($query, $name));
-	if ($result ["visible"] == 0 || $result ["visible"] == "0" /* && in (model_member_list, $user->name) */)
+	if (($result ["visible"] == 0 || $result ["visible"] == "0") && $user->name != $owner /* && in (model_member_list, $user->name) */)
 		return "This is a privately managed project.";
 
-	$owner = openabmma_getModelOwner ($name);
 	$output = "<br/><u>Owner</u>: " . $owner;
 
 	$members = openabmma_getModelMembers ($name);
@@ -327,7 +470,7 @@ function openabmma_addMember ()
 	if ($projName == "")
 		return null;
 
-	if ($user->name != openabmma_getProjectOwner ($name))
+	if ($user->name != openabmma_getModelOwner ($projName))
 	{
 		$form["details"] = array(
 			"#type" => 'fieldset',
@@ -499,13 +642,13 @@ function openabmma_openProject ($id='')
 
 	$query = "SELECT visible FROM openabm_model_project WHERE name='%s'";
 	$result = (array) db_fetch_object (db_query ($query, $id));
-	if ($result ["visible"] == 0 || $result ["visible"] == "0" && $user->name != $owner /* && in (model_member_list, $user->name) */)
+	if (($result ["visible"] == 0 || $result ["visible"] == "0") && $user->name != $owner /* && in (model_member_list, $user->name) */)
 		return "This is a privately managed project.";
 
 	$output .= "<br/>" . l ("View/download files in this project", "mymodels/" . $id . "/files");
 	$output .= "<br/>" . l ("Add files to this project", "mymodels/" . $id . "/addFiles");
 
-	if ($owner == $user->uid)
+	if ($owner == $user->name)
 	{
 		$output .= "<br/>&nbsp;<br/>" . l ("Manage members in this project", "mymodels/" . $id . "/members");
 		$output .= "<br/>" . l ("Change project meta-data", "mymodels/" . $id . "/metadata");
@@ -749,6 +892,24 @@ function openabmma_newModel ($edit=null, $item=0)
 		"#required" => false
 	);
 
+	$form ["details"]["ref_url"] = array (
+		"#type" => "textfield",
+		"#title" => t("Reference URL:"),
+		"#default_value" => $edit ["ref_url"],
+		"#description" => t("If your project is hosted on another website, put the website address here"),
+		"#maxlength" => 210,
+		"#required" => false
+	);
+
+	$form ["details"]["key"] = array (
+		"#type" => "textfield",
+		"#title" => t("Keywords:"),
+		"#default_value" => $edit ["key"],
+		"#description" => t("Key words in your project to help us search among projects"),
+		"#maxlength" => 210,
+		"#required" => false
+	);
+
 	$licenseTypes = array ();
 	$result = db_query ("SELECT id, license, url FROM openabm_license");
 	while ($node = db_fetch_object ($result))
@@ -784,7 +945,7 @@ function openabmma_newModel ($edit=null, $item=0)
 function openabmma_newModel_submit ($form_id, $edit)
 {
 	global $user;
-	$query = "INSERT INTO openabm_model_project (owner_uid, name, description, visible, license_id) VALUES (%d, '%s', '%s', %d, %d)";
-	db_query ($query, $user->uid, $edit ['proj_name'], $edit ['proj_description'], $edit ["proj_visibility"], $edit ['proj_licenseId']);
+	$query = "INSERT INTO openabm_model_project (owner_uid, name, description, visible, license_id, reference_url, keywords) VALUES (%d, '%s', '%s', %d, %d, '%s', '%s')";
+	db_query ($query, $user->uid, $edit ['proj_name'], $edit ['proj_description'], $edit ["proj_visibility"], $edit ['proj_licenseId'], $edit ["ref_url"], $edit ["key"]);
 	drupal_goto ("models");
 }

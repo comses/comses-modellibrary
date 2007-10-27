@@ -15,7 +15,9 @@ function openabmma_install() {
                 name            VARCHAR(255) NOT NULL,
                 description     MEDIUMTEXT NOT NULL,
 		visible		bool default 0,
+                reference_url   VARCHAR(255) NULL,
                 license_id      TINYINT UNSIGNED NOT NULL,
+                keywords        VARCHAR(255) NULL,
                 PRIMARY KEY(id),
                 FOREIGN KEY (owner_uid) REFERENCES user(uid),
                 FOREIGN KEY (license_id) REFERENCES openabm_license(id)
