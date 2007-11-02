@@ -264,11 +264,15 @@ function openabmma_getSearchText ()
 
 function openabmma_metadata_submit ($form_id, $edit)
 {
+	$visible = 0;
+	if ($edit ["proj_visibility"]["visibility"] != 0)
+		$visible = 1;
+
 //	if ($edit ["proj_visibility"] == 1)	$edit ["proj_visibility"] = "true";
 //	else					$edit ["proj_visibility"] = "false";
 
 	$query = "UPDATE openabm_model_project SET description='%s', visible=%d, license_id=%d, reference_url='%s', keywords='%s' WHERE id=%d";
-	db_query ($query, $edit["proj_description"], $edit ["proj_visibility"], $edit ["proj_licenseId"], $edit ["ref_url"], $edit ["key"], $edit ["projId"]);
+	db_query ($query, $edit["proj_description"], $visible, $edit ["proj_licenseId"], $edit ["ref_url"], $edit ["key"], $edit ["projId"]);
 	drupal_goto ("mymodels/" . arg(1));
 }
 
@@ -595,7 +599,8 @@ function openabmma_getModelMembers ($name='')
 	$query = "SELECT user_id, role FROM openabm_model_project_member WHERE project_id=%d";
 	$result = db_query ($query, $proj_id);
 	while ($users = db_fetch_object ($result))
-		$output .= "<br/>" . openabmma_getUserName ($users->user_id) . "&nbsp;<small>[" . openabmma_getRoleName ($users->role) . "] - " . l ("Remove this user from my project", "mymodels/" . $name . "/members/delete/" . $users->user_id) . "</small>";
+		$output .= "<br/>" . openabmma_getUserName ($users->user_id) . "&nbsp;<small>[" . openabmma_getRoleName ($users->role) . "] - " . "<a href=\"javascript:if(confirm('Are you sure you want to remove this user from your project?')) window.location.replace('" . url("mymodels/" . $name . "/members/delete/" . $users->user_id) . "');\">Remove this user from my project</a>";
+//l ("Remove this user from my project", "javascript:if(confirm('Really?')) window.location.replace('mymodels/" . $name . "/embers/delete/" . $users->user_id . "');") . "</small>";
 
 	return $output;
 }
@@ -709,7 +714,8 @@ function openabmma_showRoles ()
 	while ($node = db_fetch_object ($result))
 	{
 		$count++;
-		$output .= "<br/><b>" . $node->name . "</b>&nbsp;" . l ("[delete]", "roles/delete/" . $node->id);
+		$output .= "<br/><b>" . $node->name . "</b>&nbsp;" . "<a href=\"javascript:if(confirm('Are you sure you want to delete this role?')) window.location.replace('" . url("roles/delete/" . $node->id) . "');\"><small>[delete this]</small></a>";
+// l ("[delete]", "roles/delete/" . $node->id);
 	}
 
 	$output = "<br/>Total " . $count . " role(s).<br/>" . $output . "<br/>&nbsp;" . drupal_get_form (openabmma_add_role);
@@ -760,7 +766,8 @@ function openabmma_showLicenses ()
 	while ($node = db_fetch_object ($result))
 	{
 		$count++;
-		$output .= "<b>" . $node->license . "</b>&nbsp;<small>" . l ("[delete this]", "licenses/delete/" . $node->id) . "<br/>" . l($node->url, $node->url) . "</small><br/>&nbsp;<br/>";
+		$output .= "<b>" . $node->license . "</b>&nbsp;<small>" . "<a href=\"javascript:if(confirm('Are you sure you want to delete this license?')) window.location.replace('" . url("licenses/delete/" . $node->id) . "');\"><small>[delete this]</small></a></small><br/>";
+//l ("[delete this]", "licenses/delete/" . $node->id) . "<br/>" . l($node->url, $node->url) . "</small><br/>&nbsp;<br/>";
 	}
 
 	return "There are currently " . $count . " license(s). <br/>&nbsp;<br/>" . $output . "<hr/><br/>" . drupal_get_form(openabmma_addLicense_form);
