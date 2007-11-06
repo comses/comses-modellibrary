@@ -650,8 +650,7 @@ function openabmma_openProject ($id='')
 	if (($result ["visible"] == 0 || $result ["visible"] == "0") && $user->name != $owner /* && in (model_member_list, $user->name) */)
 		return "This is a privately managed project.";
 
-	$output .= "<br/>" . l ("View/download files in this project", "mymodels/" . $id . "/files");
-	$output .= "<br/>" . l ("Add files to this project", "mymodels/" . $id . "/addFiles");
+	$output .= "<br/><a href='/svn'>View/download files in this project</a>";
 
 	if ($owner == $user->name)
 	{
