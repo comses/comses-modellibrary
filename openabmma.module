@@ -30,8 +30,11 @@ function openabmma_block ($op='list', $delta=0)
 
 		if (user_access ('administer content'))
 		{
-			$block_content .= "<br/>" . l ("Project licenses", "licenses");
-			$block_content .= "<br/>" . l ("Member roles", "roles");
+			$block_content .= "<br/>" . l ("Project licenses", "config/licenses");
+			$block_content .= "<br/>" . l ("Member roles", "config/roles");
+			$block_content .= "<br/>" . l ("Prog. languages listed", "config/planguages");
+			$block_content .= "<br/>" . l ("OS listed", "config/os");
+			$block_content .= "<br/>" . l ("Frameworks", "config/frameworks");
 		}
 		$block['subject'] = 'Model Archive';
 		$block['content'] = $block_content;
@@ -103,7 +106,7 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'roles',
+            'path' => 'config/roles',
             'title' => t('User roles'),
             'description' => "",
             'access' => user_access ('administer content'),
@@ -112,7 +115,7 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'licenses',
+            'path' => 'config/licenses',
             'title' => t('Manage licenses'),
             'description' => "",
             'access' => user_access ('administer content'),
@@ -120,6 +123,32 @@ function openabmma_menu($may_cache) {
             'type' => MENU_CALLBACK
             );
 
+        $items[] = array(
+            'path' => 'config/planguages',
+            'title' => t('Programming languages listed'),
+            'description' => "",
+            'access' => user_access ('administer content'),
+            'callback' => 'openabmma_showPLanguages',
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'config/os',
+            'title' => t('Operating systems listed'),
+            'description' => "",
+            'access' => user_access ('administer content'),
+            'callback' => 'openabmma_showOS',
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'config/frameworks',
+            'title' => t('Manage frameworks'),
+            'description' => "",
+            'access' => user_access ('administer content'),
+            'callback' => 'openabmma_showFrameworks',
+            'type' => MENU_CALLBACK
+            );
     }
     else
     {
@@ -182,12 +211,12 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'roles/delete/' . arg(2),
+            'path' => 'config/roles/delete/' . arg(3),
             'title' => t('Delete role'),
             'description' => "",
             'access' => user_access ('administer content'),
             'callback' => 'openabmma_deleteRole',
-            'callback arguments' => array(arg(2)),
+            'callback arguments' => array(arg(3)),
             'type' => MENU_CALLBACK
             );
 
@@ -201,12 +230,42 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'licenses/delete/' . arg(2),
+            'path' => 'config/licenses/delete/' . arg(3),
             'title' => t('Delete license'),
             'description' => "",
             'access' => user_access ('administer content'),
             'callback' => 'openabmma_deleteLicense',
-            'callback arguments' => array(arg(2)),
+            'callback arguments' => array(arg(3)),
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'config/planguages/delete/' . arg(3),
+            'title' => t('Delete language'),
+            'description' => "",
+            'access' => user_access ('administer content'),
+            'callback' => 'openabmma_deletePLanguages',
+            'callback arguments' => array(arg(3)),
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'config/frameworks/delete/' . arg(3),
+            'title' => t('Delete framework'),
+            'description' => "",
+            'access' => user_access ('administer content'),
+            'callback' => 'openabmma_deleteFramework',
+            'callback arguments' => array(arg(3)),
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'config/os/delete/' . arg(3),
+            'title' => t('Delete Operating System'),
+            'description' => "",
+            'access' => user_access ('administer content'),
+            'callback' => 'openabmma_deleteOS',
+            'callback arguments' => array(arg(3)),
             'type' => MENU_CALLBACK
             );
 
@@ -274,9 +333,195 @@ function openabmma_menu($may_cache) {
     return $items;
 }
 
+function openabmma_deletePLanguages ($id='')
+{
+	if ($id != "")
+	{
+		$query = "DELETE FROM openabm_prog_lang WHERE progLangId=%d";
+		db_query ($query, $id);
+	}
+
+	drupal_goto ("config/planguages");	
+	return '';
+}
+
+function openabmma_showPLanguages ()
+{
+	$count = 0;
+	$query = "SELECT progLangId, name FROM openabm_prog_lang";
+	$result = db_query ($query);
+	while ($node = db_fetch_object ($result))
+	{
+		$count++;
+		$output .= "<br/><b>" . $node->name . "</b>&nbsp;" . "<a href=\"javascript:if(confirm('Are you sure you want to delete this language from the list?')) window.location.replace('" . url("config/planguages/delete/" . $node->progLangId) . "');\"><small>[delete this]</small></a>";
+	}
+
+	$output = "<br/>Total " . $count . " language(s).<br/>" . $output . "<br/>&nbsp;" . drupal_get_form (openabmma_add_pLanguage);
+	return $output;
+}
+
+function openabmma_add_pLanguage_submit ($form_id, $edit)
+{
+	$query = "INSERT INTO openabm_prog_lang (name) VALUES ('%s')";
+	db_query ($query, $edit ['name']);
+	drupal_goto ("config/planguages");
+}
+
+function openabmma_add_pLanguage ()
+{
+	$form["details"] = array(
+		"#type" => 'fieldset',
+		"#collapsible" => FALSE,
+		"#collapsed" => FALSE,
+		"#title" => null,
+		"#description" => t("You can add a new programming languages to the list here."),
+	);
+
+	$form ["details"]["name"] = array (
+		"#type" => "textfield",
+		"#title" => t("Language name:"),
+		"#default_value" => null,
+		"#description" => "",
+		"#maxlength" => 210,
+		"#required" => true
+	);
+
+	$form ["details"]["submit"] = array (
+		"#type" => "submit",
+		"#value" => t("Submit"),
+		"#submit" => TRUE
+	);
+
+	return ($form);
+}
+
+function openabmma_deleteFramework ($id='')
+{
+	if ($id != "")
+	{
+		$query = "DELETE FROM openabm_framework WHERE frameworkId=%d";
+		db_query ($query, $id);
+	}
+
+	drupal_goto ("config/frameworks");
+	return '';
+}
+
+function openabmma_showFrameworks ()
+{
+	$count = 0;
+	$query = "SELECT frameworkId, name FROM openabm_framework";
+	$result = db_query ($query);
+	while ($node = db_fetch_object ($result))
+	{
+		$count++;
+		$output .= "<br/><b>" . $node->name . "</b>&nbsp;" . "<a href=\"javascript:if(confirm('Are you sure you want to delete this framework from the list?')) window.location.replace('" . url("config/frameworks/delete/" . $node->frameworkId) . "');\"><small>[delete this]</small></a>";
+	}
+
+	$output = "<br/>Total " . $count . " framework(s).<br/>" . $output . "<br/>&nbsp;" . drupal_get_form (openabmma_add_framework);
+	return $output;
+}
+
+function openabmma_add_framework_submit ($form_id, $edit)
+{
+	$query = "INSERT INTO openabm_framework (name) VALUES ('%s')";
+	db_query ($query, $edit ['name']);
+	drupal_goto ("config/frameworks");
+}
+
+function openabmma_add_framework ()
+{
+	$form["details"] = array(
+		"#type" => 'fieldset',
+		"#collapsible" => FALSE,
+		"#collapsed" => FALSE,
+		"#title" => null,
+		"#description" => t("You can add a new framework to the list here."),
+	);
+
+	$form ["details"]["name"] = array (
+		"#type" => "textfield",
+		"#title" => t("Framework name:"),
+		"#default_value" => null,
+		"#description" => "",
+		"#maxlength" => 210,
+		"#required" => true
+	);
+
+	$form ["details"]["submit"] = array (
+		"#type" => "submit",
+		"#value" => t("Submit"),
+		"#submit" => TRUE
+	);
+
+	return ($form);
+}
+
+function openabmma_deleteOS ($id='')
+{
+	if ($id != "")
+	{
+		$query = "DELETE FROM openabm_os WHERE osId=%d";
+		db_query ($query, $id);
+	}
+
+	drupal_goto ("config/os");
+	return '';
+}
+
+function openabmma_showOS ()
+{
+	$count = 0;
+	$query = "SELECT osId, name FROM openabm_os";
+	$result = db_query ($query);
+	while ($node = db_fetch_object ($result))
+	{
+		$count++;
+		$output .= "<br/><b>" . $node->name . "</b>&nbsp;" . "<a href=\"javascript:if(confirm('Are you sure you want to delete this OS from the list?')) window.location.replace('" . url("config/os/delete/" . $node->osId) . "');\"><small>[delete this]</small></a>";
+	}
+
+	$output = "<br/>Total " . $count . " Operating System(s).<br/>" . $output . "<br/>&nbsp;" . drupal_get_form (openabmma_add_OS);
+	return $output;
+}
+
+function openabmma_add_OS_submit ($form_id, $edit)
+{
+	$query = "INSERT INTO openabm_os (name) VALUES ('%s')";
+	db_query ($query, $edit ['name']);
+	drupal_goto ("config/os");
+}
+
+function openabmma_add_OS ()
+{
+	$form["details"] = array(
+		"#type" => 'fieldset',
+		"#collapsible" => FALSE,
+		"#collapsed" => FALSE,
+		"#title" => null,
+		"#description" => t("You can add a new Operating System to the list here."),
+	);
+
+	$form ["details"]["name"] = array (
+		"#type" => "textfield",
+		"#title" => t("OS name:"),
+		"#default_value" => null,
+		"#description" => "",
+		"#maxlength" => 210,
+		"#required" => true
+	);
+
+	$form ["details"]["submit"] = array (
+		"#type" => "submit",
+		"#value" => t("Submit"),
+		"#submit" => TRUE
+	);
+
+	return ($form);
+}
+
 function openabmma_askIfReview ()
 {
-	return "<p>&nbsp;<br/>At this point, you have completed the basic requirements of submitting a project and hosting it on OpenABM.org. If you wish to submit your model for review, click " . l ("Submit Model", "models/add/" . arg(2) . "/step05") . ". The following page will guide you to through the requirements of submitting a model for review.<br/><p>&nbsp;</p>If you do not wish to submit your model for review now, click " . l ("My Projects", "models") . ". You could submit your model for review any time you wish to, by clicking on the 'Send model for review' link in the model workspace.";
+	return "<p>&nbsp;<br/>At this point, you have completed the basic requirements of submitting a project and hosting it on OpenABM.org. If you wish to submit your model for review, click " . l ("Submit Model for Review", "models/add/" . arg(2) . "/step05") . ". The following page will guide you to through the requirements of submitting a model for review.<br/><p>&nbsp;</p>If you do not wish to submit your model for review now, click " . l ("My Projects", "models") . ". You could submit your model for review any time you wish to, by clicking on the 'Send model for review' link in the model workspace.";
 }
 
 function openabmma_uploadFile ($formVar)
@@ -344,11 +589,15 @@ function openabmma_addModel02 ($edit=null, $item=0)
 		"#title" => t("Code file (zipped):")
 	);
 
-	$languages = array ('C/C++', 'Java', 'NetLogo', 'Other');
+	$languages = array ();
+	$result = db_query ("SELECT name FROM openabm_prog_lang ORDER BY name");
+	while ($node = db_fetch_object ($result))
+		$languages [$node->name] = $node->name;
+	$languages ["Other"] = "Other";
 
-	$form ["details"]["proj_languages"] = array (
+	$form ["details"]["proj_language"] = array (
 		"#type" => "select",
-		"#title" => t("Programming Languages:"),
+		"#title" => t("Programming Language:"),
 		"#options" => $languages,
 		"#description" => null
 	);
@@ -360,11 +609,32 @@ function openabmma_addModel02 ($edit=null, $item=0)
 		"#required" => false
 	);
 
-	$form ["details"]["proj_platform"] = array (
-		"#type" => "textarea",
-		"#title" => t("Operating System and platform information:"),
-		"#description" => null,
-		"#required" => false
+	$arrayElements = array ();
+	$result = db_query ("SELECT name FROM openabm_os ORDER BY name");
+	while ($node = db_fetch_object ($result))
+		$arrayElements [$node->name] = $node->name;
+	$arrayElements ["Other"] = "Other";
+
+	$form ["details"]["os"] = array (
+		"#type" => "select",
+		"#title" => t("Operating System:"),
+		"#default_value" => $edit ["os"],
+		"#options" => $arrayElements,
+		"#description" => null
+	);
+
+	$arrayElements = array ();
+	$result = db_query ("SELECT name FROM openabm_framework ORDER BY name");
+	while ($node = db_fetch_object ($result))
+		$arrayElements [$node->name] = $node->name;
+	$arrayElements ["Other"] = "Other";
+
+	$form ["details"]["framework"] = array (
+		"#type" => "select",
+		"#title" => t("Framework used:"),
+		"#default_value" => $edit ["framework"],
+		"#options" => $arrayElements,
+		"#description" => null
 	);
 
 /*
@@ -505,25 +775,25 @@ function openabmma_addModel04 ($edit=null, $item=0)
 	);
 */
 	$form ["details"]["proj_ref"] = array (
-		"#type" => "textfield",
+		"#type" => "textarea",
 		"#title" => "References:",
 		"#maxlength" => 210,
-		"#description" => t("If your project is hosted on another website, put the website address here"),
+		"#description" => t("Links to other hosted material of reference"),
 		"#required" => false
 	);
 
 	$form ["details"]["proj_examples"] = array (
-		"#type" => "textfield",
+		"#type" => "textarea",
 		"#title" => "Examples:",
 		"#maxlength" => 210,
+		"#description" => t("Notes on how to use the model"),
 		"#required" => false
 	);
 
 	$form ["details"]["proj_sensitivity"] = array (
-		"#type" => "textfield",
-		"#title" => "Sensitivity:",
-		"#maxlength" => 210,
-		"#required" => false
+		"#type" => "file",
+		"#description" => t("File containing sensitivity data"),
+		"#title" => t("Sensitivity:")
 	);
 
 	$form ["details"]["submit"] = array (
@@ -540,7 +810,8 @@ function openabmma_addModel05_submit ($form_id, $edit)
 //	openabmma_uploadFile ('proj_odd_file');
 	if ($edit ["proj_inst"]['commented'] == '0' || $edit ["proj_inst"]['cleanup'] == '0' || $edit ["proj_inst"]['running'] == '0')
 		drupal_set_message ("<b><font color='red'>Well-commented, cleanedup and running code is required before you submit your model for review!</font></b><br/>[Should we have a link to let the user still submit the model for review along with comments to the editor to justify that he should still be able to send his model for review?]");
-//	drupal_goto ("models/add/" . arg(2) . "/complete");
+	else
+		drupal_goto ("models/add/" . arg(2) . "/complete");
 }
 
 function openabmma_addModel05 ($edit=null, $item=0)
@@ -1224,7 +1495,7 @@ function openabmma_showRoles ()
 	while ($node = db_fetch_object ($result))
 	{
 		$count++;
-		$output .= "<br/><b>" . $node->name . "</b>&nbsp;" . "<a href=\"javascript:if(confirm('Are you sure you want to delete this role?')) window.location.replace('" . url("roles/delete/" . $node->id) . "');\"><small>[delete this]</small></a>";
+		$output .= "<br/><b>" . $node->name . "</b>&nbsp;" . "<a href=\"javascript:if(confirm('Are you sure you want to delete this role?')) window.location.replace('" . url("config/roles/delete/" . $node->id) . "');\"><small>[delete this]</small></a>";
 // l ("[delete]", "roles/delete/" . $node->id);
 	}
 
@@ -1236,7 +1507,7 @@ function openabmma_add_role_submit ($form_id, $edit)
 {
 	$query = "INSERT INTO openabm_role (name) VALUES ('%s')";
 	db_query ($query, $edit ['name']);
-	drupal_goto ("roles");
+	drupal_goto ("config/roles");
 }
 
 function openabmma_add_role ()
@@ -1276,7 +1547,7 @@ function openabmma_showLicenses ()
 	while ($node = db_fetch_object ($result))
 	{
 		$count++;
-		$output .= "<b>" . $node->license . "</b>&nbsp;<small>" . "<a href=\"javascript:if(confirm('Are you sure you want to delete this license?')) window.location.replace('" . url("licenses/delete/" . $node->id) . "');\"><small>[delete this]</small></a></small><br/>";
+		$output .= "<b>" . $node->license . "</b>&nbsp;<small>" . "<a href=\"javascript:if(confirm('Are you sure you want to delete this license?')) window.location.replace('" . url("config/licenses/delete/" . $node->id) . "');\"><small>[delete this]</small></a></small><br/>";
 //l ("[delete this]", "licenses/delete/" . $node->id) . "<br/>" . l($node->url, $node->url) . "</small><br/>&nbsp;<br/>";
 	}
 
@@ -1291,7 +1562,7 @@ function openabmma_deleteLicense ($id='')
 		db_query ($query, $id);
 	}
 
-	drupal_goto ("licenses");	
+	drupal_goto ("config/licenses");	
 	return '';
 }
 
@@ -1303,7 +1574,7 @@ function openabmma_deleteRole ($id='')
 		db_query ($query, $id);
 	}
 
-	drupal_goto ("roles");
+	drupal_goto ("config/roles");
 	return '';
 }
 

@@ -24,12 +24,30 @@ function openabmma_install() {
             // create pivot table for members of an ABM project
 
             db_query("CREATE TABLE openabm_model_keywords (
-		proj_id		INT(10) UNSIGNED NOT NULL,
-                keyword         VARCHAR (50) NOT NULL,
+		proj_id		INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
+                keyword         VARCHAR(50) NOT NULL,
                 PRIMARY KEY(proj_id, keyword),
                 FOREIGN KEY (proj_id) REFERENCES openabm_model_project(id)
                 );");
             // create pivot table for members of an ABM project
+
+            db_query("CREATE TABLE openabm_prog_lang (
+                progLangId      INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
+                name            VARCHAR(255) NOT NULL,
+                PRIMARY KEY(progLangId)
+		);");
+
+            db_query("CREATE TABLE openabm_framework (
+                frameworkId      INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
+                name             VARCHAR(255) NOT NULL,
+                PRIMARY KEY(frameworkId)
+		);");
+
+            db_query("CREATE TABLE openabm_os (
+                osId             INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
+                name             VARCHAR(255) NOT NULL,
+                PRIMARY KEY(osId)
+		);");
 
             db_query("CREATE TABLE openabm_model_project_member (
 		id		INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
