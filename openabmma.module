@@ -246,7 +246,7 @@ function openabmma_menu($may_cache) {
             'path' => 'models/add/' . arg(2) . "/reviewnote",
             'title' => t('Step 04 :: Adding a new model'),
             'description' => "",
-            'access' => user_access ('administer content'),
+            'access' => user_access ('logged in'),
             'callback' => 'drupal_get_form',
             'callback arguments' => array(openabmma_askIfReview),
             'type' => MENU_CALLBACK
@@ -572,7 +572,11 @@ function openabmma_add_OS ()
 
 function openabmma_askIfReview ()
 {
+	global $user;
 	$pName = arg(2);
+	if ($user->name != openabmma_getModelOwner ($pName))
+		return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+
 	$output = "<br/><p><table border='0' cellpadding='0' cellspacing='0' width='100%'>";
 $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><b>Step 1</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>[Complete]</i></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'>Project name, description and visibility to public</td></tr>";
 $output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 2</b></td><td style='border-bottom: thin solid #aaaaaa'><i>[Complete]</i></td><td style='border-bottom: thin solid #aaaaaa'>Code files, language and platform details</td></tr>";
@@ -627,7 +631,11 @@ $output .= "<p><u>Note: You can submit the model for review at any time by click
 
 function openabmma_askIfReview_submit ($form_id, $edit)
 {
+	global $user;
 	$pName = arg(2);
+	if ($user->name != openabmma_getModelOwner ($pName))
+		return openabmma_accessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+
 	if ($_POST ["op"] == "Proceed to Submit Model for Review")
 		drupal_goto ("models/add/" . $pName . "/step05");
 	else if ($_POST ["op"] == "Finish the Add Model process")
@@ -638,27 +646,26 @@ function openabmma_askIfReview_submit ($form_id, $edit)
 		drupal_goto ("/");
 }
 
-function openabmma_uploadFile ($formVar)
+function openabmma_uploadFile ($subdir, $formVar, $permission=0660)
 {
 	if ($formVar == '')
 		return;
 
 	$dir = "files";
+	if ($subdir != "")
+		$dir .= "/" . $subdir;
+
 	$is_writable = file_check_directory($dir, 1);
 	if($is_writable)
 	{
 		$source = file_check_upload($formVar);
-		if ($source == FALSE)
-			drupal_set_message ("Errpr uploading file!");
-
+		if ($source == null)
+			return null;
 		// Security measure to prevent exploit of file.php.png
 		$source->filename = upload_munge_filename($source->filename);
-		drupal_set_message ($source);
 
 		if ($file = file_save_upload($source,$dir ))
 		{
-			drupal_set_message ("Uploaded to " . $source->filename);
-
 //			if (image_get_info($file->filepath))
 //				drupal_set_message(t('New image saved.'));
 //			else
@@ -666,20 +673,24 @@ function openabmma_uploadFile ($formVar)
 //				file_delete($file->filepath);
 //				drupal_set_message('Uploaded file does not appear to be a valid image file. Please try again.');
 //			}
-
-			return 0;
+			chmod (realpath ($dir . "/" . $source->filename), $permission);
+			return $source->filename;
 		}
 		else
-			return -1;
+			return null;
 	}
 	else
-		return -1;
+		return null;
 }
 
 function openabmma_addModel02_submit ($form_id, $edit)
 {
+	global $user;
 	$errString = '';
 	$pName = arg(2);
+
+	if ($user->name != openabmma_getModelOwner ($pName))
+		return openabmma_accessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
 
 	$action = arg(1);
 	if ($_POST ["op"] == "Back")
@@ -693,13 +704,13 @@ function openabmma_addModel02_submit ($form_id, $edit)
 		else
 			$pLang = $edit ["other_language"];
 	}
-/*
-	if (openabmma_uploadFile ('proj_code_file') == -1)
+
+	if (openabmma_uploadFile ('code', 'proj_code_file') == null)
 	{
-		drupal_set_message ("<font color='red'><b>Error uploading file</b></font>");
+		drupal_set_message ("<font color='red'><b>Error uploading file, please check the path of the file specified</b></font>");
 		return;
 	}
-*/
+
 	if ($errString != "")
 	{
 		drupal_set_message ("<b><font color='red'>" . $errString . "</font></b>");
@@ -724,7 +735,12 @@ function openabmma_inList ($value, $arr)
 
 function openabmma_addModel02 ($edit=null, $item=0)
 {
+	global $user;
 	$pName = arg(2);
+
+	if ($user->name != openabmma_getModelOwner ($pName))
+		return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+
 	$query = "SELECT prog_lang, os, framework FROM openabm_model_project WHERE name='%s'";
 	$result = (array) db_fetch_object (db_query ($query, $pName));
 	$progLang = $result ['prog_lang'];
@@ -841,7 +857,11 @@ function openabmma_addModel02 ($edit=null, $item=0)
 
 function openabmma_addModel03_submit ($form_id, $edit)
 {
+	global $user;
 	$pName = arg(2);
+	if ($user->name != openabmma_getModelOwner ($pName))
+		return openabmma_accessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+
 	$action = arg(1);
 	if ($_POST ["op"] == "Back")
 		drupal_goto ("models/" . $action . "/" . $pName . "/step02");
@@ -879,7 +899,11 @@ function openabmma_addModel03_submit ($form_id, $edit)
 
 function openabmma_addModel03 ($edit=null, $item=0)
 {
+	global $user;
 	$pName = arg(2);
+
+	if ($user->name != openabmma_getModelOwner ($pName))
+		return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
 
 	$query = "SELECT license_id FROM openabm_model_project WHERE name='%s'";
 	$result = (array) db_fetch_object (db_query ($query, $pName));
@@ -957,18 +981,21 @@ function openabmma_addModel04_validate ()
 
 function openabmma_addModel04_submit ($form_id, $edit)
 {
+	global $user;
 	$pName = arg(2);
+	if ($user->name != openabmma_getModelOwner ($pName))
+		return openabmma_accessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+
 	$action = arg(1);
 	if ($_POST ["op"] == "Back")
 		drupal_goto ("models/" . $action . "/" . $pName . "/step03");
 
-/*
-	if (openabmma_uploadFile ('proj_sentivity') == -1)
+	if (openabmma_uploadFile ('sensitivity', 'proj_sensitivity') == null)
 	{
 		drupal_set_message ("<font color='red'><b>Error uploading file, please check the path of the file specified</b></font>");
 		return;
 	}
-*/
+
 	$query = "UPDATE openabm_model_project SET reference_text='%s', examples='%s' WHERE name='%s'";
 //	$query = "UPDATE openabm_model_project SET reference_text='" . $edit ["proj_ref"] . "', examples='" . $edit ["proj_examples"] . "' WHERE name='" . $pName . "'";
 
@@ -984,11 +1011,17 @@ function openabmma_addModel04_submit ($form_id, $edit)
 
 function openabmma_addModel04 ($edit=null, $item=0)
 {
+	global $user;
 	$pName = arg(2);
+	if ($user->name != openabmma_getModelOwner ($pName))
+		return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+
 	$query = "SELECT reference_text, examples FROM openabm_model_project WHERE name='%s'";
 	$result = (array) db_fetch_object (db_query ($query, $pName));
 	$refText = $result ['reference_text'];
 	$examples = $result ['examples'];
+
+	$form['#attributes'] = array('enctype' => "multipart/form-data");
 
 	$form["details"] = array(
 		"#type" => 'fieldset',
@@ -1066,8 +1099,11 @@ function openabmma_addModel04 ($edit=null, $item=0)
 
 function openabmma_addModel05_submit ($form_id, $edit)
 {
+	global $user;
 	$pName = arg(2);
-//	openabmma_uploadFile ('proj_odd_file');
+	if ($user->name != openabmma_getModelOwner ($pName))
+		return openabmma_accessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+
 	if ($_POST ["op"] == "Back")
 		drupal_goto ("models/add/" . $pName . "/reviewnote");
 
@@ -1075,6 +1111,12 @@ function openabmma_addModel05_submit ($form_id, $edit)
 		drupal_set_message ("<b><font color='red'>Well-commented, cleanedup and running code is required before you submit your model for review!</font></b><br/>[Should we have a link to let the user still submit the model for review along with comments to the editor to justify that he should still be able to send his model for review?]");
 	else
 	{
+		if (openabmma_uploadFile ('odd', 'proj_odd_file') == null)
+		{
+			drupal_set_message ("<font color='red'><b>Error uploading file, please check the path of the file specified</b></font>");
+			return;
+		}
+
 		$query = "UPDATE openabm_model_project SET submittedReview=1 WHERE name='%s'";
 		db_query ($query, $pName);
 		drupal_goto ("models/add/" . arg(2) . "/complete");
@@ -1083,6 +1125,13 @@ function openabmma_addModel05_submit ($form_id, $edit)
 
 function openabmma_addModel05 ($edit=null, $item=0)
 {
+	global $user;
+	$pName = arg(2);
+	if ($user->name != openabmma_getModelOwner ($pName))
+		return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+
+	$form['#attributes'] = array('enctype' => "multipart/form-data");
+
 	$form["details"] = array(
 		"#type" => 'fieldset',
 		"#collapsible" => FALSE,
@@ -1094,7 +1143,7 @@ function openabmma_addModel05 ($edit=null, $item=0)
 	$form ["details"]["proj_name"] = array (
 		"#type" => "item",
 		"#title" => t("Project Name:"),
-		"#value" => arg (2),
+		"#value" => $pName,
 		"#description" => null,
 	);
 /*
@@ -1145,13 +1194,17 @@ function openabmma_addModel05 ($edit=null, $item=0)
 
 function openabmma_addModelComplete ()
 {
+	global $user;
 	$pName = arg(2);
+	if ($user->name != openabmma_getModelOwner ($pName))
+		return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+
 	$query = "SELECT submittedReview FROM openabm_model_project WHERE name='%s'";
 	$result = (array) db_fetch_object (db_query ($query, $pName));
 	if ($result ['submittedReview'] == "1")
-		$output = "<p><br/>Congratultions! Your model has been uploaded and submitted for review!</p>";
+		$output = "<p><br/>Congratulations! Your model has been uploaded and submitted for review!</p>";
 	else
-		$output = "<p><br/>Congratultions! Your model has been uploaded!</p>";
+		$output = "<p><br/>Congratulations! Your model has been uploaded!</p>";
 
 	$webAddr = url ("mymodels/" . $pName, NULL, NULL, TRUE);
 	$output .= "<p>Your model can be accessed via the URL:<br/>" . l($webAddr, $webAddr) . "</p>";
@@ -1162,14 +1215,6 @@ function openabmma_addModelComplete ()
 function openabmma_addModel01_submit ($form_id, $edit)
 {
 	$action = arg(1);
-	if ($_POST ["op"] == "Cancel")
-		if ($action == "add")
-			drupal_goto ("models");
-		else if ($action == "edit")
-		{
-			$pName = arg(2);
-			drupal_goto ("mymodels/" . $pName);
-		}
 
 	global $user;
 	if ($edit ["newModel"] == "1")
@@ -1182,6 +1227,21 @@ function openabmma_addModel01_submit ($form_id, $edit)
 		$newModel = FALSE;
 		$pName = arg(2);
 	}
+
+	if (!$newModel)
+	{
+		if ($user->name != openabmma_getModelOwner ($pName))
+			return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+	}
+
+	if ($_POST ["op"] == "Cancel")
+		if ($action == "add")
+			drupal_goto ("models");
+		else if ($action == "edit")
+		{
+			$pName = arg(2);
+			drupal_goto ("mymodels/" . $pName);
+		}
 
 	if ($pName == "" || $pName == null)
 	{
@@ -1228,6 +1288,12 @@ function openabmma_addModel01 ($edit=null, $item=0)
 		$newModel = "0";
 	else
 		$newModel = "1";
+
+	if ($newModel == "0")
+	{
+		if ($user->name != openabmma_getModelOwner ($pName))
+			return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+	}
 
 	$desc = '';
 	$visible = "false";
@@ -2128,4 +2194,28 @@ function openabmma_newModel_submit ($form_id, $edit)
 	db_query ($query, $user->uid, $edit ['proj_name'], $edit ['proj_description'], $edit ["proj_visibility"], $edit ['proj_licenseId'], $edit ["ref_url"], $edit ["key"]);
 //	drupal_goto ("models");
 	drupal_goto ("mymodels/" . $edit ['proj_name'] . "/code");
+}
+
+function openabmma_accessError ($errorString)
+{
+	drupal_set_message ("<b><font color='red'>Access Error:</font></b><br/>" . $errorString . "<p>Click " . l ("here", "models") . " to go to your model workspace.</p>");
+}
+
+function openabmma_formAccessError ($errorString)
+{
+	$form["details"] = array(
+		"#type" => 'fieldset',
+		"#collapsible" => FALSE,
+		"#collapsed" => FALSE,
+		"#title" => null,
+		"#description" => null
+	);
+
+	$form ["details"]["name"] = array (
+		"#type" => "item",
+		"#title" => null,
+		"#value" => "<b><font color='red'>Access error:</font></b><p>" . $errorString . "</p>",
+	);
+
+	return ($form);
 }
