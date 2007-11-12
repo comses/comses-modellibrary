@@ -17,7 +17,7 @@ function openabmma_install() {
                 prog_lang       VARCHAR(255) NOT NULL,
                 os              VARCHAR(255) NOT NULL,
                 framework	VARCHAR(255) NOT NULL,
-                references      TEXT,
+                reference_text  TEXT,
                 examples        TEXT,
 		visible		bool default 0,
                 reference_url   VARCHAR(255) NULL,
@@ -32,7 +32,7 @@ function openabmma_install() {
 		proj_id		INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
                 keyword         VARCHAR(50) NOT NULL,
                 PRIMARY KEY(proj_id, keyword),
-                FOREIGN KEY (proj_id) REFERENCES openabm_model_project(id)
+                FOREIGN KEY (proj_id) REFERENCES openabm_model_project(id) ON DELETE CASCADE
                 );");
             // create pivot table for members of an ABM project
 

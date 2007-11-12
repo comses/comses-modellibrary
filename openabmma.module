@@ -153,10 +153,20 @@ function openabmma_menu($may_cache) {
     else
     {
         $items[] = array(
+            'path' => 'models/add/' . arg(2) . "/step01",
+            'title' => t('Step 02 :: Add new model'),
+            'description' => "",
+            'access' => user_access ('logged in'),
+            'callback' => 'drupal_get_form',
+            'callback arguments' => array(openabmma_addModel01),
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
             'path' => 'models/add/' . arg(2) . "/step02",
             'title' => t('Step 02 :: Add new model'),
             'description' => "",
-            'access' => user_access ('administer content'),
+            'access' => user_access ('logged in'),
             'callback' => 'drupal_get_form',
             'callback arguments' => array(openabmma_addModel02),
             'type' => MENU_CALLBACK
@@ -166,7 +176,7 @@ function openabmma_menu($may_cache) {
             'path' => 'models/add/' . arg(2) . "/step03",
             'title' => t('Step 03 :: Add new model'),
             'description' => "",
-            'access' => user_access ('administer content'),
+            'access' => user_access ('logged in'),
             'callback' => 'drupal_get_form',
             'callback arguments' => array(openabmma_addModel03),
             'type' => MENU_CALLBACK
@@ -176,7 +186,7 @@ function openabmma_menu($may_cache) {
             'path' => 'models/add/' . arg(2) . "/step04",
             'title' => t('Step 04 :: Add new model'),
             'description' => "",
-            'access' => user_access ('administer content'),
+            'access' => user_access ('logged in'),
             'callback' => 'drupal_get_form',
             'callback arguments' => array(openabmma_addModel04),
             'type' => MENU_CALLBACK
@@ -186,7 +196,7 @@ function openabmma_menu($may_cache) {
             'path' => 'models/add/' . arg(2) . "/step05",
             'title' => t('Step 05 :: Add new model'),
             'description' => "",
-            'access' => user_access ('administer content'),
+            'access' => user_access ('logged in'),
             'callback' => 'drupal_get_form',
             'callback arguments' => array(openabmma_addModel05),
             'type' => MENU_CALLBACK
@@ -197,7 +207,8 @@ function openabmma_menu($may_cache) {
             'title' => t('Step 04 :: Add new model'),
             'description' => "",
             'access' => user_access ('administer content'),
-            'callback' => 'openabmma_askIfReview',
+            'callback' => 'drupal_get_form',
+            'callback arguments' => array(openabmma_askIfReview),
             'type' => MENU_CALLBACK
             );
 
@@ -521,7 +532,70 @@ function openabmma_add_OS ()
 
 function openabmma_askIfReview ()
 {
-	return "<p>&nbsp;<br/>At this point, you have completed the basic requirements of submitting a project and hosting it on OpenABM.org. If you wish to submit your model for review, click " . l ("Submit Model for Review", "models/add/" . arg(2) . "/step05") . ". The following page will guide you to through the requirements of submitting a model for review.<br/><p>&nbsp;</p>If you do not wish to submit your model for review now, click " . l ("My Projects", "models") . ". You could submit your model for review any time you wish to, by clicking on the 'Send model for review' link in the model workspace.";
+	$pName = arg(2);
+	$output = "<br/><p><table border='0' cellpadding='0' cellspacing='0' width='100%'>";
+$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><b>Step 1</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>[Complete]</i></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'>Project name, description and visibility to public</td></tr>";
+$output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 2</b></td><td style='border-bottom: thin solid #aaaaaa'><i>[Complete]</i></td><td style='border-bottom: thin solid #aaaaaa'>Code files, language and platform details</td></tr>";
+$output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 3</b></td><td style='border-bottom: thin solid #aaaaaa'><i>[Complete]</i></td><td style='border-bottom: thin solid #aaaaaa'>License information and keywords</td></tr>";
+$output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 4</b></td><td style='border-bottom: thin solid #aaaaaa'><i>[Complete]</i></td><td style='border-bottom: thin solid #aaaaaa'>References, examples and senstivity information</td></tr>";
+$output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 5</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='green'>Only for review</font></td><td style='border-bottom: thin solid #aaaaaa'>Sending model for review</td></tr>";
+$output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 6</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='green'>Only for review</font></td><td style='border-bottom: thin solid #aaaaaa'>Collecting documents for model review</td></tr>";
+$output .= "</table>";
+
+$output .= "<p>&nbsp;<br/>At this point, you have completed the basic requirements of submitting a project and hosting it on OpenABM.org.<br/>You could complete the process of adding your model to the OpenABM repository by clicking on the 'Finish' button below.</p>";
+
+$output .= "<p>Alternatively, you could indicate the model is ready for a review by the committee at OpenABM.org. If you wish to submit your model for review, click the 'Submit Model for Review' button. In that case, you would be directed to a page that asks for some more information such as the ODD protocol.</p>";
+
+$output .= "<p><u>Note: You can submit the model for review at any time by clicking on the \"Send this model for review\" link in the model workspace.</u></p>";
+
+	$form["details"] = array(
+		"#type" => 'fieldset',
+		"#collapsible" => FALSE,
+		"#collapsed" => FALSE,
+		"#title" => null,
+		"#visible" => FALSE,
+		"#description" => null,
+	);
+
+	$form ["details"]["proj_name"] = array (
+		"#type" => "item",
+		"#title" => null,
+		"#value" => $output,
+		"#description" => null,
+	);
+
+	$form ["details"]["review"] = array (
+		"#type" => "submit",
+		"#value" => t("Submit Model for Review"),
+		"#submit" => TRUE
+	);
+
+	$form ["details"]["noreview"] = array (
+		"#type" => "submit",
+		"#value" => t("Finish the Add Model process"),
+		"#submit" => TRUE
+	);
+
+	$form ["details"]["cancel"] = array (
+		"#type" => "submit",
+		"#value" => t("Back"),
+		"#submit" => TRUE
+	);
+
+	return ($form);
+}
+
+function openabmma_askIfReview_submit ($form_id, $edit)
+{
+	$pName = arg(2);
+	if ($_POST ["op"] == "Submit Model for Review")
+		drupal_goto ("models/add/" . $pName . "/step05");
+	else if ($_POST ["op"] == "Finish the Add Model process")
+		drupal_goto ("models/add/" . $pName . "/complete");
+	else if ($_POST ["op"] == "Back")
+		drupal_goto ("models/add/" . $pName . "/step03");
+	else
+		drupal_goto ("/");
 }
 
 function openabmma_uploadFile ($formVar)
@@ -554,8 +628,30 @@ function openabmma_uploadFile ($formVar)
 
 function openabmma_addModel02_submit ($form_id, $edit)
 {
+	$errString = '';
+	$pName = arg(2);
+	if ($_POST ["op"] == "Back")
+		drupal_goto ("models/add/" . $pName . "/step01");
+
+	$pLang = $edit ["proj_language"];
+	if ($pLang == "Other")
+	{
+		if ($edit ["other_language"] == '' || $edit ["other_language"] == null)
+			$errString = "Please type in the programming language used for this model, if it is not mentioned in the list.";
+		else
+			$pLang = $edit ["other_language"];
+	}
+
 //	openabmma_uploadFile ('proj_code_file');
-	drupal_goto ("models/add/" . arg(2) . "/step03");
+//	$query = "UPDATE openabm_model_project SET prog_lang='%s', os='%s', framework='%s' WHERE name='%s'";
+	$query = "UPDATE openabm_model_project SET prog_lang='" . $pLang . "', os='" . $edit ["os"] . "', framework='" . $edit ["framework"] . "' WHERE name='" . $pName . "'";
+	if ($errString != "")
+	{
+		drupal_set_message ("<b><font color='red'>" . $errString . "</font></b>");
+		return;
+	}
+//	drupal_set_message ($query);
+	drupal_goto ("models/add/" . $pName . "/step03");
 }
 
 function openabmma_addModel02 ($edit=null, $item=0)
@@ -657,24 +753,43 @@ function openabmma_addModel02 ($edit=null, $item=0)
 		"#submit" => TRUE
 	);
 
+	$form ["details"]["cancel"] = array (
+		"#type" => "submit",
+		"#value" => t("Back"),
+		"#submit" => TRUE
+	);
+
 	return ($form);	
 }
 
 function openabmma_addModel03_submit ($form_id, $edit)
 {
+	$pName = arg(2);
+	if ($_POST ["op"] == "Back")
+		drupal_goto ("models/add/" . $pName . "/step02");
+
 	$keywordList = $edit ["keywords"];
-	$keywordList = str_replace (" ", ",", $keywordList);
+	$replaceList = "!@#$%^&*()+-|\\[]{}:;'\"<>,./?~` ";
+	$replaceLen = strlen ($replaceList);
+	for ($i=0; $i<$replaceLen; $i = $i+1)
+		$keywordList = str_replace ($replaceList [$i], ",", $keywordList);
+
 	$keywords = explode (",", $keywordList);
 
 	for ($i=0; $i<count($keywords); $i++)
 	{
 		if ($keywords [$i] == '')
 			continue;
-		$query = "INSERT INTO openabm_model_keywords (proj_id, keyword) VALUES (" . openabmma_getProjectId (arg(2)) .  ", '" . $keywords [$i] . "');";
-//		drupal_set_message ($query);
+		$query = "INSERT INTO openabm_model_keywords (proj_id, keyword) VALUES (" . openabmma_getProjectId ($pName) .  ", '" . $keywords [$i] . "');";
+		drupal_set_message ($query);
 	}
 
-	drupal_goto ("models/add/" . arg(2) . "/step04");
+	$query = "UPDATE openabm_model_project SET license_id=%d WHERE name='%s'";
+	$query = "UPDATE openabm_model_project SET license_id=" . $edit ["proj_licenseId"] . " WHERE name='" . $pName . "'";
+
+//	drupal_set_message ($query);
+
+	drupal_goto ("models/add/" . $pName . "/step04");
 }
 
 function openabmma_addModel03 ($edit=null, $item=0)
@@ -727,14 +842,25 @@ function openabmma_addModel03 ($edit=null, $item=0)
 		"#submit" => TRUE
 	);
 
+	$form ["details"]["cancel"] = array (
+		"#type" => "submit",
+		"#value" => t("Back"),
+		"#submit" => TRUE
+	);
+
 	return ($form);	
 }
 
 function openabmma_addModel04_submit ($form_id, $edit)
 {
-//	drupal_goto ("models/search/" . $edit ["text"]);
+	$pName = arg(2);
+	if ($_POST ["op"] == "Back")
+		drupal_goto ("models/add/" . $pName . "/step03");
 
-	drupal_goto ("models/add/" . arg(2) . "/reviewnote");
+	$query = "UPDATE openabm_model_project SET reference_text='%s', examples='%s' WHERE name='%s'";
+	$query = "UPDATE openabm_model_project SET reference_text='" . $edit ["proj_ref"] . "', examples='" . $edit ["proj_examples"] . "' WHERE name='" . $pName . "'";
+//	drupal_set_message ($query);
+	drupal_goto ("models/add/" . $pName . "/reviewnote");
 }
 
 function openabmma_addModel04 ($edit=null, $item=0)
@@ -802,12 +928,21 @@ function openabmma_addModel04 ($edit=null, $item=0)
 		"#submit" => TRUE
 	);
 
+	$form ["details"]["cancel"] = array (
+		"#type" => "submit",
+		"#value" => t("Back"),
+		"#submit" => TRUE
+	);
+
 	return ($form);	
 }
 
 function openabmma_addModel05_submit ($form_id, $edit)
 {
 //	openabmma_uploadFile ('proj_odd_file');
+	if ($_POST ["op"] == "Back")
+		drupal_goto ("models/add/" . $pName . "/reviewNote");
+
 	if ($edit ["proj_inst"]['commented'] == '0' || $edit ["proj_inst"]['cleanup'] == '0' || $edit ["proj_inst"]['running'] == '0')
 		drupal_set_message ("<b><font color='red'>Well-commented, cleanedup and running code is required before you submit your model for review!</font></b><br/>[Should we have a link to let the user still submit the model for review along with comments to the editor to justify that he should still be able to send his model for review?]");
 	else
@@ -867,6 +1002,12 @@ function openabmma_addModel05 ($edit=null, $item=0)
 		"#submit" => TRUE
 	);
 
+	$form ["details"]["cancel"] = array (
+		"#type" => "submit",
+		"#value" => t("Back"),
+		"#submit" => TRUE
+	);
+
 	return ($form);	
 }
 
@@ -877,14 +1018,50 @@ function openabmma_addModelComplete ()
 
 function openabmma_addModel01_submit ($form_id, $edit)
 {
-//	drupal_goto ("models/search/" . $edit ["text"]);
+	if ($_POST ["op"] == "Cancel")
+		drupal_goto ("models");
 
-	drupal_goto ("models/add/" . $edit ["proj_name"] . "/step02");
+	global $user;
+	if ($edit ["newModel"] == "1")
+		$pName = $edit ["proj_name"];
+	else
+		$pName = arg(2);
+
+	if ($pName == "" || $pName == null)
+	{
+		drupal_set_message ("<b><font color='red'>Project name is a required field</font></b>");
+		return;
+	}
+
+	$visible = $edit ["proj_visibility"]["visibility"];
+	if ($visible != '0')
+		$visible = '1';
+
+	if (openabmma_getProjectId ($pName) != -1 && openabmma_getProjectId ($pName) != '')
+		drupal_set_message ("<b><font color='red'>Another project with the same name exists. Please choose a different name</font></b>");
+	else
+	{
+/*
+		$query = "INSERT INTO openabm_model_project (owner_uid, name, description, visible) VALUES (%d, '%s', '%s', %d)";
+		
+*/
+		$query = "INSERT INTO openabm_model_project (owner_uid, name, description, visible) VALUES (" . $user->uid . ", '" . $pName . "', '" . $edit ["proj_description"] . "', " . $visible . ")";
+		drupal_goto ("models/add/" . $edit ["proj_name"] . "/step02");
+	}
 }
 
 function openabmma_addModel01 ($edit=null, $item=0)
 {
 	global $user;
+
+	$pName = arg(2);
+	for ($argc=0; arg($argc) != ''; $argc++)
+		;
+
+	if ($argc == 4)
+		$newModel = "0";
+	else
+		$newModel = "1";
 
 	$result = (array) db_fetch_object (db_query ("SELECT max(id) FROM openabm_model_project"));
 	$id = $result['max(id)'] + 1;
@@ -911,16 +1088,35 @@ function openabmma_addModel01 ($edit=null, $item=0)
 		"#description" => null,
 	);
 
-	$form ["details"]["proj_name"] = array (
-		"#type" => "textfield",
-		"#title" => t("Project Name:"),
-		"#default_value" => $edit ["proj_name"],
-		"#description" => null,
-		"#maxlength" => 210,
-//		'#autocomplete_path' => 'user/autocomplete',
-		"#required" => true
+	$form ["details"]["newModel"] = array (
+		"#type" => "hidden",
+		"#value" => $newModel
 	);
 
+	if ($newModel == "1")
+	{
+		$form ["details"]["proj_name"] = array (
+			"#type" => "textfield",
+			"#title" => t("Project Name:"),
+			"#default_value" => $edit ["proj_name"],
+			"#description" => null,
+	//		"#required" => true,		// Commented because clicking Cancel validates this field too!
+			"#maxlength" => 210
+	//		'#autocomplete_path' => 'user/autocomplete',
+		);
+	}
+	else
+	{
+		$form ["details"]["proj_name"] = array (
+			"#type" => "item",
+			"#title" => t("Project Name:"),
+			"#description" => null,
+			"#value" => arg(2),
+	//		"#required" => true,		// Commented because clicking Cancel validates this field too!
+			"#maxlength" => 210
+	//		'#autocomplete_path' => 'user/autocomplete',
+		);
+	}
 	$form ["details"]["proj_description"] = array (
 		"#type" => "textarea",
 		"#title" => t("Description of project:"),
@@ -955,6 +1151,12 @@ function openabmma_addModel01 ($edit=null, $item=0)
 	$form ["details"]["submit"] = array (
 		"#type" => "submit",
 		"#value" => t("Submit"),
+		"#submit" => TRUE
+	);
+
+	$form ["details"]["cancel"] = array (
+		"#type" => "submit",
+		"#value" => t("Cancel"),
 		"#submit" => TRUE
 	);
 
