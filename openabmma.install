@@ -19,6 +19,7 @@ function openabmma_install() {
                 framework	VARCHAR(255) NOT NULL,
                 reference_text  TEXT,
                 examples        TEXT,
+                submittedReview bool default 0,
 		visible		bool default 0,
                 reference_url   VARCHAR(255) NULL,
                 license_id      TINYINT UNSIGNED NOT NULL,
@@ -29,7 +30,7 @@ function openabmma_install() {
             // create pivot table for members of an ABM project
 
             db_query("CREATE TABLE openabm_model_keywords (
-		proj_id		INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
+		proj_id		INT(10) UNSIGNED NOT NULL,
                 keyword         VARCHAR(50) NOT NULL,
                 PRIMARY KEY(proj_id, keyword),
                 FOREIGN KEY (proj_id) REFERENCES openabm_model_project(id) ON DELETE CASCADE

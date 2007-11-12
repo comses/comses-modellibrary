@@ -153,8 +153,48 @@ function openabmma_menu($may_cache) {
     else
     {
         $items[] = array(
+            'path' => 'models/edit/' . arg(2) . "/step01",
+            'title' => t('Step 01 :: Editing your model'),
+            'description' => "",
+            'access' => user_access ('logged in'),
+            'callback' => 'drupal_get_form',
+            'callback arguments' => array(openabmma_addModel01),
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'models/edit/' . arg(2) . "/step02",
+            'title' => t('Step 02 :: Editing your model'),
+            'description' => "",
+            'access' => user_access ('logged in'),
+            'callback' => 'drupal_get_form',
+            'callback arguments' => array(openabmma_addModel02),
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'models/edit/' . arg(2) . "/step03",
+            'title' => t('Step 03 :: Editing your model'),
+            'description' => "",
+            'access' => user_access ('logged in'),
+            'callback' => 'drupal_get_form',
+            'callback arguments' => array(openabmma_addModel03),
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'models/edit/' . arg(2) . "/step04",
+            'title' => t('Step 04 :: Editing your model'),
+            'description' => "",
+            'access' => user_access ('logged in'),
+            'callback' => 'drupal_get_form',
+            'callback arguments' => array(openabmma_addModel04),
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
             'path' => 'models/add/' . arg(2) . "/step01",
-            'title' => t('Step 02 :: Add new model'),
+            'title' => t('Step 01 :: Adding a new model'),
             'description' => "",
             'access' => user_access ('logged in'),
             'callback' => 'drupal_get_form',
@@ -164,7 +204,7 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'models/add/' . arg(2) . "/step02",
-            'title' => t('Step 02 :: Add new model'),
+            'title' => t('Step 02 :: Adding a new model'),
             'description' => "",
             'access' => user_access ('logged in'),
             'callback' => 'drupal_get_form',
@@ -174,7 +214,7 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'models/add/' . arg(2) . "/step03",
-            'title' => t('Step 03 :: Add new model'),
+            'title' => t('Step 03 :: Adding a new model'),
             'description' => "",
             'access' => user_access ('logged in'),
             'callback' => 'drupal_get_form',
@@ -184,7 +224,7 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'models/add/' . arg(2) . "/step04",
-            'title' => t('Step 04 :: Add new model'),
+            'title' => t('Step 04 :: Adding a new model'),
             'description' => "",
             'access' => user_access ('logged in'),
             'callback' => 'drupal_get_form',
@@ -194,7 +234,7 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'models/add/' . arg(2) . "/step05",
-            'title' => t('Step 05 :: Add new model'),
+            'title' => t('Step 05 :: Adding a new model'),
             'description' => "",
             'access' => user_access ('logged in'),
             'callback' => 'drupal_get_form',
@@ -204,7 +244,7 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'models/add/' . arg(2) . "/reviewnote",
-            'title' => t('Step 04 :: Add new model'),
+            'title' => t('Step 04 :: Adding a new model'),
             'description' => "",
             'access' => user_access ('administer content'),
             'callback' => 'drupal_get_form',
@@ -544,7 +584,7 @@ $output .= "</table>";
 
 $output .= "<p>&nbsp;<br/>At this point, you have completed the basic requirements of submitting a project and hosting it on OpenABM.org.<br/>You could complete the process of adding your model to the OpenABM repository by clicking on the 'Finish' button below.</p>";
 
-$output .= "<p>Alternatively, you could indicate the model is ready for a review by the committee at OpenABM.org. If you wish to submit your model for review, click the 'Submit Model for Review' button. In that case, you would be directed to a page that asks for some more information such as the ODD protocol.</p>";
+$output .= "<p>Alternatively, you could indicate the model is ready for a review by the committee at OpenABM.org. If you wish to submit your model for review, click the 'Proceed to Submit Model for Review' button. In that case, you would be directed to a page that asks for some more information such as the ODD protocol.</p>";
 
 $output .= "<p><u>Note: You can submit the model for review at any time by clicking on the \"Send this model for review\" link in the model workspace.</u></p>";
 
@@ -566,7 +606,7 @@ $output .= "<p><u>Note: You can submit the model for review at any time by click
 
 	$form ["details"]["review"] = array (
 		"#type" => "submit",
-		"#value" => t("Submit Model for Review"),
+		"#value" => t("Proceed to Submit Model for Review"),
 		"#submit" => TRUE
 	);
 
@@ -588,12 +628,12 @@ $output .= "<p><u>Note: You can submit the model for review at any time by click
 function openabmma_askIfReview_submit ($form_id, $edit)
 {
 	$pName = arg(2);
-	if ($_POST ["op"] == "Submit Model for Review")
+	if ($_POST ["op"] == "Proceed to Submit Model for Review")
 		drupal_goto ("models/add/" . $pName . "/step05");
 	else if ($_POST ["op"] == "Finish the Add Model process")
 		drupal_goto ("models/add/" . $pName . "/complete");
 	else if ($_POST ["op"] == "Back")
-		drupal_goto ("models/add/" . $pName . "/step03");
+		drupal_goto ("models/add/" . $pName . "/step04");
 	else
 		drupal_goto ("/");
 }
@@ -607,9 +647,13 @@ function openabmma_uploadFile ($formVar)
 	$is_writable = file_check_directory($dir, 1);
 	if($is_writable)
 	{
-		$source = file_check_upload($formVar);     
+		$source = file_check_upload($formVar);
+		if ($source == FALSE)
+			drupal_set_message ("Errpr uploading file!");
+
 		// Security measure to prevent exploit of file.php.png
 		$source->filename = upload_munge_filename($source->filename);
+		drupal_set_message ($source);
 
 		if ($file = file_save_upload($source,$dir ))
 		{
@@ -622,16 +666,24 @@ function openabmma_uploadFile ($formVar)
 //				file_delete($file->filepath);
 //				drupal_set_message('Uploaded file does not appear to be a valid image file. Please try again.');
 //			}
+
+			return 0;
 		}
+		else
+			return -1;
 	}
+	else
+		return -1;
 }
 
 function openabmma_addModel02_submit ($form_id, $edit)
 {
 	$errString = '';
 	$pName = arg(2);
+
+	$action = arg(1);
 	if ($_POST ["op"] == "Back")
-		drupal_goto ("models/add/" . $pName . "/step01");
+		drupal_goto ("models/" . $action . "/" . $pName . "/step01");
 
 	$pLang = $edit ["proj_language"];
 	if ($pLang == "Other")
@@ -641,21 +693,44 @@ function openabmma_addModel02_submit ($form_id, $edit)
 		else
 			$pLang = $edit ["other_language"];
 	}
-
-//	openabmma_uploadFile ('proj_code_file');
-//	$query = "UPDATE openabm_model_project SET prog_lang='%s', os='%s', framework='%s' WHERE name='%s'";
-	$query = "UPDATE openabm_model_project SET prog_lang='" . $pLang . "', os='" . $edit ["os"] . "', framework='" . $edit ["framework"] . "' WHERE name='" . $pName . "'";
+/*
+	if (openabmma_uploadFile ('proj_code_file') == -1)
+	{
+		drupal_set_message ("<font color='red'><b>Error uploading file</b></font>");
+		return;
+	}
+*/
 	if ($errString != "")
 	{
 		drupal_set_message ("<b><font color='red'>" . $errString . "</font></b>");
 		return;
 	}
-//	drupal_set_message ($query);
-	drupal_goto ("models/add/" . $pName . "/step03");
+
+//	$query = "UPDATE openabm_model_project SET prog_lang='%s', os='%s', framework='%s' WHERE name='%s'";
+	$query = "UPDATE openabm_model_project SET prog_lang='" . $pLang . "', os='" . $edit ["os"] . "', framework='" . $edit ["framework"] . "' WHERE name='" . $pName . "'";
+
+	db_query ($query, $pLang, $edit ["os"], $edit ["framework"], $pname);
+	drupal_goto ("models/" . $action . "/" . $pName . "/step03");
+}
+
+function openabmma_inList ($value, $arr)
+{
+	foreach ($arr as $val)
+		if ($val == $value)
+			return 1;
+
+	return 0;
 }
 
 function openabmma_addModel02 ($edit=null, $item=0)
 {
+	$pName = arg(2);
+	$query = "SELECT prog_lang, os, framework FROM openabm_model_project WHERE name='%s'";
+	$result = (array) db_fetch_object (db_query ($query, $pName));
+	$progLang = $result ['prog_lang'];
+	$os = $result ['os'];
+	$framework = $result ['framework'];
+	
 	$form['#attributes'] = array('enctype' => "multipart/form-data");
 
 	$form["details"] = array(
@@ -676,7 +751,7 @@ function openabmma_addModel02 ($edit=null, $item=0)
 	$form ["details"]["proj_name"] = array (
 		"#type" => "item",
 		"#title" => t("Project Name:"),
-		"#value" => arg (2),
+		"#value" => $pName,
 		"#description" => null,
 	);
 
@@ -695,6 +770,7 @@ function openabmma_addModel02 ($edit=null, $item=0)
 		"#type" => "select",
 		"#title" => t("Programming Language:"),
 		"#options" => $languages,
+		"#default_value" => $edit ["prog_language"] == "" ? (openabmma_inList ($progLang, $languages) == 1 ? $progLang : "Other") : $edit ["prog_language"],
 		"#description" => null
 	);
 
@@ -702,6 +778,7 @@ function openabmma_addModel02 ($edit=null, $item=0)
 		"#type" => "textfield",
 		"#title" => t("Other (if not mentioned in above list):"),
 		"#maxlength" => 210,
+		"#default_value" => $edit ["other_language"] == "" ? (openabmma_inList ($progLang, $languages) != 1 ? $progLang : "") : $edit ["prog_language"],
 		"#required" => false
 	);
 
@@ -714,7 +791,7 @@ function openabmma_addModel02 ($edit=null, $item=0)
 	$form ["details"]["os"] = array (
 		"#type" => "select",
 		"#title" => t("Operating System:"),
-		"#default_value" => $edit ["os"],
+		"#default_value" => $edit ["os"] == "" ? $os : $edit ["os"],
 		"#options" => $arrayElements,
 		"#description" => null
 	);
@@ -728,7 +805,7 @@ function openabmma_addModel02 ($edit=null, $item=0)
 	$form ["details"]["framework"] = array (
 		"#type" => "select",
 		"#title" => t("Framework used:"),
-		"#default_value" => $edit ["framework"],
+		"#default_value" => $edit ["framework"] == "" ? $framework : $edit ["framework"],
 		"#options" => $arrayElements,
 		"#description" => null
 	);
@@ -765,35 +842,56 @@ function openabmma_addModel02 ($edit=null, $item=0)
 function openabmma_addModel03_submit ($form_id, $edit)
 {
 	$pName = arg(2);
+	$action = arg(1);
 	if ($_POST ["op"] == "Back")
-		drupal_goto ("models/add/" . $pName . "/step02");
+		drupal_goto ("models/" . $action . "/" . $pName . "/step02");
 
 	$keywordList = $edit ["keywords"];
-	$replaceList = "!@#$%^&*()+-|\\[]{}:;'\"<>,./?~` ";
+	$replaceList = "!@#$%^&*()+-|\\[]{}:;'\"<>,/?~`";	// removed '.' and ' '
 	$replaceLen = strlen ($replaceList);
 	for ($i=0; $i<$replaceLen; $i = $i+1)
 		$keywordList = str_replace ($replaceList [$i], ",", $keywordList);
 
 	$keywords = explode (",", $keywordList);
 
+	$pId = openabmma_getProjectId ($pName);
+	$query = "DELETE FROM openabm_model_keywords WHERE proj_id=%d";
+	db_query ($query, $pId);
+
+	$query = "INSERT INTO openabm_model_keywords (proj_id, keyword) VALUES (%d, '%s')";
 	for ($i=0; $i<count($keywords); $i++)
 	{
 		if ($keywords [$i] == '')
 			continue;
-		$query = "INSERT INTO openabm_model_keywords (proj_id, keyword) VALUES (" . openabmma_getProjectId ($pName) .  ", '" . $keywords [$i] . "');";
-		drupal_set_message ($query);
+//		$query = "INSERT INTO openabm_model_keywords (proj_id, keyword) VALUES (" . openabmma_getProjectId ($pName) .  ", '" . $keywords [$i] . "');";
+		db_query ($query, $pId, trim ($keywords [$i]));
 	}
 
 	$query = "UPDATE openabm_model_project SET license_id=%d WHERE name='%s'";
-	$query = "UPDATE openabm_model_project SET license_id=" . $edit ["proj_licenseId"] . " WHERE name='" . $pName . "'";
+//	$query = "UPDATE openabm_model_project SET license_id=" . $edit ["proj_licenseId"] . " WHERE name='" . $pName . "'";
+
+	db_query ($query, $edit ["proj_licenseId"], $pName);
 
 //	drupal_set_message ($query);
 
-	drupal_goto ("models/add/" . $pName . "/step04");
+	drupal_goto ("models/" . $action . "/" . $pName . "/step04");
 }
 
 function openabmma_addModel03 ($edit=null, $item=0)
 {
+	$pName = arg(2);
+
+	$query = "SELECT license_id FROM openabm_model_project WHERE name='%s'";
+	$result = (array) db_fetch_object (db_query ($query, $pName));
+	$licenseId = $result ['license_id'];
+
+	$keywordList = '';
+	$query = "SELECT keyword FROM openabm_model_keywords WHERE proj_id=%d";
+	$result = db_query ($query, openabmma_getProjectId ($pName));
+	while ($element = db_fetch_object ($result))
+		$keywordList .= $element->keyword . ", ";
+	$keywordList = substr ($keywordList, 0, strlen($keywordList)-2);
+
 	$form["details"] = array(
 		"#type" => 'fieldset',
 		"#collapsible" => FALSE,
@@ -812,7 +910,7 @@ function openabmma_addModel03 ($edit=null, $item=0)
 	$form ["details"]["proj_name"] = array (
 		"#type" => "item",
 		"#title" => t("Project Name:"),
-		"#value" => arg (2),
+		"#value" => $pName,
 		"#description" => null,
 	);
 
@@ -824,7 +922,7 @@ function openabmma_addModel03 ($edit=null, $item=0)
 	$form ["details"]["proj_licenseId"] = array (
 		"#type" => "select",
 		"#title" => t("License:"),
-		"#default_value" => $edit ["proj_licenseId"],
+		"#default_value" => $edit ["proj_licenseId"] == "" ? $licenseId : $edit ['proj_licenseId'],
 		"#options" => $licenseTypes,
 		"#description" => null
 	);
@@ -832,6 +930,7 @@ function openabmma_addModel03 ($edit=null, $item=0)
 	$form ["details"]["keywords"] = array (
 		"#type" => "textfield",
 		"#title" => "Keywords:",
+		"#default_value" => $edit ["keywords"] == "" ? $keywordList : $edit ["keywords"],
 		"#maxlength" => 210,
 		"#required" => false
 	);
@@ -851,20 +950,46 @@ function openabmma_addModel03 ($edit=null, $item=0)
 	return ($form);	
 }
 
+function openabmma_addModel04_validate ()
+{
+	
+}
+
 function openabmma_addModel04_submit ($form_id, $edit)
 {
 	$pName = arg(2);
+	$action = arg(1);
 	if ($_POST ["op"] == "Back")
-		drupal_goto ("models/add/" . $pName . "/step03");
+		drupal_goto ("models/" . $action . "/" . $pName . "/step03");
 
+/*
+	if (openabmma_uploadFile ('proj_sentivity') == -1)
+	{
+		drupal_set_message ("<font color='red'><b>Error uploading file, please check the path of the file specified</b></font>");
+		return;
+	}
+*/
 	$query = "UPDATE openabm_model_project SET reference_text='%s', examples='%s' WHERE name='%s'";
-	$query = "UPDATE openabm_model_project SET reference_text='" . $edit ["proj_ref"] . "', examples='" . $edit ["proj_examples"] . "' WHERE name='" . $pName . "'";
+//	$query = "UPDATE openabm_model_project SET reference_text='" . $edit ["proj_ref"] . "', examples='" . $edit ["proj_examples"] . "' WHERE name='" . $pName . "'";
+
+	db_query ($query, $edit ["proj_ref"], $edit ["proj_examples"], $pName);
 //	drupal_set_message ($query);
-	drupal_goto ("models/add/" . $pName . "/reviewnote");
+
+	if ($action == "add")
+		drupal_goto ("models/add/" . $pName . "/reviewnote");
+	else
+		if ($action == "edit")
+			drupal_goto ("mymodels/" . $pName);
 }
 
 function openabmma_addModel04 ($edit=null, $item=0)
 {
+	$pName = arg(2);
+	$query = "SELECT reference_text, examples FROM openabm_model_project WHERE name='%s'";
+	$result = (array) db_fetch_object (db_query ($query, $pName));
+	$refText = $result ['reference_text'];
+	$examples = $result ['examples'];
+
 	$form["details"] = array(
 		"#type" => 'fieldset',
 		"#collapsible" => FALSE,
@@ -883,7 +1008,7 @@ function openabmma_addModel04 ($edit=null, $item=0)
 	$form ["details"]["proj_name"] = array (
 		"#type" => "item",
 		"#title" => t("Project Name:"),
-		"#value" => arg (2),
+		"#value" => $pName,
 		"#description" => null,
 	);
 /*
@@ -903,6 +1028,7 @@ function openabmma_addModel04 ($edit=null, $item=0)
 	$form ["details"]["proj_ref"] = array (
 		"#type" => "textarea",
 		"#title" => "References:",
+		"#default_value" => $edit ["proj_ref"] == "" ? $refText : $edit ["proj_ref"],
 		"#maxlength" => 210,
 		"#description" => t("Links to other hosted material of reference"),
 		"#required" => false
@@ -911,6 +1037,7 @@ function openabmma_addModel04 ($edit=null, $item=0)
 	$form ["details"]["proj_examples"] = array (
 		"#type" => "textarea",
 		"#title" => "Examples:",
+		"#default_value" => $edit ["proj_examples"] == "" ? $examples : $edit ["proj_examples"],
 		"#maxlength" => 210,
 		"#description" => t("Notes on how to use the model"),
 		"#required" => false
@@ -939,14 +1066,19 @@ function openabmma_addModel04 ($edit=null, $item=0)
 
 function openabmma_addModel05_submit ($form_id, $edit)
 {
+	$pName = arg(2);
 //	openabmma_uploadFile ('proj_odd_file');
 	if ($_POST ["op"] == "Back")
-		drupal_goto ("models/add/" . $pName . "/reviewNote");
+		drupal_goto ("models/add/" . $pName . "/reviewnote");
 
 	if ($edit ["proj_inst"]['commented'] == '0' || $edit ["proj_inst"]['cleanup'] == '0' || $edit ["proj_inst"]['running'] == '0')
 		drupal_set_message ("<b><font color='red'>Well-commented, cleanedup and running code is required before you submit your model for review!</font></b><br/>[Should we have a link to let the user still submit the model for review along with comments to the editor to justify that he should still be able to send his model for review?]");
 	else
+	{
+		$query = "UPDATE openabm_model_project SET submittedReview=1 WHERE name='%s'";
+		db_query ($query, $pName);
 		drupal_goto ("models/add/" . arg(2) . "/complete");
+	}
 }
 
 function openabmma_addModel05 ($edit=null, $item=0)
@@ -1013,19 +1145,43 @@ function openabmma_addModel05 ($edit=null, $item=0)
 
 function openabmma_addModelComplete ()
 {
-	return "New model added";
+	$pName = arg(2);
+	$query = "SELECT submittedReview FROM openabm_model_project WHERE name='%s'";
+	$result = (array) db_fetch_object (db_query ($query, $pName));
+	if ($result ['submittedReview'] == "1")
+		$output = "<p><br/>Congratultions! Your model has been uploaded and submitted for review!</p>";
+	else
+		$output = "<p><br/>Congratultions! Your model has been uploaded!</p>";
+
+	$webAddr = url ("mymodels/" . $pName, NULL, NULL, TRUE);
+	$output .= "<p>Your model can be accessed via the URL:<br/>" . l($webAddr, $webAddr) . "</p>";
+//	$output = 
+	return $output;
 }
 
 function openabmma_addModel01_submit ($form_id, $edit)
 {
+	$action = arg(1);
 	if ($_POST ["op"] == "Cancel")
-		drupal_goto ("models");
+		if ($action == "add")
+			drupal_goto ("models");
+		else if ($action == "edit")
+		{
+			$pName = arg(2);
+			drupal_goto ("mymodels/" . $pName);
+		}
 
 	global $user;
 	if ($edit ["newModel"] == "1")
+	{
+		$newModel = TRUE;
 		$pName = $edit ["proj_name"];
+	}
 	else
+	{
+		$newModel = FALSE;
 		$pName = arg(2);
+	}
 
 	if ($pName == "" || $pName == null)
 	{
@@ -1037,16 +1193,26 @@ function openabmma_addModel01_submit ($form_id, $edit)
 	if ($visible != '0')
 		$visible = '1';
 
-	if (openabmma_getProjectId ($pName) != -1 && openabmma_getProjectId ($pName) != '')
-		drupal_set_message ("<b><font color='red'>Another project with the same name exists. Please choose a different name</font></b>");
+	if ($newModel == TRUE)
+	{
+		if (openabmma_getProjectId ($pName) != -1 && openabmma_getProjectId ($pName) != '')
+			drupal_set_message ("<b><font color='red'>Another project with the same name exists. Please choose a different name</font></b>");
+		else
+		{
+			$query = "INSERT INTO openabm_model_project (owner_uid, name, description, visible) VALUES (%d, '%s', '%s', %d)";
+//			$query = "INSERT INTO openabm_model_project (owner_uid, name, description, visible) VALUES (" . $user->uid . ", '" . $pName . "', '" . $edit ["proj_description"] . "', " . $visible . ")";
+
+			db_query ($query, $user->uid, $pName, $edit ["proj_description"], $visible);
+			drupal_goto ("models/add/" . $pName . "/step02");
+		}
+	}
 	else
 	{
-/*
-		$query = "INSERT INTO openabm_model_project (owner_uid, name, description, visible) VALUES (%d, '%s', '%s', %d)";
-		
-*/
-		$query = "INSERT INTO openabm_model_project (owner_uid, name, description, visible) VALUES (" . $user->uid . ", '" . $pName . "', '" . $edit ["proj_description"] . "', " . $visible . ")";
-		drupal_goto ("models/add/" . $edit ["proj_name"] . "/step02");
+		$query = "UPDATE openabm_model_project SET description='%s', visible=%d WHERE name='%s'";
+//		$query = "UPDATE openabm_model_project SET description='" . $edit ["proj_description"] . "', visible=" . $visible . " WHERE name='" .$pName . "'";
+//		drupal_set_message ($query);
+		db_query ($query, $edit ["proj_description"], $visible, $pName);
+		drupal_goto ("models/add/" . $pName . "/step02");
 	}
 }
 
@@ -1063,6 +1229,20 @@ function openabmma_addModel01 ($edit=null, $item=0)
 	else
 		$newModel = "1";
 
+	$desc = '';
+	$visible = "false";
+	if ($newModel == "0")
+	{
+		$query = "SELECT description, visible FROM openabm_model_project WHERE name='%s'";
+		$result = (array) db_fetch_object (db_query ($query, $pName));
+		$desc = $result ['description'];
+		$visible = $result ['visible'];
+		if ($visible == "1")
+			$visible = TRUE;
+		else
+			$visible = FALSE;
+	}
+
 	$result = (array) db_fetch_object (db_query ("SELECT max(id) FROM openabm_model_project"));
 	$id = $result['max(id)'] + 1;
 
@@ -1074,13 +1254,6 @@ function openabmma_addModel01 ($edit=null, $item=0)
 		"#description" => null,
 	);
 
-/*	$form ["details"]["proj_id"] = array (
-		"#type" => "item",
-		"#title" => t("Project ID:"),
-		"#value" => $id,
-		"#description" => t("Unique id for this project"),
-	);
-*/
 	$form ["details"]["proj_ownerId"] = array (
 		"#type" => "item",
 		"#title" => t("Owner ID:"),
@@ -1120,7 +1293,7 @@ function openabmma_addModel01 ($edit=null, $item=0)
 	$form ["details"]["proj_description"] = array (
 		"#type" => "textarea",
 		"#title" => t("Description of project:"),
-		"#default_value" => $edit ["proj_description"],
+		"#default_value" => $edit ["proj_description"] == "" ? $desc : $edit ["proj_description"],
 		"#description" => null,
 		"#required" => false
 	);
@@ -1138,15 +1311,31 @@ function openabmma_addModel01 ($edit=null, $item=0)
 		"#description" => null
 	);
 */
-	$form["details"]["proj_visibility"] = array(
-	'#type' => 'checkboxes',
-	'#title' => t('Project visibility:'),
-	'#default_value' => "false",
-	'#options' => array(
-	'visibility' => t('I want to make my project visible to all'),
-		),
-	'#description' => t('Enabling this option will make your project visible to all registered users of this site.'),
-	);
+	if ($visible)
+	{
+		$form["details"]["proj_visibility"] = array(
+		'#type' => 'checkboxes',
+		'#title' => t('Project visibility:'),
+		"#attributes" => array ('checked' => 'checked'),
+	//	'#default_value' => array (TRUE),
+		'#options' => array(
+		'visibility' => t('I want to make my project visible to all'),
+			),
+		'#description' => t('Enabling this option will make your project visible to all registered users of this site.'),
+		);
+	}
+	else
+	{
+		$form["details"]["proj_visibility"] = array(
+		'#type' => 'checkboxes',
+		'#title' => t('Project visibility:'),
+	//	'#default_value' => array (TRUE),
+		'#options' => array(
+		'visibility' => t('I want to make my project visible to all'),
+			),
+		'#description' => t('Enabling this option will make your project visible to all registered users of this site.'),
+		);
+	}
 
 	$form ["details"]["submit"] = array (
 		"#type" => "submit",
