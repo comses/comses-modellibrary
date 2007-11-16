@@ -15,7 +15,7 @@ function openabmma_install() {
                 owner_uid       INT(10) UNSIGNED NOT NULL,
                 name            VARCHAR(255) NOT NULL,
                 description     MEDIUMTEXT NOT NULL,
-                pl_id           INT(10) UNSIGNED,
+                model_language_id INT(10) UNSIGNED,
                 os              VARCHAR(255) NOT NULL,
                 framework	VARCHAR(255) NOT NULL,
                 reference_text  TEXT,
@@ -25,7 +25,8 @@ function openabmma_install() {
                 reference_url   VARCHAR(255) NULL,
                 license_id      INT(10) UNSIGNED,
                 PRIMARY KEY(id),
-                FOREIGN KEY (license_id) REFERENCES openabm_license(id)
+                FOREIGN KEY (license_id) REFERENCES openabm_license(id),
+                FOREIGN KEY (model_language_id) REFERENCES openabm_model_language(id)
                 );");
             // create pivot table for members of an ABM project
 
