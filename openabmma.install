@@ -2,6 +2,7 @@
 // $Id$
 
 function openabmma_install() {
+// this is a comment
     drupal_set_message( t('Beginning installation of openabmma module') );
     switch ($GLOBALS['db_type']) {
         case 'mysql':
@@ -14,7 +15,7 @@ function openabmma_install() {
                 owner_uid       INT(10) UNSIGNED NOT NULL,
                 name            VARCHAR(255) NOT NULL,
                 description     MEDIUMTEXT NOT NULL,
-                prog_lang       VARCHAR(255) NOT NULL,
+                pl_id           INT(10) UNSIGNED,
                 os              VARCHAR(255) NOT NULL,
                 framework	VARCHAR(255) NOT NULL,
                 reference_text  TEXT,
@@ -22,37 +23,37 @@ function openabmma_install() {
                 submittedReview bool default 0,
 		visible		bool default 0,
                 reference_url   VARCHAR(255) NULL,
-                license_id      TINYINT UNSIGNED NOT NULL,
+                license_id      INT(10) UNSIGNED,
                 PRIMARY KEY(id),
-                FOREIGN KEY (owner_uid) REFERENCES user(uid),
                 FOREIGN KEY (license_id) REFERENCES openabm_license(id)
                 );");
             // create pivot table for members of an ABM project
 
             db_query("CREATE TABLE openabm_model_keywords (
+                id              INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
 		proj_id		INT(10) UNSIGNED NOT NULL,
-                keyword         VARCHAR(50) NOT NULL,
-                PRIMARY KEY(proj_id, keyword),
-                FOREIGN KEY (proj_id) REFERENCES openabm_model_project(id) ON DELETE CASCADE
+                keyword         VARCHAR(255) NOT NULL,
+                PRIMARY KEY(id),
+                FOREIGN KEY (proj_id) REFERENCES openabm_model_project(id) 
                 );");
             // create pivot table for members of an ABM project
 
-            db_query("CREATE TABLE openabm_prog_lang (
-                progLangId      INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
+            db_query("CREATE TABLE openabm_model_language (
+                id              INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
                 name            VARCHAR(255) NOT NULL,
-                PRIMARY KEY(progLangId)
+                PRIMARY KEY(id)
 		);");
 
             db_query("CREATE TABLE openabm_framework (
-                frameworkId      INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
-                name             VARCHAR(255) NOT NULL,
-                PRIMARY KEY(frameworkId)
-		);");
+                id              INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
+                name            VARCHAR(255) NOT NULL,
+                PRIMARY KEY(id)
+                );");
 
             db_query("CREATE TABLE openabm_os (
-                osId             INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
-                name             VARCHAR(255) NOT NULL,
-                PRIMARY KEY(osId)
+                id              INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
+                name            VARCHAR(255) NOT NULL,
+                PRIMARY KEY(id)
 		);");
 
             db_query("CREATE TABLE openabm_model_project_member (
@@ -61,10 +62,8 @@ function openabmma_install() {
                 user_id         INT(10) UNSIGNED NOT NULL,
                 role            INT(10) UNSIGNED NOT NULL,
                 PRIMARY KEY (id),
-                FOREIGN KEY (project_id) REFERENCES openabm_model_project(id)
-                    ON DELETE CASCADE,
-                FOREIGN KEY (user_id) REFERENCES users(uid) ON DELETE CASCADE,
-                FOREIGN KEY (role) REFERENCES openabm_roles(id)
+                FOREIGN KEY (project_id) REFERENCES openabm_model_project(id),
+                FOREIGN KEY (role) REFERENCES openabm_role(id)
                 );");
 
             db_query("CREATE TABLE openabm_role (
@@ -76,8 +75,8 @@ function openabmma_install() {
             // create license table
             db_query("CREATE TABLE openabm_license (
                 id INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
-                license MEDIUMTEXT NOT NULL,
-                url     TEXT,
+                license_text MEDIUMTEXT NOT NULL,
+                url     VARCHAR(255),
                 PRIMARY KEY(id)
                 );");
             break;

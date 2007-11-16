@@ -388,7 +388,7 @@ function openabmma_deletePLanguages ($id='')
 {
 	if ($id != "")
 	{
-		$query = "DELETE FROM openabm_prog_lang WHERE progLangId=%d";
+		$query = "DELETE FROM openabm_prog_lang WHERE id=%d";
 		db_query ($query, $id);
 	}
 
@@ -399,12 +399,12 @@ function openabmma_deletePLanguages ($id='')
 function openabmma_showPLanguages ()
 {
 	$count = 0;
-	$query = "SELECT progLangId, name FROM openabm_prog_lang";
+	$query = "SELECT id, name FROM openabm_prog_lang";
 	$result = db_query ($query);
 	while ($node = db_fetch_object ($result))
 	{
 		$count++;
-		$output .= "<br/><b>" . $node->name . "</b>&nbsp;" . "<a href=\"javascript:if(confirm('Are you sure you want to delete this language from the list?')) window.location.replace('" . url("config/planguages/delete/" . $node->progLangId) . "');\"><small>[delete this]</small></a>";
+		$output .= "<br/><b>" . $node->name . "</b>&nbsp;" . "<a href=\"javascript:if(confirm('Are you sure you want to delete this language from the list?')) window.location.replace('" . url("config/planguages/delete/" . $node->id) . "');\"><small>[delete this]</small></a>";
 	}
 
 	$output = "<br/>Total " . $count . " language(s).<br/>" . $output . "<br/>&nbsp;" . drupal_get_form (openabmma_add_pLanguage);
@@ -450,7 +450,7 @@ function openabmma_deleteFramework ($id='')
 {
 	if ($id != "")
 	{
-		$query = "DELETE FROM openabm_framework WHERE frameworkId=%d";
+		$query = "DELETE FROM openabm_framework WHERE id=%d";
 		db_query ($query, $id);
 	}
 
@@ -461,12 +461,12 @@ function openabmma_deleteFramework ($id='')
 function openabmma_showFrameworks ()
 {
 	$count = 0;
-	$query = "SELECT frameworkId, name FROM openabm_framework";
+	$query = "SELECT id, name FROM openabm_framework";
 	$result = db_query ($query);
 	while ($node = db_fetch_object ($result))
 	{
 		$count++;
-		$output .= "<br/><b>" . $node->name . "</b>&nbsp;" . "<a href=\"javascript:if(confirm('Are you sure you want to delete this framework from the list?')) window.location.replace('" . url("config/frameworks/delete/" . $node->frameworkId) . "');\"><small>[delete this]</small></a>";
+		$output .= "<br/><b>" . $node->name . "</b>&nbsp;" . "<a href=\"javascript:if(confirm('Are you sure you want to delete this framework from the list?')) window.location.replace('" . url("config/frameworks/delete/" . $node->id) . "');\"><small>[delete this]</small></a>";
 	}
 
 	$output = "<br/>Total " . $count . " framework(s).<br/>" . $output . "<br/>&nbsp;" . drupal_get_form (openabmma_add_framework);
@@ -512,7 +512,7 @@ function openabmma_deleteOS ($id='')
 {
 	if ($id != "")
 	{
-		$query = "DELETE FROM openabm_os WHERE osId=%d";
+		$query = "DELETE FROM openabm_os WHERE id=%d";
 		db_query ($query, $id);
 	}
 
@@ -523,12 +523,12 @@ function openabmma_deleteOS ($id='')
 function openabmma_showOS ()
 {
 	$count = 0;
-	$query = "SELECT osId, name FROM openabm_os";
+	$query = "SELECT id, name FROM openabm_os";
 	$result = db_query ($query);
 	while ($node = db_fetch_object ($result))
 	{
 		$count++;
-		$output .= "<br/><b>" . $node->name . "</b>&nbsp;" . "<a href=\"javascript:if(confirm('Are you sure you want to delete this OS from the list?')) window.location.replace('" . url("config/os/delete/" . $node->osId) . "');\"><small>[delete this]</small></a>";
+		$output .= "<br/><b>" . $node->name . "</b>&nbsp;" . "<a href=\"javascript:if(confirm('Are you sure you want to delete this OS from the list?')) window.location.replace('" . url("config/os/delete/" . $node->id) . "');\"><small>[delete this]</small></a>";
 	}
 
 	$output = "<br/>Total " . $count . " Operating System(s).<br/>" . $output . "<br/>&nbsp;" . drupal_get_form (openabmma_add_OS);
