@@ -1,0 +1,10 @@
+drop table if exists openabm_framework;
+drop table if exists openabm_model_project_member;
+drop table if exists openabm_os;
+drop table if exists openabm_role;
+drop table if exists openabm_model_keywords;
+drop table if exists openabm_model_project;
+drop table if exists openabm_license;
+drop table if exists openabm_model_language;
+
+delete from system where name like 'openabmma';
