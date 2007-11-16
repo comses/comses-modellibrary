@@ -22,6 +22,9 @@ function openabmma_install() {
                 examples        TEXT,
                 submittedReview bool default 0,
 		visible		bool default 0,
+		replicatedModel bool default 0,
+		run_conditions  TEXT NULL,
+		replicators     VARCHAR(255) NULL,
                 reference_url   VARCHAR(255) NULL,
                 license_id      INT(10) UNSIGNED,
                 PRIMARY KEY(id),
@@ -35,7 +38,7 @@ function openabmma_install() {
 		proj_id		INT(10) UNSIGNED NOT NULL,
                 keyword         VARCHAR(255) NOT NULL,
                 PRIMARY KEY(id),
-                FOREIGN KEY (proj_id) REFERENCES openabm_model_project(id) 
+                FOREIGN KEY (proj_id) REFERENCES openabm_model_project(id) ON DELETE CASCADE
                 );");
             // create pivot table for members of an ABM project
 
@@ -63,7 +66,7 @@ function openabmma_install() {
                 user_id         INT(10) UNSIGNED NOT NULL,
                 role            INT(10) UNSIGNED NOT NULL,
                 PRIMARY KEY (id),
-                FOREIGN KEY (project_id) REFERENCES openabm_model_project(id),
+                FOREIGN KEY (project_id) REFERENCES openabm_model_project(id) ON DELETE CASCADE,
                 FOREIGN KEY (role) REFERENCES openabm_role(id)
                 );");
 

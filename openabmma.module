@@ -24,13 +24,13 @@ function openabmma_block ($op='list', $delta=0)
 	}
 	else if ($op == 'view')
 	{
-		$block_content = l ("My projects", "models/") . "<br/>"
-			. l ("Search projects", "models/search") . "<br/>"
+		$block_content = l ("My models", "models/") . "<br/>"
+			. l ("Search models", "models/search") . "<br/>"
 			;
 
 		if (user_access ('administer content'))
 		{
-			$block_content .= "<br/>" . l ("Project licenses", "config/licenses");
+			$block_content .= "<br/>" . l ("Model licenses", "config/licenses");
 			$block_content .= "<br/>" . l ("Member roles", "config/roles");
 			$block_content .= "<br/>" . l ("Prog. languages listed", "config/planguages");
 			$block_content .= "<br/>" . l ("OS listed", "config/os");
@@ -89,7 +89,7 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'models/search',
-            'title' => t('Search projects'),
+            'title' => t('Search Models'),
             'description' => "",
             'access' => user_access ('logged in'),
             'callback' => 'openabmma_searchProjects',
@@ -98,7 +98,7 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'models',
-            'title' => t('My projects'),
+            'title' => t('My models'),
             'description' => "",
             'access' => user_access ('logged in'),
             'callback' => 'openabmma_showProjects',
@@ -273,7 +273,7 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'models/search/' . arg (2),
-            'title' => t('Search projects'),
+            'title' => t('Search models'),
             'description' => "",
             'access' => user_access ('logged in'),
             'callback' => 'openabmma_searchProjects',
@@ -362,10 +362,20 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'mymodels/' . arg(1) . '/members',
-            'title' => t('Project members'),
+            'title' => t('Model members'),
             'description' => "",
             'access' => user_access ('logged in'),
             'callback' => 'openabmma_manageMembers',
+            'callback arguments' => array(arg(1)),
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'mymodels/' . arg(1) . '/viewMetadata',
+            'title' => arg(1),
+            'description' => "",
+            'access' => user_access ('access content'),
+            'callback' => 'openabmma_showMetaData',
             'callback arguments' => array(arg(1)),
             'type' => MENU_CALLBACK
             );
@@ -382,6 +392,82 @@ function openabmma_menu($may_cache) {
     }
 
     return $items;
+}
+
+function openabmma_showMetaData ($pName='')
+{
+	global $user;
+	if ($pName == '')
+		return '';
+
+	$owner = openabmma_getModelOwner ($pName);
+	if ($owner == "")
+		drupal_goto ("models");
+
+	if ($user->name != $owner)
+	{
+		drupal_access_error ('Only model members can view metadata for a model.');
+		return '';
+	}
+
+	$query = "SELECT owner_uid, name, description, model_language_id, os, framework, reference_text, examples, submittedReview, visible, replicatedModel, replicators, reference_url, license_id from openabm_model_project WHERE name='%s'";
+	$result = (array) db_fetch_object (db_query ($query, $pName));
+	$owner_uid = $result ['owner_uid'];
+	$name = $result ['name'];
+	$description = $result ['description'];
+	$replicated = $result ['replicatedModel'] == "1" ? "Yes" : "No";
+	$replicators = $result ['replicators'];
+	$reference_url = $result ['reference_url'];
+	$model_language_id = $result ['model_language_id'];
+	$os = $result ['os'];
+	$framework = $result ['framework'];
+	$reference_text = $result ['reference_text'];
+	$examples = $result ['examples'];
+	$submittedReview = $result ['submittedReview'] == "1" ? "Yes" : "No";
+	$visible = $result ['visible'] == "1" ? "Yes" : "No";
+	$replicators = $result ['replicators'];
+	$reference_url = $result ['reference_url'];
+	$license_id = $result ['license_id'];
+
+	$query = "SELECT name from openabm_model_language WHERE id=%d";
+	$result = (array) db_fetch_object (db_query ($query, $model_language_id));
+	$model_language_id = $result ['name'];
+
+	$query = "SELECT license_text from openabm_license WHERE id=%d";
+	$result = (array) db_fetch_object (db_query ($query, $license_id));
+	$license_id = $result ['license_text'];
+
+	$keywordList = '';
+	$query = "SELECT keyword FROM openabm_model_keywords WHERE proj_id=%d";
+	$result = db_query ($query, openabmma_getProjectId ($pName));
+	while ($element = db_fetch_object ($result))
+		$keywordList .= $element->keyword . ", ";
+	$keywordList = substr ($keywordList, 0, strlen($keywordList)-2);
+
+	$output = "<br/><p><table border='0' cellpadding='0' cellspacing='0' width='100%'>";
+$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Model name:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $name . "</i></td></tr>";
+$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Model description:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $description . "</i></td></tr>";
+$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Replicated model:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $replicated . "</i></td></tr>";
+	if ($replicated == "Yes")
+	{
+		$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Replicators:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $replicators . "</i></td></tr>";
+		$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Reference URL:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $reference_url . "</i></td></tr>";
+	}
+
+$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Visible to public:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $visible . "</i></td></tr>";
+$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Programming language:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $model_language_id . "</i></td></tr>";
+$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Operating System:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $os . "</i></td></tr>";
+$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Framework:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $framework . "</i></td></tr>";
+$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>License:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $license_id . "</i></td></tr>";
+$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Model keywords:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $keywordList . "</i></td></tr>";
+$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>References:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $reference_text . "</i></td></tr>";
+$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Examples:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $examples . "</i></td></tr>";
+$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Submitted for review:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $submittedReview . "</i></td></tr>";
+
+$output .= "</table>";
+
+$output .= "<p></p>" . l ("To change your metadata settings, click here", "models/edit/" . $pName . "/step01");
+	return $output;
 }
 
 function openabmma_deletePLanguages ($id='')
@@ -578,7 +664,7 @@ function openabmma_askIfReview ()
 		return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
 
 	$output = "<br/><p><table border='0' cellpadding='0' cellspacing='0' width='100%'>";
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><b>Step 1</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>[Complete]</i></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'>Project name, description and visibility to public</td></tr>";
+$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><b>Step 1</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>[Complete]</i></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'>Model name, description and visibility to public</td></tr>";
 $output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 2</b></td><td style='border-bottom: thin solid #aaaaaa'><i>[Complete]</i></td><td style='border-bottom: thin solid #aaaaaa'>Code files, language and platform details</td></tr>";
 $output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 3</b></td><td style='border-bottom: thin solid #aaaaaa'><i>[Complete]</i></td><td style='border-bottom: thin solid #aaaaaa'>License information and keywords</td></tr>";
 $output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 4</b></td><td style='border-bottom: thin solid #aaaaaa'><i>[Complete]</i></td><td style='border-bottom: thin solid #aaaaaa'>References, examples and senstivity information</td></tr>";
@@ -586,7 +672,7 @@ $output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 5</b></td>
 $output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 6</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='green'>Only for review</font></td><td style='border-bottom: thin solid #aaaaaa'>Collecting documents for model review</td></tr>";
 $output .= "</table>";
 
-$output .= "<p>&nbsp;<br/>At this point, you have completed the basic requirements of submitting a project and hosting it on OpenABM.org.<br/>You could complete the process of adding your model to the OpenABM repository by clicking on the 'Finish' button below.</p>";
+$output .= "<p>&nbsp;<br/>At this point, you have completed the basic requirements of submitting a model and hosting it on OpenABM.org.<br/>You could complete the process of adding your model to the OpenABM repository by clicking on the 'Finish' button below.</p>";
 
 $output .= "<p>Alternatively, you could indicate the model is ready for a review by the committee at OpenABM.org. If you wish to submit your model for review, click the 'Proceed to Submit Model for Review' button. In that case, you would be directed to a page that asks for some more information such as the ODD protocol.</p>";
 
@@ -717,10 +803,10 @@ function openabmma_addModel02_submit ($form_id, $edit)
 		return;
 	}
 
-//	$query = "UPDATE openabm_model_project SET prog_lang='%s', os='%s', framework='%s' WHERE name='%s'";
+	$query = "UPDATE openabm_model_project SET prog_lang='%s', os='%s', framework='%s' WHERE name='%s'";
 # FIXME: This is probably broken - need to set it to the appropriate id
 # instead of the string value.
-	$query = "UPDATE openabm_model_project SET model_language_id='" . $pLang . "', os='" . $edit ["os"] . "', framework='" . $edit ["framework"] . "' WHERE name='" . $pName . "'";
+//	$query = "UPDATE openabm_model_project SET model_language_id='" . $pLang . "', os='" . $edit ["os"] . "', framework='" . $edit ["framework"] . "' WHERE name='" . $pName . "'";
 
 	db_query ($query, $pLang, $edit ["os"], $edit ["framework"], $pname);
 	drupal_goto ("models/" . $action . "/" . $pName . "/step03");
@@ -768,7 +854,7 @@ function openabmma_addModel02 ($edit=null, $item=0)
 */
 	$form ["details"]["proj_name"] = array (
 		"#type" => "item",
-		"#title" => t("Project Name:"),
+		"#title" => t("Model Name:"),
 		"#value" => $pName,
 		"#description" => null,
 	);
@@ -804,7 +890,7 @@ function openabmma_addModel02 ($edit=null, $item=0)
 	$result = db_query ("SELECT name FROM openabm_os ORDER BY name");
 	while ($node = db_fetch_object ($result))
 		$arrayElements [$node->name] = $node->name;
-	$arrayElements ["Other"] = "Other";
+	$arrayElements ["Other / Platform Independent"] = "Other / Platform Independent";
 
 	$form ["details"]["os"] = array (
 		"#type" => "select",
@@ -935,15 +1021,15 @@ function openabmma_addModel03 ($edit=null, $item=0)
 */
 	$form ["details"]["proj_name"] = array (
 		"#type" => "item",
-		"#title" => t("Project Name:"),
+		"#title" => t("Model Name:"),
 		"#value" => $pName,
 		"#description" => null,
 	);
 
 	$licenseTypes = array ();
-	$result = db_query ("SELECT id, license, url FROM openabm_license");
+	$result = db_query ("SELECT id, license_text, url FROM openabm_license");
 	while ($node = db_fetch_object ($result))
-		$licenseTypes [$node->id] = $node->license . " [" . $node->url . "]";
+		$licenseTypes [$node->id] = $node->license_text . " [" . $node->url . "]";
 
 	$form ["details"]["proj_licenseId"] = array (
 		"#type" => "select",
@@ -1042,7 +1128,7 @@ function openabmma_addModel04 ($edit=null, $item=0)
 */
 	$form ["details"]["proj_name"] = array (
 		"#type" => "item",
-		"#title" => t("Project Name:"),
+		"#title" => t("Model Name:"),
 		"#value" => $pName,
 		"#description" => null,
 	);
@@ -1119,8 +1205,8 @@ function openabmma_addModel05_submit ($form_id, $edit)
 			return;
 		}
 
-		$query = "UPDATE openabm_model_project SET submittedReview=1 WHERE name='%s'";
-		db_query ($query, $pName);
+		$query = "UPDATE openabm_model_project SET submittedReview=1, run_conditions='%s' WHERE name='%s'";
+		db_query ($query, $edit ["proj_conditions"], $pName);
 		drupal_goto ("models/add/" . arg(2) . "/complete");
 	}
 }
@@ -1131,6 +1217,10 @@ function openabmma_addModel05 ($edit=null, $item=0)
 	$pName = arg(2);
 	if ($user->name != openabmma_getModelOwner ($pName))
 		return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+
+	$query = "SELECT run_conditions FROM openabm_model_project WHERE name='%s'";
+	$result = (array) db_fetch_object (db_query ($query, $pName));
+	$run_conditions = $result ['run_conditions'];
 
 	$form['#attributes'] = array('enctype' => "multipart/form-data");
 
@@ -1144,7 +1234,7 @@ function openabmma_addModel05 ($edit=null, $item=0)
 
 	$form ["details"]["proj_name"] = array (
 		"#type" => "item",
-		"#title" => t("Project Name:"),
+		"#title" => t("Model Name:"),
 		"#value" => $pName,
 		"#description" => null,
 	);
@@ -1167,9 +1257,28 @@ function openabmma_addModel05 ($edit=null, $item=0)
 		"#title" => t("ODD file:")
 	);
 
+	$form ["details"]["proj_dataset"] = array (
+		"#type" => "file",
+		"#title" => t("Test data set (for running the model):")
+	);
+
+	$form ["details"]["proj_conditions"] = array (
+		"#type" => "textarea",
+		"#title" => "Conditions or comments for running the code:",
+		"#default_value" => $edit ["proj_conditions"] == "" ? $run_conditions : $edit ["proj_conditions"],
+		"#maxlength" => 210,
+		"#description" => t("Optional notes on running of model"),
+		"#required" => false
+	);
+
+	$form ["details"]["proj_extra"] = array (
+		"#type" => "file",
+		"#title" => t("Additional document to be included with model submission (optional):")
+	);
+
 	$form["details"]["proj_inst"] = array(
 	'#type' => 'checkboxes',
-	'#title' => t('Project requirements:'),
+	'#title' => t('Model requirements:'),
 	'#default_value' => "false",
 	'#options' => array(
 	'commented' => t('The code submitted has been commented well'),
@@ -1247,7 +1356,7 @@ function openabmma_addModel01_submit ($form_id, $edit)
 
 	if ($pName == "" || $pName == null)
 	{
-		drupal_set_message ("<b><font color='red'>Project name is a required field</font></b>");
+		drupal_set_message ("<b><font color='red'>Model name is a required field</font></b>");
 		return;
 	}
 
@@ -1255,25 +1364,26 @@ function openabmma_addModel01_submit ($form_id, $edit)
 	if ($visible != '0')
 		$visible = '1';
 
+	$replicated = $edit ["proj_replicated"]["replica"];
+	if ($replicated != '0')
+		$replicated = '1';
+
 	if ($newModel == TRUE)
 	{
 		if (openabmma_getProjectId ($pName) != -1 && openabmma_getProjectId ($pName) != '')
 			drupal_set_message ("<b><font color='red'>Another project with the same name exists. Please choose a different name</font></b>");
 		else
 		{
-			$query = "INSERT INTO openabm_model_project (owner_uid, name, description, visible) VALUES (%d, '%s', '%s', %d)";
-//			$query = "INSERT INTO openabm_model_project (owner_uid, name, description, visible) VALUES (" . $user->uid . ", '" . $pName . "', '" . $edit ["proj_description"] . "', " . $visible . ")";
+			$query = "INSERT INTO openabm_model_project (owner_uid, name, description, visible, replicatedModel, replicators, reference_url) VALUES (%d, '%s', '%s', %d, '%s', '%s')";
 
-			db_query ($query, $user->uid, $pName, $edit ["proj_description"], $visible);
+			db_query ($query, $user->uid, $pName, $edit ["proj_description"], $visible, $replicated, $edit ["proj_repl"], $edit ["proj_refurl"]);
 			drupal_goto ("models/add/" . $pName . "/step02");
 		}
 	}
 	else
 	{
-		$query = "UPDATE openabm_model_project SET description='%s', visible=%d WHERE name='%s'";
-//		$query = "UPDATE openabm_model_project SET description='" . $edit ["proj_description"] . "', visible=" . $visible . " WHERE name='" .$pName . "'";
-//		drupal_set_message ($query);
-		db_query ($query, $edit ["proj_description"], $visible, $pName);
+		$query = "UPDATE openabm_model_project SET description='%s', visible=%d, replicatedModel=%d, replicators='%s', reference_url='%s' WHERE name='%s'";
+		db_query ($query, $edit ["proj_description"], $visible, $replicated, $edit ["proj_repl"], $edit ["proj_refurl"], $pName);
 		drupal_goto ("models/add/" . $pName . "/step02");
 	}
 }
@@ -1301,8 +1411,18 @@ function openabmma_addModel01 ($edit=null, $item=0)
 	$visible = "false";
 	if ($newModel == "0")
 	{
-		$query = "SELECT description, visible FROM openabm_model_project WHERE name='%s'";
+		$query = "SELECT replicatedModel, replicators, reference_url, description, visible FROM openabm_model_project WHERE name='%s'";
 		$result = (array) db_fetch_object (db_query ($query, $pName));
+		$replicated = $result ['replicatedModel'];
+		if ($replicated == "1")
+			$replicated = TRUE;
+		else
+			$replicated = FALSE;
+
+		$replicators = $result ['replicators'];
+		$refurl = $result ['reference_url'];
+//		drupal_set_message 
+
 		$desc = $result ['description'];
 		$visible = $result ['visible'];
 		if ($visible == "1")
@@ -1338,7 +1458,7 @@ function openabmma_addModel01 ($edit=null, $item=0)
 	{
 		$form ["details"]["proj_name"] = array (
 			"#type" => "textfield",
-			"#title" => t("Project Name:"),
+			"#title" => t("Model Name:"),
 			"#default_value" => $edit ["proj_name"],
 			"#description" => null,
 	//		"#required" => true,		// Commented because clicking Cancel validates this field too!
@@ -1350,7 +1470,7 @@ function openabmma_addModel01 ($edit=null, $item=0)
 	{
 		$form ["details"]["proj_name"] = array (
 			"#type" => "item",
-			"#title" => t("Project Name:"),
+			"#title" => t("Model Name:"),
 			"#description" => null,
 			"#value" => arg(2),
 	//		"#required" => true,		// Commented because clicking Cancel validates this field too!
@@ -1360,48 +1480,75 @@ function openabmma_addModel01 ($edit=null, $item=0)
 	}
 	$form ["details"]["proj_description"] = array (
 		"#type" => "textarea",
-		"#title" => t("Description of project:"),
+		"#title" => t("Description of model:"),
 		"#default_value" => $edit ["proj_description"] == "" ? $desc : $edit ["proj_description"],
 		"#description" => null,
 		"#required" => false
 	);
-/*
-	$licenseTypes = array ();
-	$result = db_query ("SELECT id, license, url FROM openabm_license");
-	while ($node = db_fetch_object ($result))
-		$licenseTypes [$node->id] = $node->license . " [" . $node->url . "]";
 
-	$form ["details"]["proj_licenseId"] = array (
-		"#type" => "select",
-		"#title" => t("License:"),
-		"#default_value" => $edit ["proj_licenseId"],
-		"#options" => $licenseTypes,
-		"#description" => null
+	if ($replicated)
+	{
+		$form["details"]["proj_replicated"] = array(
+		'#type' => 'checkboxes',
+		"#attributes" => array ('checked' => 'checked'),
+		'#title' => t("Model replication:"),
+		'#options' => array(
+		'replica' => t('Check this box is this a replicated model instead of an original model'),
+			),
+		'#description' => t('If the model you are submitting is your own implementation but an idea of somebody else, put a check mark here. If your model is your own idea, leave this box blank.'),
+		);
+	}
+	else
+	{
+		$form["details"]["proj_replicated"] = array(
+		'#type' => 'checkboxes',
+		'#title' => t("Model replication:"),
+		'#options' => array(
+		'replica' => t('Check this box is this a replicated model instead of an original model'),
+			),
+		'#description' => t('If the model you are submitting is your own implementation but an idea of somebody else, put a check mark here. If your model is your own idea, leave this box blank.'),
+		);
+	}
+
+	$form ["details"]["proj_repl"] = array (
+		"#type" => "textfield",
+		"#title" => t("Replicators (only for replicated models):"),
+		"#default_value" => $edit ["proj_repl"] == "" ? $replicators : $edit ["proj_repl"],
+		"#description" => t("If this model is a replicated model, enter the name of replicators here."),
+		"#maxlength" => 210
 	);
-*/
+
+	$form ["details"]["proj_refurl"] = array (
+		"#type" => "textfield",
+		"#title" => t("URL to original model (only for replicated models):"),
+		"#default_value" => $edit ["proj_refurl"] == "" ? $refurl : $edit ["proj_refurl"],
+		"#description" => t("If this model is a replicated model, enter the references to websites, if any."),
+		"#maxlength" => 210
+	);
+
 	if ($visible)
 	{
 		$form["details"]["proj_visibility"] = array(
 		'#type' => 'checkboxes',
-		'#title' => t('Project visibility:'),
+		'#title' => t('Model visibility:'),
 		"#attributes" => array ('checked' => 'checked'),
 	//	'#default_value' => array (TRUE),
 		'#options' => array(
-		'visibility' => t('I want to make my project visible to all'),
+		'visibility' => t('I want to make my model visible to all'),
 			),
-		'#description' => t('Enabling this option will make your project visible to all registered users of this site.'),
+		'#description' => t('Enabling this option will make your model visible to all registered users of this site.'),
 		);
 	}
 	else
 	{
 		$form["details"]["proj_visibility"] = array(
 		'#type' => 'checkboxes',
-		'#title' => t('Project visibility:'),
+		'#title' => t('Model visibility:'),
 	//	'#default_value' => array (TRUE),
 		'#options' => array(
-		'visibility' => t('I want to make my project visible to all'),
+		'visibility' => t('I want to make my model visible to all'),
 			),
-		'#description' => t('Enabling this option will make your project visible to all registered users of this site.'),
+		'#description' => t('Enabling this option will make your model visible to all registered users of this site.'),
 		);
 	}
 
@@ -1425,7 +1572,7 @@ function openabmma_addModel ()
 	$output = "<p><br/>To create a new model, it can take 3-6 steps depending on whether your model is to be submitted for review or not. The first three steps are mandatory.<p>&nbsp;</p>";
 
 $output .= "<table border='0' cellpadding='0' cellspacing='0' width='100%'>";
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><b>Step 1</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><font color='red'>Mandatory</font></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'>Project name, description and visibility to public</td></tr>";
+$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><b>Step 1</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><font color='red'>Mandatory</font></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'>Model name, description and visibility to public</td></tr>";
 $output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 2</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='red'>Mandatory</font></td><td style='border-bottom: thin solid #aaaaaa'>Code files, language and platform details</td></tr>";
 $output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 3</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='red'>Mandatory</font></td><td style='border-bottom: thin solid #aaaaaa'>License information and keywords</td></tr>";
 $output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 4</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='green'>Optional</font></td><td style='border-bottom: thin solid #aaaaaa'>References, examples and senstivity information</td></tr>";
@@ -1566,7 +1713,7 @@ function openabmma_metadata ()
 
 	$form ["details"]["proj_description"] = array (
 		"#type" => "textarea",
-		"#title" => t("Description of project:"),
+		"#title" => t("Description of model:"),
 		"#default_value" => $result ["description"],
 		"#description" => null,
 		"#required" => false
@@ -1576,7 +1723,7 @@ function openabmma_metadata ()
 		"#type" => "textfield",
 		"#title" => t("Reference URL:"),
 		"#default_value" => $result ["reference_url"],
-		"#description" => t("If your project is hosted on another website, put the website address here"),
+		"#description" => t("If your model is hosted on another website, put the website address here"),
 		"#maxlength" => 210,
 		"#required" => false
 	);
@@ -1585,7 +1732,7 @@ function openabmma_metadata ()
 		"#type" => "textfield",
 		"#title" => t("Keywords:"),
 		"#default_value" => $result ["keywords"],
-		"#description" => t("Key words in your project to help us search among projects"),
+		"#description" => t("Key words in your model to help us search among models"),
 		"#maxlength" => 210,
 		"#required" => false
 	);
@@ -1608,9 +1755,9 @@ function openabmma_metadata ()
 	'#title' => t(''),
 	'#value' => array(true),
 	'#options' => array(
-		'visibility' => t('I want to make my project visible to all'),
+		'visibility' => t('I want to make my model visible to all'),
 		),
-	'#description' => t('Enabling this option will make your project visible to all registered users of this site.'),
+	'#description' => t('Enabling this option will make your model visible to all registered users of this site.'),
 	);
 
 	$form ["details"]["submit"] = array (
@@ -1625,10 +1772,10 @@ function openabmma_metadata ()
 function openabmma_deleteMember ($name, $uid)
 {
 	global $user;
-	// check if user is owner of this project
+	// check if user is owner of this model
 	$owner = openabmma_getModelOwner ($name);
 	if ($owner != $user->name)
-		return "Only the project owner can perform this function.";
+		return "Only the model owner can perform this function.";
 
 	$query = "DELETE FROM openabm_model_project_member WHERE project_id=%d AND user_id=%d";
 
@@ -1692,14 +1839,14 @@ function openabmma_manageMembers ($name='')
 	$query = "SELECT visible FROM openabm_model_project WHERE name='%s'";
 	$result = (array) db_fetch_object (db_query ($query, $name));
 	if (($result ["visible"] == 0 || $result ["visible"] == "0") && $user->name != $owner /* && in (model_member_list, $user->name) */)
-		return "This is a privately managed project.";
+		return "This is a privately managed model.";
 
 	$output = "<br/><u>Owner</u>: " . $owner;
 
 	$members = openabmma_getModelMembers ($name);
 
 	if ($members != "")	$output .= "<br/>&nbsp;<br/><u>Members</u>: " . $members;
-	else			$output .= "<br/>&nbsp;<br/>Currently there are no members in this project.";
+	else			$output .= "<br/>&nbsp;<br/>Currently there are no members in this model.";
 
 	if ($user->name == $owner)
 		$output .= "<br/>&nbsp;<br/>" . drupal_get_form (openabmma_addMember);
@@ -1738,7 +1885,7 @@ function openabmma_addMember ()
 		"#collapsible" => FALSE,
 		"#collapsed" => FALSE,
 		"#title" => null,
-		"#description" => t("You can add a new member for this project here."),
+		"#description" => t("You can add a new member for this model here."),
 	);
 
 	$form ["details"]["projName"] = array (
@@ -1784,7 +1931,7 @@ function openabmma_addMember_submit ($form_id, $edit)
 	$username = $edit ["name"];
 	if ($username == $user->name)
 	{
-		drupal_set_message ("You already have owner privileges. You cannot add yourself as a Developer for this project.");
+		drupal_set_message ("You already have owner privileges. You cannot add yourself as a Developer for this model.");
 		return;
 	}
 
@@ -1840,8 +1987,8 @@ function openabmma_getModelMembers ($name='')
 	$query = "SELECT user_id, role FROM openabm_model_project_member WHERE project_id=%d";
 	$result = db_query ($query, $proj_id);
 	while ($users = db_fetch_object ($result))
-		$output .= "<br/>" . openabmma_getUserName ($users->user_id) . "&nbsp;<small>[" . openabmma_getRoleName ($users->role) . "] - " . "<a href=\"javascript:if(confirm('Are you sure you want to remove this user from your project?')) window.location.replace('" . url("mymodels/" . $name . "/members/delete/" . $users->user_id) . "');\">Remove this user from my project</a>";
-//l ("Remove this user from my project", "javascript:if(confirm('Really?')) window.location.replace('mymodels/" . $name . "/embers/delete/" . $users->user_id . "');") . "</small>";
+		$output .= "<br/>" . openabmma_getUserName ($users->user_id) . "&nbsp;<small>[" . openabmma_getRoleName ($users->role) . "] - " . "<a href=\"javascript:if(confirm('Are you sure you want to remove this user from your model?')) window.location.replace('" . url("mymodels/" . $name . "/members/delete/" . $users->user_id) . "');\">Remove this user from my model</a>";
+//l ("Remove this user from my model", "javascript:if(confirm('Really?')) window.location.replace('mymodels/" . $name . "/embers/delete/" . $users->user_id . "');") . "</small>";
 
 	return $output;
 }
@@ -1889,14 +2036,14 @@ function openabmma_openProject ($id='')
 	$query = "SELECT visible FROM openabm_model_project WHERE name='%s'";
 	$result = (array) db_fetch_object (db_query ($query, $id));
 	if (($result ["visible"] == 0 || $result ["visible"] == "0") && $user->name != $owner /* && in (model_member_list, $user->name) */)
-		return "This is a privately managed project.";
+		return "This is a privately managed model.";
 
-	$output .= "<br/><a href='/svn'>View/download files in this project</a>";
+	$output .= "<br/><a href='/svn'>View/download files in this model</a>";
 
 	if ($owner == $user->name)
 	{
-		$output .= "<br/>&nbsp;<br/>" . l ("Manage members in this project", "mymodels/" . $id . "/members");
-		$output .= "<br/>" . l ("Change project meta-data", "mymodels/" . $id . "/metadata");
+		$output .= "<br/>&nbsp;<br/>" . l ("Manage members in this model", "mymodels/" . $id . "/members");
+		$output .= "<br/>" . l ("Change model meta-data", "mymodels/" . $id . "/metadata");
 	}
 
 	return $output;
@@ -1907,7 +2054,7 @@ function openabmma_showProjects ()
 	global $user;
 
 	$count = 0;
-	$output .= '<br/><u>Owned projects:</u><br/>&nbsp;';
+	$output .= '<br/><u>Owned models:</u><br/>&nbsp;';
 	$query = "SELECT name, description, visible FROM openabm_model_project WHERE owner_uid=%d";
 	$result = db_query ($query, $user->uid);
 	while ($node = db_fetch_object ($result))
@@ -1922,10 +2069,10 @@ function openabmma_showProjects ()
 		$output .= "</small><br/>";
 	}
 
-	$output .= "Total " . $count . " owned projects.<br/>&nbsp;<br/>";
+	$output .= "Total " . $count . " owned models.<br/>&nbsp;<br/>";
 	$count = 0;
 
-	$output .= '<br/><u>Membered projects:<br/></u>&nbsp;<br/>';
+	$output .= '<br/><u>Membered models:<br/></u>&nbsp;<br/>';
 	$query = "SELECT A.owner_uid, A.name, A.description, A.visible, B.role FROM openabm_model_project A, openabm_model_project_member B WHERE B.user_id=%d AND A.id = B.project_id";
 	$result = db_query ($query, $user->uid);
 	while ($node = db_fetch_object ($result))
@@ -1941,8 +2088,8 @@ function openabmma_showProjects ()
 		$output .= "Owned by: <b>" . $owner . "</b></small><br/>&nbsp;<br/>";
 	}
 
-	$output .= "Total " . $count . " membered projects.<br/>&nbsp;<br/>";
-	$output .= "<br/>" . l ("To add new project, click here", "models/add");
+	$output .= "Total " . $count . " membered models.<br/>&nbsp;<br/>";
+	$output .= "<br/>" . l ("To add new model, click here", "models/add");
 	return $output;
 }
 
@@ -2104,7 +2251,7 @@ function openabmma_newModel ($edit=null, $item=0)
 		"#collapsible" => FALSE,
 		"#collapsed" => FALSE,
 		"#title" => null,
-		"#description" => t("You can set the project properties here."),
+		"#description" => t("You can set the model properties here."),
 	);
 
 /*	$form ["details"]["proj_id"] = array (
@@ -2118,12 +2265,12 @@ function openabmma_newModel ($edit=null, $item=0)
 		"#type" => "item",
 		"#title" => t("Owner ID:"),
 		"#value" => "#" . $user->uid . " - " . $user->name,
-		"#description" => t("Information about the owner of this project"),
+		"#description" => t("Information about the owner of this model"),
 	);
 
 	$form ["details"]["proj_name"] = array (
 		"#type" => "textfield",
-		"#title" => t("Project Name:"),
+		"#title" => t("Model Name:"),
 		"#default_value" => $edit ["proj_name"],
 		"#description" => null,
 		"#maxlength" => 210,
@@ -2133,7 +2280,7 @@ function openabmma_newModel ($edit=null, $item=0)
 
 	$form ["details"]["proj_description"] = array (
 		"#type" => "textarea",
-		"#title" => t("Description of project:"),
+		"#title" => t("Description of model:"),
 		"#default_value" => $edit ["proj_description"],
 		"#description" => null,
 		"#required" => false
@@ -2143,7 +2290,7 @@ function openabmma_newModel ($edit=null, $item=0)
 		"#type" => "textfield",
 		"#title" => t("Reference URL:"),
 		"#default_value" => $edit ["ref_url"],
-		"#description" => t("If your project is hosted on another website, put the website address here"),
+		"#description" => t("If your model is hosted on another website, put the website address here"),
 		"#maxlength" => 210,
 		"#required" => false
 	);
@@ -2152,7 +2299,7 @@ function openabmma_newModel ($edit=null, $item=0)
 		"#type" => "textfield",
 		"#title" => t("Keywords:"),
 		"#default_value" => $edit ["key"],
-		"#description" => t("Key words in your project to help us search among projects"),
+		"#description" => t("Key words in your model to help us search among models"),
 		"#maxlength" => 210,
 		"#required" => false
 	);
@@ -2175,9 +2322,9 @@ function openabmma_newModel ($edit=null, $item=0)
 	'#title' => t(''),
 	'#default_value' => "false",
 	'#options' => array(
-		'visibility' => t('I want to make my project visible to all'),
+		'visibility' => t('I want to make my model visible to all'),
 		),
-	'#description' => t('Enabling this option will make your project visible to all registered users of this site.'),
+	'#description' => t('Enabling this option will make your model visible to all registered users of this site.'),
 	);
 
 	$form ["details"]["submit"] = array (
