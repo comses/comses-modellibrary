@@ -743,7 +743,7 @@ function openabmma_addModel02 ($edit=null, $item=0)
 	if ($user->name != openabmma_getModelOwner ($pName))
 		return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
 
-	$query = "SELECT language.name as prog_lang, os, framework FROM openabm_model_project project INNER JOIN openabm_model_language language ON project.model_language_id=language.id WHERE name='%s'";
+	$query = "SELECT language.name as prog_lang, os, framework FROM openabm_model_project project INNER JOIN openabm_model_language language ON project.model_language_id=language.id WHERE language.name='%s'";
 	$result = (array) db_fetch_object (db_query ($query, $pName));
 	$progLang = $result ['prog_lang'];
 	$os = $result ['os'];
