@@ -342,7 +342,7 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'mymodels/' . arg(1) . '/metadata',
-            'title' => t('Meta data'),
+            'title' => t('Model metadata'),
             'description' => "",
             'access' => user_access ('logged in'),
             'callback' => 'drupal_get_form',
@@ -663,6 +663,8 @@ function openabmma_askIfReview ()
 	if ($user->name != openabmma_getModelOwner ($pName))
 		return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
 
+        // FIXME: use CSS instead of repeating style elements over and over
+        // again.  Cardinal programming sin - Don't Repeat Yourself.
 	$output = "<br/><p><table border='0' cellpadding='0' cellspacing='0' width='100%'>";
 $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><b>Step 1</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>[Complete]</i></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'>Model name, description and visibility to public</td></tr>";
 $output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 2</b></td><td style='border-bottom: thin solid #aaaaaa'><i>[Complete]</i></td><td style='border-bottom: thin solid #aaaaaa'>Code files, language and platform details</td></tr>";
@@ -1691,7 +1693,9 @@ function openabmma_metadata ()
 		return $form;
 	}
 
-	$query = "SELECT description, visible, license_id, reference_url, keywords FROM openabm_model_project WHERE name='%s'";
+        // FIXME: may need a separate query to grab all keywords for a given
+        // project.
+	$query = "SELECT description, visible, license_id, reference_url s FROM openabm_model_project WHERE name='%s'";
 	$result = (array) db_fetch_object (db_query ($query, $name));
 
 	$visibility = $result ["visible"];
@@ -1738,7 +1742,7 @@ function openabmma_metadata ()
 	);
 
 	$licenseTypes = array ();
-	$result2 = db_query ("SELECT id, license, url FROM openabm_license");
+	$result2 = db_query ("SELECT id, license_text, url FROM openabm_license");
 	while ($node = db_fetch_object ($result2))
 		$licenseTypes [$node->id] = $node->license . " [" . $node->url . "]";
 
