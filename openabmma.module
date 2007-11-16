@@ -718,6 +718,8 @@ function openabmma_addModel02_submit ($form_id, $edit)
 	}
 
 //	$query = "UPDATE openabm_model_project SET prog_lang='%s', os='%s', framework='%s' WHERE name='%s'";
+# FIXME: This is probably broken - need to set it to the appropriate id
+# instead of the string value.
 	$query = "UPDATE openabm_model_project SET model_language_id='" . $pLang . "', os='" . $edit ["os"] . "', framework='" . $edit ["framework"] . "' WHERE name='" . $pName . "'";
 
 	db_query ($query, $pLang, $edit ["os"], $edit ["framework"], $pname);
