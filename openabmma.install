@@ -14,6 +14,7 @@ function openabmma_install() {
 		id		INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
                 owner_uid       INT(10) UNSIGNED NOT NULL,
                 name            VARCHAR(255) NOT NULL,
+		title		VARCHAR(255) NOT NULL,
                 description     MEDIUMTEXT NOT NULL,
                 model_language_id INT(10) UNSIGNED,
                 os              VARCHAR(255) NOT NULL,

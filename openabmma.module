@@ -410,10 +410,11 @@ function openabmma_showMetaData ($pName='')
 		return '';
 	}
 
-	$query = "SELECT owner_uid, name, description, model_language_id, os, framework, reference_text, examples, submittedReview, visible, replicatedModel, replicators, reference_url, license_id from openabm_model_project WHERE name='%s'";
+	$query = "SELECT owner_uid, name, title, description, model_language_id, os, framework, reference_text, examples, submittedReview, visible, replicatedModel, replicators, reference_url, license_id from openabm_model_project WHERE name='%s'";
 	$result = (array) db_fetch_object (db_query ($query, $pName));
 	$owner_uid = $result ['owner_uid'];
 	$name = $result ['name'];
+	$title = $result ['title'];
 	$description = $result ['description'];
 	$replicated = $result ['replicatedModel'] == "1" ? "Yes" : "No";
 	$replicators = $result ['replicators'];
@@ -447,6 +448,7 @@ function openabmma_showMetaData ($pName='')
 	$output = "<br/><p><table border='0' cellpadding='0' cellspacing='0' width='100%'>";
 $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Model name:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $name . "</i></td></tr>";
 $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Model description:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $description . "</i></td></tr>";
+$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Model title:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $title . "</i></td></tr>";
 $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Replicated model:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $replicated . "</i></td></tr>";
 	if ($replicated == "Yes")
 	{
@@ -1359,6 +1361,17 @@ function openabmma_addModel01_submit ($form_id, $edit)
 		return;
 	}
 
+	$pCount = strlen ($pName);
+	for ($i=0; $i<$pCount; $i++)
+	{
+		if ($pName [$i] == ' ')
+		{
+			$errorString = "Model name cannot contain spaces. Please re-enter the correct model name.";
+			drupal_set_message ("<b><font color='red'>" . $errorString . "</font></b>");
+			return;
+		}
+	}
+
 	$visible = $edit ["proj_visibility"]["visibility"];
 	if ($visible != '0')
 		$visible = '1';
@@ -1373,16 +1386,16 @@ function openabmma_addModel01_submit ($form_id, $edit)
 			drupal_set_message ("<b><font color='red'>Another project with the same name exists. Please choose a different name</font></b>");
 		else
 		{
-			$query = "INSERT INTO openabm_model_project (owner_uid, name, description, visible, replicatedModel, replicators, reference_url) VALUES (%d, '%s', '%s', %d, '%s', '%s')";
+			$query = "INSERT INTO openabm_model_project (owner_uid, name, title, description, visible, replicatedModel, replicators, reference_url) VALUES (%d, '%s', '%s', '%s', %d, %d, '%s', '%s')";
 
-			db_query ($query, $user->uid, $pName, $edit ["proj_description"], $visible, $replicated, $edit ["proj_repl"], $edit ["proj_refurl"]);
+			db_query ($query, $user->uid, $pName, $edit ["proj_title"], $edit ["proj_description"], $visible, $replicated, $edit ["proj_repl"], $edit ["proj_refurl"]);
 			drupal_goto ("models/add/" . $pName . "/step02");
 		}
 	}
 	else
 	{
-		$query = "UPDATE openabm_model_project SET description='%s', visible=%d, replicatedModel=%d, replicators='%s', reference_url='%s' WHERE name='%s'";
-		db_query ($query, $edit ["proj_description"], $visible, $replicated, $edit ["proj_repl"], $edit ["proj_refurl"], $pName);
+		$query = "UPDATE openabm_model_project SET title='%s', description='%s', visible=%d, replicatedModel=%d, replicators='%s', reference_url='%s' WHERE name='%s'";
+		db_query ($query, $edit ["proj_title"], $edit ["proj_description"], $visible, $replicated, $edit ["proj_repl"], $edit ["proj_refurl"], $pName);
 		drupal_goto ("models/add/" . $pName . "/step02");
 	}
 }
@@ -1410,9 +1423,10 @@ function openabmma_addModel01 ($edit=null, $item=0)
 	$visible = "false";
 	if ($newModel == "0")
 	{
-		$query = "SELECT replicatedModel, replicators, reference_url, description, visible FROM openabm_model_project WHERE name='%s'";
+		$query = "SELECT title, replicatedModel, replicators, reference_url, description, visible FROM openabm_model_project WHERE name='%s'";
 		$result = (array) db_fetch_object (db_query ($query, $pName));
 		$replicated = $result ['replicatedModel'];
+		$projTitle = $result ['title'];
 		if ($replicated == "1")
 			$replicated = TRUE;
 		else
@@ -1457,7 +1471,7 @@ function openabmma_addModel01 ($edit=null, $item=0)
 	{
 		$form ["details"]["proj_name"] = array (
 			"#type" => "textfield",
-			"#title" => t("Model Name:"),
+			"#title" => t("Model name (should not contain spaces):"),
 			"#default_value" => $edit ["proj_name"],
 			"#description" => null,
 	//		"#required" => true,		// Commented because clicking Cancel validates this field too!
@@ -1469,7 +1483,7 @@ function openabmma_addModel01 ($edit=null, $item=0)
 	{
 		$form ["details"]["proj_name"] = array (
 			"#type" => "item",
-			"#title" => t("Model Name:"),
+			"#title" => t("Model name:"),
 			"#description" => null,
 			"#value" => arg(2),
 	//		"#required" => true,		// Commented because clicking Cancel validates this field too!
@@ -1477,6 +1491,16 @@ function openabmma_addModel01 ($edit=null, $item=0)
 	//		'#autocomplete_path' => 'user/autocomplete',
 		);
 	}
+
+	$form ["details"]["proj_title"] = array (
+		"#type" => "textfield",
+		"#title" => t("Model title (human-friendly name):"),
+		"#default_value" => $edit ["proj_title"] == "" ? $projTitle : $edit ["proj_title"],
+		"#description" => null,
+//		"#required" => true,		// Commented because clicking Cancel validates this field too!
+		"#maxlength" => 210
+	);
+
 	$form ["details"]["proj_description"] = array (
 		"#type" => "textarea",
 		"#title" => t("Description of model:"),
