@@ -256,7 +256,7 @@ function openabmma_menu($may_cache) {
             'path' => 'models/add/' . arg(2) . "/complete",
             'title' => t('Add new model complete'),
             'description' => "",
-            'access' => user_access ('administer content'),
+            'access' => user_access ('logged in'),
             'callback' => 'openabmma_addModelComplete',
             'type' => MENU_CALLBACK
             );
@@ -795,9 +795,9 @@ function openabmma_addModel02_submit ($form_id, $edit)
 			$pLang = $edit ["other_language"];
 	}
 
-	if (openabmma_uploadFile ('code', 'proj_code_file') == null)
+	if (openabmma_uploadFile ('code/' . $pName, 'proj_code_file') == null)
 	{
-		drupal_set_message ("<font color='red'><b>Error uploading file, please check the path of the file specified</b></font>");
+		drupal_set_message ("<font color='red'><b>Error uploading code file, please check the path of the file specified</b></font>");
 		return;
 	}
 
@@ -807,9 +807,9 @@ function openabmma_addModel02_submit ($form_id, $edit)
 		return;
 	}
 
-	$query = "UPDATE openabm_model_project SET prog_lang='%s', os='%s', framework='%s' WHERE name='%s'";
+	$query = "UPDATE openabm_model_project SET model_language_id=%d, os='%s', framework='%s' WHERE name='%s'";
 
-	db_query ($query, $pLang, $edit ["os"], $edit ["framework"], $pname);
+	db_query ($query, $pLang, $edit ["os"], $edit ["framework"], $pName);
 	drupal_goto ("models/" . $action . "/" . $pName . "/step03");
 }
 
@@ -866,9 +866,9 @@ function openabmma_addModel02 ($edit=null, $item=0)
 	);
 
 	$languages = array ();
-	$result = db_query ("SELECT name FROM openabm_model_language ORDER BY name");
+	$result = db_query ("SELECT id, name FROM openabm_model_language ORDER BY name");
 	while ($node = db_fetch_object ($result))
-		$languages [$node->name] = $node->name;
+		$languages [$node->id] = $node->name;
 	$languages ["Other"] = "Other";
 
 	$form ["details"]["proj_language"] = array (
@@ -956,7 +956,7 @@ function openabmma_addModel03_submit ($form_id, $edit)
 		drupal_goto ("models/" . $action . "/" . $pName . "/step02");
 
 	$keywordList = $edit ["keywords"];
-	$replaceList = "!@#$%^&*()+-|\\[]{}:;'\"<>,/?~`";	// removed '.' and ' '
+	$replaceList = "!@#$%^&*()+-|\\[]{}:;'\"<>,/?~` ";	// removed '.'
 	$replaceLen = strlen ($replaceList);
 	for ($i=0; $i<$replaceLen; $i = $i+1)
 		$keywordList = str_replace ($replaceList [$i], ",", $keywordList);
@@ -1079,9 +1079,9 @@ function openabmma_addModel04_submit ($form_id, $edit)
 	if ($_POST ["op"] == "Back")
 		drupal_goto ("models/" . $action . "/" . $pName . "/step03");
 
-	if (openabmma_uploadFile ('sensitivity', 'proj_sensitivity') == null)
+	if (openabmma_uploadFile ('sensitivity/' . $pName, 'proj_sensitivity') == null)
 	{
-		drupal_set_message ("<font color='red'><b>Error uploading file, please check the path of the file specified</b></font>");
+		drupal_set_message ("<font color='red'><b>Error uploading sensitivity file, please check the path of the file specified</b></font>");
 		return;
 	}
 
@@ -1168,7 +1168,7 @@ function openabmma_addModel04 ($edit=null, $item=0)
 	$form ["details"]["proj_sensitivity"] = array (
 		"#type" => "file",
 		"#description" => t("File containing sensitivity data"),
-		"#title" => t("Sensitivity:")
+		"#title" => t("Sensitivity (required):")
 	);
 
 	$form ["details"]["submit"] = array (
@@ -1200,11 +1200,14 @@ function openabmma_addModel05_submit ($form_id, $edit)
 		drupal_set_message ("<b><font color='red'>Well-commented, cleanedup and running code is required before you submit your model for review!</font></b><br/>[Should we have a link to let the user still submit the model for review along with comments to the editor to justify that he should still be able to send his model for review?]");
 	else
 	{
-		if (openabmma_uploadFile ('odd', 'proj_odd_file') == null)
+		if (openabmma_uploadFile ('odd/' . $pName, 'proj_odd_file') == null)
 		{
-			drupal_set_message ("<font color='red'><b>Error uploading file, please check the path of the file specified</b></font>");
+			drupal_set_message ("<font color='red'><b>Error uploading ODD file, please check the path of the file specified</b></font>");
 			return;
 		}
+
+		openabmma_uploadFile ('dataset/' . $pName, 'proj_dataset');
+		openabmma_uploadFile ('other/' . $pName, 'proj_other');
 
 		$query = "UPDATE openabm_model_project SET submittedReview=1, run_conditions='%s' WHERE name='%s'";
 		db_query ($query, $edit ["proj_conditions"], $pName);
@@ -1255,12 +1258,12 @@ function openabmma_addModel05 ($edit=null, $item=0)
 */
 	$form ["details"]["proj_odd_file"] = array (
 		"#type" => "file",
-		"#title" => t("ODD file:")
+		"#title" => t("ODD file (required):")
 	);
 
 	$form ["details"]["proj_dataset"] = array (
 		"#type" => "file",
-		"#title" => t("Test data set (for running the model):")
+		"#title" => t("Test data set (for running the model) - optional:")
 	);
 
 	$form ["details"]["proj_conditions"] = array (
@@ -1272,7 +1275,7 @@ function openabmma_addModel05 ($edit=null, $item=0)
 		"#required" => false
 	);
 
-	$form ["details"]["proj_extra"] = array (
+	$form ["details"]["proj_other"] = array (
 		"#type" => "file",
 		"#title" => t("Additional document to be included with model submission (optional):")
 	);
@@ -1386,6 +1389,21 @@ function openabmma_addModel01_submit ($form_id, $edit)
 			drupal_set_message ("<b><font color='red'>Another project with the same name exists. Please choose a different name</font></b>");
 		else
 		{
+			if ($replicated == '1')
+			{
+				if ($edit ["proj_repl"] == "" || $edit ["prof_refurl"] == "")
+				{
+					drupal_set_message ("<b><font color='red'>Since this project is a replicated one, you need to enter information about the replicators and the reference URL.</font></b>");
+					return;
+				}
+			}
+
+			mkdir ("files/odd/" . $pName, 0755, TRUE);
+			mkdir ("files/code/" . $pName, 0755, TRUE);
+			mkdir ("files/other/" . $pName, 0755, TRUE);
+			mkdir ("files/dataset/" . $pName, 0755, TRUE);
+			mkdir ("files/sensitivity/" . $pName, 0755, TRUE);
+
 			$query = "INSERT INTO openabm_model_project (owner_uid, name, title, description, visible, replicatedModel, replicators, reference_url) VALUES (%d, '%s', '%s', '%s', %d, %d, '%s', '%s')";
 
 			db_query ($query, $user->uid, $pName, $edit ["proj_title"], $edit ["proj_description"], $visible, $replicated, $edit ["proj_repl"], $edit ["proj_refurl"]);
@@ -1394,6 +1412,15 @@ function openabmma_addModel01_submit ($form_id, $edit)
 	}
 	else
 	{
+		if ($replicated == '1')
+		{
+			if ($edit ["proj_repl"] == "" || $edit ["prof_refurl"] == "")
+			{
+				drupal_set_message ("<b><font color='red'>Since this project is a replicated one, you need to enter information about the replicators and the reference URL.</font></b>");
+				return;
+			}
+		}
+
 		$query = "UPDATE openabm_model_project SET title='%s', description='%s', visible=%d, replicatedModel=%d, replicators='%s', reference_url='%s' WHERE name='%s'";
 		db_query ($query, $edit ["proj_title"], $edit ["proj_description"], $visible, $replicated, $edit ["proj_repl"], $edit ["proj_refurl"], $pName);
 		drupal_goto ("models/add/" . $pName . "/step02");
@@ -1971,7 +1998,19 @@ function openabmma_addMember_submit ($form_id, $edit)
 	// get identifier (number) of the project
 	$proj_id = openabmma_getProjectid ($projName);
 
-	$query = "INSERT INTO openabm_model_project_member (project_id, user_id, role) VALUES (%d, '%s', 3)";
+	$query = "SELECT id FROM openabm_role WHERE name='Developer'";
+	$result = (array) db_fetch_object (db_query ($query));
+	$roleId = $result ['id'];
+
+	$query = "SELECT id FROM openabm_model_project_member WHERE user_id=%d AND project_id=%d AND role=%d";
+	$result = (array) db_fetch_object (db_query ($query, $userid, $proj_id, $roleId));
+	if ($result ['id'] != "")
+	{
+		drupal_set_message ("<b><font color='red'>This user has already been added as a member for this project.</font></b>");
+		return;
+	}
+
+	$query = "INSERT INTO openabm_model_project_member (project_id, user_id, role) VALUES (%d, %d, $roleId)";
 	db_query ($query, $proj_id, $userid);
 //	drupal_goto ("roles");
 }
@@ -2033,7 +2072,7 @@ function openabmma_showModelMembers ($name='')
 	$query = "SELECT user_id, role FROM openabm_model_project_member WHERE project_id=%d";
 	$result = db_query ($query, $proj_id);
 	while ($users = db_fetch_object ($result))
-		$output .= "<br/>" . openabmma_getUserName ($users->user_id) . "&nbsp;<small>[" . openabmma_getRoleName ($users->role) . "] - " . "<a href=\"javascript:if(confirm('Are you sure you want to remove this user from your model?')) window.location.replace('" . url("mymodels/" . $name . "/members/delete/" . $users->user_id) . "');\">Remove this user from my model</a>";
+		$output .= "<br/>" . openabmma_getUserName ($users->user_id) . "&nbsp;<small>[" . openabmma_getRoleName ($users->role) . "] - " . "<a href=\"javascript:if(confirm('Are you sure you want to remove this user from your model?')) window.location.replace('" . url("mymodels/" . $name . "/members/delete/" . $users->user_id) . "');\">Remove this user from my model</a></small>";
 //l ("Remove this user from my model", "javascript:if(confirm('Really?')) window.location.replace('mymodels/" . $name . "/embers/delete/" . $users->user_id . "');") . "</small>";
 
 	return $output;
@@ -2100,41 +2139,41 @@ function openabmma_showProjects ()
 	global $user;
 
 	$count = 0;
-	$output .= '<br/><u>Owned models:</u><br/>&nbsp;';
-	$query = "SELECT name, description, visible FROM openabm_model_project WHERE owner_uid=%d";
+	$output .= '<br/><u>Owned models:</u><p>&nbsp;</p><hr/><br/>';
+	$query = "SELECT name, title, description, visible FROM openabm_model_project WHERE owner_uid=%d";
 	$result = db_query ($query, $user->uid);
 	while ($node = db_fetch_object ($result))
 	{
 		$count++;
-		$output .= "<br/><b>" . l ($node->name, "mymodels/" . $node->name) . "</b>&nbsp;";
+		$output .= "<b>" . l ($node->title . " (" . $node->name . ")", "mymodels/" . $node->name) . "</b>&nbsp;";
 
 		if ($node->visible == 1)	$output .= "[Public]";
 		else				$output .= "[Private]";
 
-		$output .= "&nbsp;<br/><small>" . $node->description . "</small><br/><small>";
+		$output .= "&nbsp;<br/><small>" . $node->description . "<hr/>";
 		$output .= "</small><br/>";
 	}
 
-	$output .= "Total " . $count . " owned models.<br/>&nbsp;<br/>";
+	$output .= "Total <b>" . $count . "</b> owned model(s).<br/>&nbsp;<br/>";
 	$count = 0;
 
-	$output .= '<br/><u>Membered models:<br/></u>&nbsp;<br/>';
-	$query = "SELECT A.owner_uid, A.name, A.description, A.visible, B.role FROM openabm_model_project A, openabm_model_project_member B WHERE B.user_id=%d AND A.id = B.project_id";
+	$output .= '<br/><u>Membered models:</u><p>&nbsp;</p><hr/><br/>';
+	$query = "SELECT A.owner_uid, A.name, A.title, A.description, A.visible, B.role FROM openabm_model_project A, openabm_model_project_member B WHERE B.user_id=%d AND A.id = B.project_id";
 	$result = db_query ($query, $user->uid);
 	while ($node = db_fetch_object ($result))
 	{
 		$count++;
 		$owner = openabmma_getUserName ($node->owner_uid);
-		$output .= "<b>" . l ($node->name, "mymodels/" . $node->name) . "</b>&nbsp;";
+		$output .= "<b>" . l ($node->title . " (" . $node->name . ")", "mymodels/" . $node->name) . "</b>&nbsp;";
 
 		if ($node->visible == 1)	$output .= "[Public]";
 		else				$output .= "[Private]";
 
 		$output .= "&nbsp;<br/><small>" . $node->description . "<br/>";
-		$output .= "Owned by: <b>" . $owner . "</b></small><br/>&nbsp;<br/>";
+		$output .= "Owned by: <b>" . $owner . "</b></small><hr/><br/>";
 	}
 
-	$output .= "Total " . $count . " membered models.<br/>&nbsp;<br/>";
+	$output .= "Total <b>" . $count . "</b> membered model(s).<br/>&nbsp;<br/>";
 	$output .= "<br/>" . l ("To add new model, click here", "models/add");
 	return $output;
 }
@@ -2194,12 +2233,12 @@ function openabmma_showLicenses ()
 {
 	$count = 0;
 	$output = '';
-	$query = "SELECT id, license, url FROM openabm_license";
+	$query = "SELECT id, license_text, url FROM openabm_license";
 	$result = db_query ($query);
 	while ($node = db_fetch_object ($result))
 	{
 		$count++;
-		$output .= "<b>" . $node->license . "</b>&nbsp;<small>" . "<a href=\"javascript:if(confirm('Are you sure you want to delete this license?')) window.location.replace('" . url("config/licenses/delete/" . $node->id) . "');\"><small>[delete this]</small></a></small><br/>";
+		$output .= "<b>" . $node->license_text . "</b>&nbsp;<small>" . "<a href=\"javascript:if(confirm('Are you sure you want to delete this license?')) window.location.replace('" . url("config/licenses/delete/" . $node->id) . "');\"><small>[Delete this]</small></a></small><br/>";
 //l ("[delete this]", "licenses/delete/" . $node->id) . "<br/>" . l($node->url, $node->url) . "</small><br/>&nbsp;<br/>";
 	}
 
@@ -2232,7 +2271,7 @@ function openabmma_deleteRole ($id='')
 
 function openabmma_addLicense_form_submit ($formid, $edit)
 {
-	$query = "INSERT INTO openabm_license (license, url) VALUES ('%s', '%s')";
+	$query = "INSERT INTO openabm_license (license_text, url) VALUES ('%s', '%s')";
 	db_query ($query, $edit['name'], $edit ['url']);
 }
 
