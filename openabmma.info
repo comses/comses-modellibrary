@@ -1,5 +1,5 @@
 ; $Id$
-name = Openabmma
+name = OpenABM Model Archive
 description = openabm.org model archive for maintaining digital artifacts associated with an agent based model i.e. code, data, documentation, etc.
-package = Openabmma
-version = "Rev: 3"
+package = OpenABM
+version = "0.1"

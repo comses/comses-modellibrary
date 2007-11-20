@@ -7,76 +7,22 @@ function openabmma_install() {
     switch ($GLOBALS['db_type']) {
         case 'mysql':
         case 'mysqli':
+        // XXX: first create tables with no foreign key dependencies, then
+        // tables with dependencies.
+
             // create model project table.  Stores all metadata associated
             // with a model project in the model archive.  Every project has
             // a single associated owner.
-            db_query("CREATE TABLE openabm_model_project (
+            db_query("CREATE TABLE openabm_model (
 		id		INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
                 owner_uid       INT(10) UNSIGNED NOT NULL,
                 name            VARCHAR(255) NOT NULL,
 		title		VARCHAR(255) NOT NULL,
-                description     MEDIUMTEXT NOT NULL,
-                model_language_id INT(10) UNSIGNED,
-                os              VARCHAR(255) NOT NULL,
-                framework	VARCHAR(255) NOT NULL,
-                reference_text  TEXT,
-                examples        TEXT,
-                submittedReview bool default 0,
-		visible		bool default 0,
-		replicatedModel bool default 0,
-		run_conditions  TEXT NULL,
 		replicators     VARCHAR(255) NULL,
-                reference_url   VARCHAR(255) NULL,
-                license_id      INT(10) UNSIGNED,
-                PRIMARY KEY(id),
-                FOREIGN KEY (license_id) REFERENCES openabm_license(id),
-                FOREIGN KEY (model_language_id) REFERENCES openabm_model_language(id)
-                );");
-            // create pivot table for members of an ABM project
-
-            db_query("CREATE TABLE openabm_model_keywords (
-                id              INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
-		proj_id		INT(10) UNSIGNED NOT NULL,
-                keyword         VARCHAR(255) NOT NULL,
-                PRIMARY KEY(id),
-                FOREIGN KEY (proj_id) REFERENCES openabm_model_project(id) ON DELETE CASCADE
-                );");
-            // create pivot table for members of an ABM project
-
-            db_query("CREATE TABLE openabm_model_language (
-                id              INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
-                name            VARCHAR(255) NOT NULL,
-                PRIMARY KEY(id)
-		);");
-
-            db_query("CREATE TABLE openabm_framework (
-                id              INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
-                name            VARCHAR(255) NOT NULL,
+		replicatedModel bool default 0,
+                reference       VARCHAR(255) NULL,
                 PRIMARY KEY(id)
                 );");
-
-            db_query("CREATE TABLE openabm_os (
-                id              INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
-                name            VARCHAR(255) NOT NULL,
-                PRIMARY KEY(id)
-		);");
-
-            db_query("CREATE TABLE openabm_model_project_member (
-		id		INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
-                project_id      INT(10) UNSIGNED NOT NULL,
-                user_id         INT(10) UNSIGNED NOT NULL,
-                role            INT(10) UNSIGNED NOT NULL,
-                PRIMARY KEY (id),
-                FOREIGN KEY (project_id) REFERENCES openabm_model_project(id) ON DELETE CASCADE,
-                FOREIGN KEY (role) REFERENCES openabm_role(id)
-                );");
-
-            db_query("CREATE TABLE openabm_role (
-		id		INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
-		name		VARCHAR(255) NOT NULL,
-                PRIMARY KEY (id)
-                );");
-
             // create license table
             db_query("CREATE TABLE openabm_license (
                 id INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
@@ -85,6 +31,67 @@ function openabmma_install() {
                 url     VARCHAR(255),
                 PRIMARY KEY(id)
                 );");
+
+            db_query("CREATE TABLE openabm_model_language (
+                id              INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
+                name            VARCHAR(255) NOT NULL,
+                url             VARCHAR(255) NOT NULL,
+                PRIMARY KEY(id)
+		);");
+
+            // versioning information table
+            db_query("CREATE TABLE openabm_model_version (
+                id              INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
+                model_id        INT(10) UNSIGNED,
+                description     MEDIUMTEXT NOT NULL,
+                model_language_id INT(10) UNSIGNED,
+                os              enum('Linux', 'Mac', 'Windows', 'Platform Independent', 'Other'),
+                framework	VARCHAR(255) NOT NULL,
+                reference_text  TEXT,
+                examples        TEXT,
+                submittedReview bool default 0,
+		visible		bool default 0,
+		run_conditions  TEXT NULL,
+                license_id      INT(10) UNSIGNED,
+                PRIMARY KEY(id),
+                FOREIGN KEY (model_id) REFERENCES openabm_model(id),
+                FOREIGN KEY (license_id) REFERENCES openabm_license(id),
+                FOREIGN KEY (model_language_id) REFERENCES openabm_model_language(id)
+                );");
+
+            db_query("CREATE TABLE openabm_model_keywords (
+                id              INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
+		model_id        INT(10) UNSIGNED NOT NULL,
+                keyword         VARCHAR(255) NOT NULL,
+                PRIMARY KEY(id),
+                FOREIGN KEY (model_id) REFERENCES openabm_model(id) ON DELETE CASCADE
+                );");
+
+
+            db_query("CREATE TABLE openabm_framework (
+                id              INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
+                name            VARCHAR(255) NOT NULL,
+                PRIMARY KEY(id)
+                );");
+
+            // model role table
+            db_query("CREATE TABLE openabm_role (
+		id		INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
+		name		VARCHAR(255) NOT NULL,
+                PRIMARY KEY (id)
+                );");
+
+            // members of a model
+            db_query("CREATE TABLE openabm_model_member (
+		id		INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
+                project_id      INT(10) UNSIGNED NOT NULL,
+                user_id         INT(10) UNSIGNED NOT NULL,
+                role            INT(10) UNSIGNED NOT NULL,
+                PRIMARY KEY (id),
+                FOREIGN KEY (project_id) REFERENCES openabm_model(id) ON DELETE CASCADE,
+                FOREIGN KEY (role) REFERENCES openabm_role(id)
+                );");
+
             break;
         case 'pgsql':
         default:
