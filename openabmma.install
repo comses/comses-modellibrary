@@ -80,6 +80,7 @@ function openabmma_install() {
             // create license table
             db_query("CREATE TABLE openabm_license (
                 id INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
+                name VARCHAR(255) NOT NULL,
                 license_text MEDIUMTEXT NOT NULL,
                 url     VARCHAR(255),
                 PRIMARY KEY(id)

@@ -1,5 +1,4 @@
 <?php
-$p = '';
 
 // $Id$
 
@@ -16,30 +15,24 @@ $p = '';
  */
 function openabmma_block ($op='list', $delta=0)
 {
-	// listing of blocks, such as on the admin/block page
-	if ($op == "list")
-	{
-		$block[0]["info"] = t("OpenABM Resource Links");
-		return $block;
-	}
-	else if ($op == 'view')
-	{
-		$block_content = l ("My models", "models/") . "<br/>"
-			. l ("Search models", "models/search") . "<br/>"
-			;
-
-		if (user_access ('administer content'))
-		{
-			$block_content .= "<br/>" . l ("Model licenses", "config/licenses");
-			$block_content .= "<br/>" . l ("Member roles", "config/roles");
-			$block_content .= "<br/>" . l ("Prog. languages listed", "config/planguages");
-			$block_content .= "<br/>" . l ("OS listed", "config/os");
-			$block_content .= "<br/>" . l ("Frameworks", "config/frameworks");
-		}
-		$block['subject'] = 'Model Archive';
-		$block['content'] = $block_content;
-		return $block;
-	}
+    // listing of blocks, such as on the admin/block page
+    if ($op == "list") {
+        $block[0]["info"] = t("OpenABM Resource Links");
+        return $block;
+    }
+    else if ($op == 'view') {
+        $block_content = l ("My models", "models/") . "<br/>"
+            . l ("Search models", "models/search") . "<br/>";
+        //if (user_access ('administer content')) {
+            $block_content .= "<br/>" . l ("Model licenses", "config/licenses");
+            $block_content .= "<br/>" . l ("Member roles", "config/roles");
+            $block_content .= "<br/>" . l ("Programming languages", "config/planguages");
+            $block_content .= "<br/>" . l ("Frameworks", "config/frameworks");
+        //}
+        $block['subject'] = 'Model Archive';
+        $block['content'] = $block_content;
+        return $block;
+    }
 }
  
 function openabmma_menu($may_cache) {
@@ -62,7 +55,7 @@ function openabmma_menu($may_cache) {
             'path' => 'models/add',
             'title' => t('Add a new model'),
             'description' => t('Add a new model to the model archive.'),
-            'access' => user_access ('logged in'),
+            'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
             'type' => MENU_CALLBACK,
             'callback arguments' => array('openabmma_newModel'),
@@ -72,7 +65,7 @@ function openabmma_menu($may_cache) {
             'path' => 'models/add',
             'title' => t('Add a new model'),
             'description' => t('Add a new model to the model archive.'),
-            'access' => user_access ('logged in'),
+            'access' => user_access ('modify models'),
             'callback' => 'openabmma_addModel',
             'type' => MENU_CALLBACK,
             );
@@ -81,7 +74,7 @@ function openabmma_menu($may_cache) {
             'path' => 'models/add/step01',
             'title' => t('Step 01 :: Adding a new model'),
             'description' => t('Add a new model to the model archive.'),
-            'access' => user_access ('logged in'),
+            'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
             'type' => MENU_CALLBACK,
             'callback arguments' => array('openabmma_addModel01'),
@@ -91,7 +84,7 @@ function openabmma_menu($may_cache) {
             'path' => 'models/search',
             'title' => t('Search Models'),
             'description' => "",
-            'access' => user_access ('logged in'),
+            'access' => user_access ('modify models'),
             'callback' => 'openabmma_searchProjects',
             'type' => MENU_CALLBACK
             );
@@ -100,7 +93,7 @@ function openabmma_menu($may_cache) {
             'path' => 'models',
             'title' => t('My models'),
             'description' => "",
-            'access' => user_access ('logged in'),
+            'access' => user_access ('modify models'),
             'callback' => 'openabmma_showProjects',
             'type' => MENU_CALLBACK
             );
@@ -133,15 +126,6 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'config/os',
-            'title' => t('Operating systems listed'),
-            'description' => "",
-            'access' => user_access ('administer content'),
-            'callback' => 'openabmma_showOS',
-            'type' => MENU_CALLBACK
-            );
-
-        $items[] = array(
             'path' => 'config/frameworks',
             'title' => t('Manage frameworks'),
             'description' => "",
@@ -150,15 +134,13 @@ function openabmma_menu($may_cache) {
             'type' => MENU_CALLBACK
             );
     }
-    else
-    {
+    else {
         $items[] = array(
             'path' => 'models/edit/' . arg(2) . "/step01",
             'title' => t('Step 01 :: Editing your model'),
             'description' => "",
-            'access' => user_access ('logged in'),
-            'callback' => 'drupal_get_form',
-            'callback arguments' => array(openabmma_addModel01),
+            'access' => user_access ('modify models'),
+            'callback' => 'drupal_get_form','callback arguments' => array(openabmma_addModel01),
             'type' => MENU_CALLBACK
             );
 
@@ -166,7 +148,7 @@ function openabmma_menu($may_cache) {
             'path' => 'models/edit/' . arg(2) . "/step02",
             'title' => t('Step 02 :: Editing your model'),
             'description' => "",
-            'access' => user_access ('logged in'),
+            'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
             'callback arguments' => array(openabmma_addModel02),
             'type' => MENU_CALLBACK
@@ -176,7 +158,7 @@ function openabmma_menu($may_cache) {
             'path' => 'models/edit/' . arg(2) . "/step03",
             'title' => t('Step 03 :: Editing your model'),
             'description' => "",
-            'access' => user_access ('logged in'),
+            'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
             'callback arguments' => array(openabmma_addModel03),
             'type' => MENU_CALLBACK
@@ -186,7 +168,7 @@ function openabmma_menu($may_cache) {
             'path' => 'models/edit/' . arg(2) . "/step04",
             'title' => t('Step 04 :: Editing your model'),
             'description' => "",
-            'access' => user_access ('logged in'),
+            'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
             'callback arguments' => array(openabmma_addModel04),
             'type' => MENU_CALLBACK
@@ -196,7 +178,7 @@ function openabmma_menu($may_cache) {
             'path' => 'models/add/' . arg(2) . "/step01",
             'title' => t('Step 01 :: Adding a new model'),
             'description' => "",
-            'access' => user_access ('logged in'),
+            'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
             'callback arguments' => array(openabmma_addModel01),
             'type' => MENU_CALLBACK
@@ -206,7 +188,7 @@ function openabmma_menu($may_cache) {
             'path' => 'models/add/' . arg(2) . "/step02",
             'title' => t('Step 02 :: Adding a new model'),
             'description' => "",
-            'access' => user_access ('logged in'),
+            'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
             'callback arguments' => array(openabmma_addModel02),
             'type' => MENU_CALLBACK
@@ -216,7 +198,7 @@ function openabmma_menu($may_cache) {
             'path' => 'models/add/' . arg(2) . "/step03",
             'title' => t('Step 03 :: Adding a new model'),
             'description' => "",
-            'access' => user_access ('logged in'),
+            'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
             'callback arguments' => array(openabmma_addModel03),
             'type' => MENU_CALLBACK
@@ -226,7 +208,7 @@ function openabmma_menu($may_cache) {
             'path' => 'models/add/' . arg(2) . "/step04",
             'title' => t('Step 04 :: Adding a new model'),
             'description' => "",
-            'access' => user_access ('logged in'),
+            'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
             'callback arguments' => array(openabmma_addModel04),
             'type' => MENU_CALLBACK
@@ -236,7 +218,7 @@ function openabmma_menu($may_cache) {
             'path' => 'models/add/' . arg(2) . "/step05",
             'title' => t('Step 05 :: Adding a new model'),
             'description' => "",
-            'access' => user_access ('logged in'),
+            'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
             'callback arguments' => array(openabmma_addModel05),
             'type' => MENU_CALLBACK
@@ -246,7 +228,7 @@ function openabmma_menu($may_cache) {
             'path' => 'models/add/' . arg(2) . "/reviewnote",
             'title' => t('Step 04 :: Adding a new model'),
             'description' => "",
-            'access' => user_access ('logged in'),
+            'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
             'callback arguments' => array(openabmma_askIfReview),
             'type' => MENU_CALLBACK
@@ -256,7 +238,7 @@ function openabmma_menu($may_cache) {
             'path' => 'models/add/' . arg(2) . "/complete",
             'title' => t('Add new model complete'),
             'description' => "",
-            'access' => user_access ('logged in'),
+            'access' => user_access ('modify models'),
             'callback' => 'openabmma_addModelComplete',
             'type' => MENU_CALLBACK
             );
@@ -275,7 +257,7 @@ function openabmma_menu($may_cache) {
             'path' => 'models/search/' . arg (2),
             'title' => t('Search models'),
             'description' => "",
-            'access' => user_access ('logged in'),
+            'access' => user_access ('modify models'),
             'callback' => 'openabmma_searchProjects',
             'type' => MENU_CALLBACK
             );
@@ -311,20 +293,10 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'config/os/delete/' . arg(3),
-            'title' => t('Delete Operating System'),
-            'description' => "",
-            'access' => user_access ('administer content'),
-            'callback' => 'openabmma_deleteOS',
-            'callback arguments' => array(arg(3)),
-            'type' => MENU_CALLBACK
-            );
-
-        $items[] = array(
             'path' => 'mymodels/' . arg(1) . '/files',
             'title' => t('Files'),
             'description' => "",
-            'access' => user_access ('logged in'),
+            'access' => user_access ('modify models'),
             'callback' => 'openabmma_showFiles',
             'callback arguments' => array(arg(1)),
             'type' => MENU_CALLBACK
@@ -334,7 +306,7 @@ function openabmma_menu($may_cache) {
             'path' => 'mymodels/' . arg(1) . '/files/' . arg(3),
             'title' => t('Files'),
             'description' => "",
-            'access' => user_access ('logged in'),
+            'access' => user_access ('modify models'),
             'callback' => 'openabmma_showFiles',
             'callback arguments' => array(arg(1)),
             'type' => MENU_CALLBACK
@@ -344,7 +316,7 @@ function openabmma_menu($may_cache) {
             'path' => 'mymodels/' . arg(1) . '/metadata',
             'title' => t('Model metadata'),
             'description' => "",
-            'access' => user_access ('logged in'),
+            'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
             'callback arguments' => array('openabmma_metadata'),
             'type' => MENU_CALLBACK
@@ -354,7 +326,7 @@ function openabmma_menu($may_cache) {
             'path' => 'mymodels/' . arg(1) . '/members/delete',
             'title' => t('Delete members'),
             'description' => "",
-            'access' => user_access ('logged in'),
+            'access' => user_access ('modify models'),
             'callback' => 'openabmma_deleteMember',
             'callback arguments' => array(arg(1), arg(4)),
             'type' => MENU_CALLBACK
@@ -364,7 +336,7 @@ function openabmma_menu($may_cache) {
             'path' => 'mymodels/' . arg(1) . '/members',
             'title' => t('Model members'),
             'description' => "",
-            'access' => user_access ('logged in'),
+            'access' => user_access ('modify models'),
             'callback' => 'openabmma_manageMembers',
             'callback arguments' => array(arg(1)),
             'type' => MENU_CALLBACK
@@ -374,7 +346,7 @@ function openabmma_menu($may_cache) {
             'path' => 'mymodels/' . arg(1) . '/viewMetadata',
             'title' => arg(1),
             'description' => "",
-            'access' => user_access ('access content'),
+            'access' => user_access ('view models'),
             'callback' => 'openabmma_showMetaData',
             'callback arguments' => array(arg(1)),
             'type' => MENU_CALLBACK
@@ -384,7 +356,7 @@ function openabmma_menu($may_cache) {
             'path' => 'mymodels/' . arg(1),
             'title' => arg(1),
             'description' => "",
-            'access' => user_access ('access content'),
+            'access' => user_access ('view models'),
             'callback' => 'openabmma_openProject',
             'callback arguments' => array(arg(1)),
             'type' => MENU_CALLBACK
@@ -394,82 +366,81 @@ function openabmma_menu($may_cache) {
     return $items;
 }
 
-function openabmma_showMetaData ($pName='')
-{
-	global $user;
-	if ($pName == '')
-		return '';
+function openabmma_showMetaData ($pName='') {
+    global $user;
+    if ($pName == '')
+        return '';
 
-	$owner = openabmma_getModelOwner ($pName);
-	if ($owner == "")
-		drupal_goto ("models");
+    $owner = openabmma_getModelOwner ($pName);
+    if ($owner == "")
+        drupal_goto ("models");
 
-	if ($user->name != $owner && !openabmma_inList ($user->name, openabmma_getModelMembers ($pName)))
-	{
-		openabmma_accessError ('Only model members can view metadata for a model.');
-		return '';
-	}
+    if ($user->name != $owner && !openabmma_inList ($user->name, openabmma_getModelMembers ($pName)))
+    {
+        openabmma_accessError ('Only model members can view metadata for a model.');
+        return '';
+    }
 
-	$query = "SELECT owner_uid, name, title, description, model_language_id, os, framework, reference_text, examples, submittedReview, visible, replicatedModel, replicators, reference_url, license_id from openabm_model_project WHERE name='%s'";
-	$result = (array) db_fetch_object (db_query ($query, $pName));
-	$owner_uid = $result ['owner_uid'];
-	$name = $result ['name'];
-	$title = $result ['title'];
-	$description = $result ['description'];
-	$replicated = $result ['replicatedModel'] == "1" ? "Yes" : "No";
-	$replicators = $result ['replicators'];
-	$reference_url = $result ['reference_url'];
-	$model_language_id = $result ['model_language_id'];
-	$os = $result ['os'];
-	$framework = $result ['framework'];
-	$reference_text = $result ['reference_text'];
-	$examples = $result ['examples'];
-	$submittedReview = $result ['submittedReview'] == "1" ? "Yes" : "No";
-	$visible = $result ['visible'] == "1" ? "Yes" : "No";
-	$replicators = $result ['replicators'];
-	$reference_url = $result ['reference_url'];
-	$license_id = $result ['license_id'];
+    $query = "SELECT owner_uid, name, title, description, model_language_id, os, framework, reference_text, examples, submittedReview, visible, replicatedModel, replicators, reference_url, license_id from openabm_model_project WHERE name='%s'";
+    $result = (array) db_fetch_object (db_query ($query, $pName));
+    $owner_uid = $result ['owner_uid'];
+    $name = $result ['name'];
+    $title = $result ['title'];
+    $description = $result ['description'];
+    $replicated = $result ['replicatedModel'] == "1" ? "Yes" : "No";
+    $replicators = $result ['replicators'];
+    $reference_url = $result ['reference_url'];
+    $model_language_id = $result ['model_language_id'];
+    $os = $result ['os'];
+    $framework = $result ['framework'];
+    $reference_text = $result ['reference_text'];
+    $examples = $result ['examples'];
+    $submittedReview = $result ['submittedReview'] == "1" ? "Yes" : "No";
+    $visible = $result ['visible'] == "1" ? "Yes" : "No";
+    $replicators = $result ['replicators'];
+    $reference_url = $result ['reference_url'];
+    $license_id = $result ['license_id'];
 
-	$query = "SELECT name from openabm_model_language WHERE id=%d";
-	$result = (array) db_fetch_object (db_query ($query, $model_language_id));
-	$model_language_id = $result ['name'];
+    $query = "SELECT name from openabm_model_language WHERE id=%d";
+    $result = (array) db_fetch_object (db_query ($query, $model_language_id));
+    $model_language_id = $result ['name'];
 
-	$query = "SELECT license_text from openabm_license WHERE id=%d";
-	$result = (array) db_fetch_object (db_query ($query, $license_id));
-	$license_id = $result ['license_text'];
+    $query = "SELECT license_text from openabm_license WHERE id=%d";
+    $result = (array) db_fetch_object (db_query ($query, $license_id));
+    $license_id = $result ['license_text'];
 
-	$keywordList = '';
-	$query = "SELECT keyword FROM openabm_model_keywords WHERE proj_id=%d";
-	$result = db_query ($query, openabmma_getProjectId ($pName));
-	while ($element = db_fetch_object ($result))
-		$keywordList .= $element->keyword . ", ";
-	$keywordList = substr ($keywordList, 0, strlen($keywordList)-2);
+    $keywordList = '';
+    $query = "SELECT keyword FROM openabm_model_keywords WHERE proj_id=%d";
+    $result = db_query ($query, openabmma_getProjectId ($pName));
+    while ($element = db_fetch_object ($result))
+        $keywordList .= $element->keyword . ", ";
+    $keywordList = substr ($keywordList, 0, strlen($keywordList)-2);
 
-	$output = "<br/><p><table border='0' cellpadding='0' cellspacing='0' width='100%'>";
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Model name:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $name . "</i></td></tr>";
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Model description:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $description . "</i></td></tr>";
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Model title:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $title . "</i></td></tr>";
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Replicated model:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $replicated . "</i></td></tr>";
-	if ($replicated == "Yes")
-	{
-		$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Replicators:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $replicators . "</i></td></tr>";
-		$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Reference URL:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $reference_url . "</i></td></tr>";
-	}
+    $output = "<br/><p><table border='0' cellpadding='0' cellspacing='0' width='100%'>";
+    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Model name:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $name . "</i></td></tr>";
+    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Model description:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $description . "</i></td></tr>";
+    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Model title:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $title . "</i></td></tr>";
+    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Replicated model:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $replicated . "</i></td></tr>";
+    if ($replicated == "Yes")
+    {
+        $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Replicators:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $replicators . "</i></td></tr>";
+        $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Reference URL:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $reference_url . "</i></td></tr>";
+    }
 
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Visible to public:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $visible . "</i></td></tr>";
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Programming language:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $model_language_id . "</i></td></tr>";
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Operating System:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $os . "</i></td></tr>";
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Framework:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $framework . "</i></td></tr>";
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>License:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $license_id . "</i></td></tr>";
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Model keywords:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $keywordList . "</i></td></tr>";
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>References:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $reference_text . "</i></td></tr>";
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Examples:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $examples . "</i></td></tr>";
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Submitted for review:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $submittedReview . "</i></td></tr>";
+    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Visible to public:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $visible . "</i></td></tr>";
+    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Programming language:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $model_language_id . "</i></td></tr>";
+    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Operating System:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $os . "</i></td></tr>";
+    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Framework:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $framework . "</i></td></tr>";
+    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>License:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $license_id . "</i></td></tr>";
+    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Model keywords:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $keywordList . "</i></td></tr>";
+    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>References:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $reference_text . "</i></td></tr>";
+    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Examples:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $examples . "</i></td></tr>";
+    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Submitted for review:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $submittedReview . "</i></td></tr>";
 
-$output .= "</table>";
+    $output .= "</table>";
 
-$output .= "<p></p>" . l ("To change your metadata settings, click here", "models/edit/" . $pName . "/step01");
-	return $output;
+    $output .= "<p></p>" . l ("To change your metadata settings, click here", "models/edit/" . $pName . "/step01");
+    return $output;
 }
 
 function openabmma_deletePLanguages ($id='')
@@ -596,70 +567,7 @@ function openabmma_add_framework ()
 	return ($form);
 }
 
-function openabmma_deleteOS ($id='')
-{
-	if ($id != "")
-	{
-		$query = "DELETE FROM openabm_os WHERE id=%d";
-		db_query ($query, $id);
-	}
-
-	drupal_goto ("config/os");
-	return '';
-}
-
-function openabmma_showOS ()
-{
-	$count = 0;
-	$query = "SELECT id, name FROM openabm_os";
-	$result = db_query ($query);
-	while ($node = db_fetch_object ($result))
-	{
-		$count++;
-		$output .= "<br/><b>" . $node->name . "</b>&nbsp;" . "<a href=\"javascript:if(confirm('Are you sure you want to delete this OS from the list?')) window.location.replace('" . url("config/os/delete/" . $node->id) . "');\"><small>[delete this]</small></a>";
-	}
-
-	$output = "<br/>Total " . $count . " Operating System(s).<br/>" . $output . "<br/>&nbsp;" . drupal_get_form (openabmma_add_OS);
-	return $output;
-}
-
-function openabmma_add_OS_submit ($form_id, $edit)
-{
-	$query = "INSERT INTO openabm_os (name) VALUES ('%s')";
-	db_query ($query, $edit ['name']);
-	drupal_goto ("config/os");
-}
-
-function openabmma_add_OS ()
-{
-	$form["details"] = array(
-		"#type" => 'fieldset',
-		"#collapsible" => FALSE,
-		"#collapsed" => FALSE,
-		"#title" => null,
-		"#description" => t("You can add a new Operating System to the list here."),
-	);
-
-	$form ["details"]["name"] = array (
-		"#type" => "textfield",
-		"#title" => t("OS name:"),
-		"#default_value" => null,
-		"#description" => "",
-		"#maxlength" => 210,
-		"#required" => true
-	);
-
-	$form ["details"]["submit"] = array (
-		"#type" => "submit",
-		"#value" => t("Submit"),
-		"#submit" => TRUE
-	);
-
-	return ($form);
-}
-
-function openabmma_askIfReview ()
-{
+function openabmma_askIfReview () {
 	global $user;
 	$pName = arg(2);
 	if ($user->name != openabmma_getModelOwner ($pName))
@@ -736,41 +644,39 @@ function openabmma_askIfReview_submit ($form_id, $edit)
 		drupal_goto ("/");
 }
 
-function openabmma_uploadFile ($subdir, $formVar, $permission=0660)
-{
-	if ($formVar == '')
-		return;
+function openabmma_uploadFile ($subdir, $formVar, $permission=0660) {
+    if ($formVar == '')
+        return;
 
-	$dir = "files";
-	if ($subdir != "")
-		$dir .= "/" . $subdir;
+    $dir = "files";
+    if ($subdir != "")
+        $dir .= "/" . $subdir;
 
-	$is_writable = file_check_directory($dir, 1);
-	if($is_writable)
-	{
-		$source = file_check_upload($formVar);
-		if ($source == null)
-			return null;
-		// Security measure to prevent exploit of file.php.png
-		$source->filename = upload_munge_filename($source->filename);
+    $is_writable = file_check_directory($dir, 1);
+    if($is_writable) {
+        $source = file_check_upload($formVar);
+        if ($source == null)
+            return null;
+        // Security measure to prevent exploit of file.php.png
+        $source->filename = upload_munge_filename($source->filename);
 
-		if ($file = file_save_upload($source,$dir ))
-		{
-//			if (image_get_info($file->filepath))
-//				drupal_set_message(t('New image saved.'));
-//			else
-//			{
-//				file_delete($file->filepath);
-//				drupal_set_message('Uploaded file does not appear to be a valid image file. Please try again.');
-//			}
-			chmod (realpath ($dir . "/" . $source->filename), $permission);
-			return $source->filename;
-		}
-		else
-			return null;
-	}
-	else
-		return null;
+        if ($file = file_save_upload($source,$dir ))
+        {
+            //			if (image_get_info($file->filepath))
+            //				drupal_set_message(t('New image saved.'));
+            //			else
+            //			{
+            //				file_delete($file->filepath);
+            //				drupal_set_message('Uploaded file does not appear to be a valid image file. Please try again.');
+            //			}
+            chmod (realpath ($dir . "/" . $source->filename), $permission);
+            return $source->filename;
+        }
+        else
+            return null;
+    }
+    else
+        return null;
 }
 
 function openabmma_addModel02_submit ($form_id, $edit)
@@ -822,126 +728,127 @@ function openabmma_inList ($value, $arr)
 	return 0;
 }
 
-function openabmma_addModel02 ($edit=null, $item=0)
-{
-	global $user;
-	$pName = arg(2);
+function get_openabmma_js() {
+    return drupal_get_path('module', 'openabmma') . '/openabmma.js';
+}
 
-	if ($user->name != openabmma_getModelOwner ($pName))
-		return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+function openabmma_addModel02 ($edit=null, $item=0) {
+    global $user;
+    $pName = arg(2);
 
-	$query = "SELECT language.name as prog_lang, os, framework FROM openabm_model_project project INNER JOIN openabm_model_language language ON project.model_language_id=language.id WHERE language.name='%s'";
-	$result = (array) db_fetch_object (db_query ($query, $pName));
-	$progLang = $result ['prog_lang'];
-	$os = $result ['os'];
-	$framework = $result ['framework'];
-	
-	$form['#attributes'] = array('enctype' => "multipart/form-data");
+    drupal_add_js( get_openabmma_js() );
+    if ($user->name != openabmma_getModelOwner ($pName))
+        return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
 
-	$form["details"] = array(
-		"#type" => 'fieldset',
-		"#collapsible" => FALSE,
-		"#collapsed" => FALSE,
-		"#title" => null,
-		"#description" => null,
-	);
+    $query = "SELECT language.name as prog_lang, os, framework FROM openabm_model_project project INNER JOIN openabm_model_language language ON project.model_language_id=language.id WHERE language.name='%s'";
+    $result = (array) db_fetch_object (db_query ($query, $pName));
+    $progLang = $result ['prog_lang'];
+    $os = $result ['os'];
+    $framework = $result ['framework'];
 
-/*	$form ["details"]["proj_id"] = array (
-		"#type" => "item",
-		"#title" => t("Project ID:"),
-		"#value" => $id,
-		"#description" => t("Unique id for this project"),
-	);
-*/
-	$form ["details"]["proj_name"] = array (
-		"#type" => "item",
-		"#title" => t("Model Name:"),
-		"#value" => $pName,
-		"#description" => null,
-	);
+    $form['#attributes'] = array('enctype' => "multipart/form-data");
 
-	$form ["details"]["proj_code_file"] = array (
-		"#type" => "file",
-		"#title" => t("Code file (zipped):")
-	);
+    $form['#attributes']['onsubmit'] = 'return validate_code_submission()';
 
-	$languages = array ();
-	$result = db_query ("SELECT id, name FROM openabm_model_language ORDER BY name");
-	while ($node = db_fetch_object ($result))
-		$languages [$node->id] = $node->name;
-	$languages ["Other"] = "Other";
+    $form["details"] = array(
+            "#type" => 'fieldset',
+            "#collapsible" => FALSE,
+            "#collapsed" => FALSE,
+            "#title" => null,
+            "#description" => null,
+            );
 
-	$form ["details"]["proj_language"] = array (
-		"#type" => "select",
-		"#title" => t("Programming Language:"),
-		"#options" => $languages,
-		"#default_value" => $edit ["prog_language"] == "" ? (openabmma_inList ($progLang, $languages) == 1 ? $progLang : "Other") : $edit ["prog_language"],
-		"#description" => null
-	);
+    /*	$form ["details"]["proj_id"] = array (
+        "#type" => "item",
+        "#title" => t("Project ID:"),
+        "#value" => $id,
+        "#description" => t("Unique id for this project"),
+        );
+     */
+    $form ["details"]["proj_name"] = array (
+            "#type" => "item",
+            "#title" => t("Model Name:"),
+            "#value" => $pName,
+            "#description" => null,
+            );
 
-	$form ["details"]["other_language"] = array (
-		"#type" => "textfield",
-		"#title" => t("Other (if not mentioned in above list):"),
-		"#maxlength" => 210,
-		"#default_value" => $edit ["other_language"] == "" ? (openabmma_inList ($progLang, $languages) != 1 ? $progLang : "") : $edit ["prog_language"],
-		"#required" => false
-	);
+    $form ["details"]["proj_code_file"] = array (
+            "#type" => "file",
+            "#title" => t("Code file (zipped):")
+            );
 
-	$arrayElements = array ();
-	$result = db_query ("SELECT name FROM openabm_os ORDER BY name");
-	while ($node = db_fetch_object ($result))
-		$arrayElements [$node->name] = $node->name;
-	$arrayElements ["Other / Platform Independent"] = "Other / Platform Independent";
+    $languages = array ();
+    $result = db_query ("SELECT id, name FROM openabm_model_language ORDER BY name");
+    while ($node = db_fetch_object ($result))
+        $languages [$node->id] = $node->name;
 
-	$form ["details"]["os"] = array (
-		"#type" => "select",
-		"#title" => t("Operating System:"),
-		"#default_value" => $edit ["os"] == "" ? $os : $edit ["os"],
-		"#options" => $arrayElements,
-		"#description" => null
-	);
+    $form ["details"]["proj_language"] = array (
+            "#type" => "select",
+            "#title" => t("Programming Language:"),
+            "#options" => $languages,
+            "#default_value" => $edit ["prog_language"] == "" ? (openabmma_inList ($progLang, $languages) == 1 ? $progLang : "Other") : $edit ["prog_language"],
+            "#description" => null
+            );
 
-	$arrayElements = array ();
-	$result = db_query ("SELECT name FROM openabm_framework ORDER BY name");
-	while ($node = db_fetch_object ($result))
-		$arrayElements [$node->name] = $node->name;
-	$arrayElements ["Other"] = "Other";
+    $form ["details"]["other_language"] = array (
+            "#type" => "textfield",
+            "#title" => t("Other (if not mentioned in above list):"),
+            "#maxlength" => 210,
+            "#default_value" => $edit ["other_language"] == "" ? (openabmma_inList ($progLang, $languages) != 1 ? $progLang : "") : $edit ["prog_language"],
+            "#required" => false
+            );
 
-	$form ["details"]["framework"] = array (
-		"#type" => "select",
-		"#title" => t("Framework used:"),
-		"#default_value" => $edit ["framework"] == "" ? $framework : $edit ["framework"],
-		"#options" => $arrayElements,
-		"#description" => null
-	);
+    $arrayElements = array ('Windows', 'Linux', 'Mac', 'Platform Independent', 'Other');
 
-/*
-	$licenseTypes = array ();
-	$result = db_query ("SELECT id, license, url FROM openabm_license");
-	while ($node = db_fetch_object ($result))
-		$licenseTypes [$node->id] = $node->license . " [" . $node->url . "]";
+    $form ["details"]["os"] = array (
+            "#type" => "select",
+            "#title" => t("Operating System:"),
+            "#default_value" => $edit ["os"] == "" ? $os : $edit ["os"],
+            "#options" => $arrayElements,
+            "#description" => null
+            );
 
-	$form ["details"]["proj_licenseId"] = array (
-		"#type" => "select",
-		"#title" => t("License:"),
-		"#default_value" => $edit ["proj_licenseId"],
-		"#options" => $licenseTypes,
-		"#description" => null
-	);
-*/
-	$form ["details"]["submit"] = array (
-		"#type" => "submit",
-		"#value" => t("Submit"),
-		"#submit" => TRUE
-	);
+    $arrayElements = array ();
+    $result = db_query ("SELECT name FROM openabm_framework ORDER BY name");
+    while ($node = db_fetch_object ($result))
+        $arrayElements [$node->name] = $node->name;
+    $arrayElements ["Other"] = "Other";
 
-	$form ["details"]["cancel"] = array (
-		"#type" => "submit",
-		"#value" => t("Back"),
-		"#submit" => TRUE
-	);
+    $form ["details"]["framework"] = array (
+            "#type" => "select",
+            "#title" => t("Framework used:"),
+            "#default_value" => $edit ["framework"] == "" ? $framework : $edit ["framework"],
+            "#options" => $arrayElements,
+            "#description" => null
+            );
 
-	return ($form);	
+    /*
+       $licenseTypes = array ();
+       $result = db_query ("SELECT id, license, url FROM openabm_license");
+       while ($node = db_fetch_object ($result))
+       $licenseTypes [$node->id] = $node->license . " [" . $node->url . "]";
+
+       $form ["details"]["proj_licenseId"] = array (
+       "#type" => "select",
+       "#title" => t("License:"),
+       "#default_value" => $edit ["proj_licenseId"],
+       "#options" => $licenseTypes,
+       "#description" => null
+       );
+     */
+    $form ["details"]["submit"] = array (
+            "#type" => "submit",
+            "#value" => t("Submit"),
+            "#submit" => TRUE
+            );
+
+    $form ["details"]["cancel"] = array (
+            "#type" => "submit",
+            "#value" => t("Back"),
+            "#submit" => TRUE
+            );
+
+    return ($form);	
 }
 
 function openabmma_addModel03_submit ($form_id, $edit)
@@ -992,7 +899,7 @@ function openabmma_addModel03 ($edit=null, $item=0)
 	$pName = arg(2);
 
 	if ($user->name != openabmma_getModelOwner ($pName))
-		return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+            return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
 
 	$query = "SELECT license_id FROM openabm_model_project WHERE name='%s'";
 	$result = (array) db_fetch_object (db_query ($query, $pName));
@@ -1028,9 +935,9 @@ function openabmma_addModel03 ($edit=null, $item=0)
 	);
 
 	$licenseTypes = array ();
-	$result = db_query ("SELECT id, license_text, url FROM openabm_license");
+	$result = db_query ("SELECT id, name, url FROM openabm_license");
 	while ($node = db_fetch_object ($result))
-		$licenseTypes [$node->id] = $node->license_text . " [" . $node->url . "]";
+            $licenseTypes [$node->id] = $node->name . " [" . $node->url . "]";
 
 	$form ["details"]["proj_licenseId"] = array (
 		"#type" => "select",
@@ -1570,10 +1477,10 @@ function openabmma_addModel01 ($edit=null, $item=0)
 
 	$form ["details"]["proj_refurl"] = array (
 		"#type" => "textfield",
-		"#title" => t("URL to original model (only for replicated models):"),
+		"#title" => t("References (only for replicated models):"),
 		"#default_value" => $edit ["proj_refurl"] == "" ? $refurl : $edit ["proj_refurl"],
-		"#description" => t("If this model is a replicated model, enter the references to websites, if any."),
-		"#maxlength" => 210
+		"#description" => t("If this model is a replicated model, enter references, if any."),
+		"#maxlength" => 255
 	);
 
 	if ($visible)
@@ -1619,20 +1526,17 @@ function openabmma_addModel01 ($edit=null, $item=0)
 
 function openabmma_addModel ()
 {
-	$output = "<p><br/>To create a new model, it can take 3-6 steps depending on whether your model is to be submitted for review or not. The first three steps are mandatory.<p>&nbsp;</p>";
-
-$output .= "<table border='0' cellpadding='0' cellspacing='0' width='100%'>";
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><b>Step 1</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><font color='red'>Mandatory</font></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'>Model name, description and visibility to public</td></tr>";
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 2</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='red'>Mandatory</font></td><td style='border-bottom: thin solid #aaaaaa'>Code files, language and platform details</td></tr>";
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 3</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='red'>Mandatory</font></td><td style='border-bottom: thin solid #aaaaaa'>License information and keywords</td></tr>";
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 4</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='green'>Optional</font></td><td style='border-bottom: thin solid #aaaaaa'>References, examples and senstivity information</td></tr>";
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 5</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='green'>Only for review</font></td><td style='border-bottom: thin solid #aaaaaa'>Sending model for review</td></tr>";
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 6</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='green'>Only for review</font></td><td style='border-bottom: thin solid #aaaaaa'>Collecting documents for model review</td></tr>";
-$output .= "</table>";
-
-$output .= "<p>&nbsp;</p>" . l ("Click here to proceed to first step", "models/add/step01");	
-
-	return $output;
+    $output = "<p><br/>To upload a new model, it can take a number of steps. If you want your model to be reviewed  for review or not. The first three steps are mandatory.<p>&nbsp;</p>";
+    $output .= "<table border='0' cellpadding='0' cellspacing='0' width='100%'>";
+    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><b>Step 1</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><font color='red'>Mandatory</font></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'>Model name, description and visibility to public</td></tr>";
+    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 2</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='red'>Mandatory</font></td><td style='border-bottom: thin solid #aaaaaa'>Code files, language and platform details</td></tr>";
+    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 3</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='red'>Mandatory</font></td><td style='border-bottom: thin solid #aaaaaa'>License information and keywords</td></tr>";
+    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 4</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='green'>Optional</font></td><td style='border-bottom: thin solid #aaaaaa'>References, examples and senstivity information</td></tr>";
+    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 5</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='green'>Only for review</font></td><td style='border-bottom: thin solid #aaaaaa'>Sending model for review</td></tr>";
+    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 6</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='green'>Only for review</font></td><td style='border-bottom: thin solid #aaaaaa'>Collecting documents for model review</td></tr>";
+    $output .= "</table>";
+    $output .= "<p>&nbsp;</p>" . l ("Click here to proceed to first step", "models/add/step01");	
+    return $output;
 }
 
 function openabmma_searchProjects ()
@@ -1841,9 +1745,8 @@ function openabmma_deleteMember ($name, $uid)
 	return "";
 }
 
-function openabmma_perm ()
-{
-	return array ('logged in');
+function openabmma_perm () {
+	return array ('view models', 'modify models', 'review models');
 }
 
 function openabmma_showFiles ($projName='', $path='')
@@ -2233,16 +2136,15 @@ function openabmma_showLicenses ()
 {
 	$count = 0;
 	$output = '';
-	$query = "SELECT id, license_text, url FROM openabm_license";
+	$query = "SELECT id, name, license_text, url FROM openabm_license";
 	$result = db_query ($query);
 	while ($node = db_fetch_object ($result))
 	{
-		$count++;
-		$output .= "<b>" . $node->license_text . "</b>&nbsp;<small>" . "<a href=\"javascript:if(confirm('Are you sure you want to delete this license?')) window.location.replace('" . url("config/licenses/delete/" . $node->id) . "');\"><small>[Delete this]</small></a></small><br/>";
-//l ("[delete this]", "licenses/delete/" . $node->id) . "<br/>" . l($node->url, $node->url) . "</small><br/>&nbsp;<br/>";
+            $count++;
+            $output .= "<b>" . $node->name . "</b>&nbsp;<small>" . "<a href=\"javascript:if(confirm('Are you sure you want to delete this license?')) window.location.replace('" . url("config/licenses/delete/" . $node->id) . "');\"><small>[Delete this]</small></a></small><br/>";
+            //l ("[delete this]", "licenses/delete/" . $node->id) . "<br/>" . l($node->url, $node->url) . "</small><br/>&nbsp;<br/>";
 	}
-
-	return "There are currently " . $count . " license(s). <br/>&nbsp;<br/>" . $output . "<hr/><br/>" . drupal_get_form(openabmma_addLicense_form);
+        return "There are currently " . $count . " license(s) available. <br/>&nbsp;<br/>" . $output . "<hr/><br/>" . drupal_get_form(openabmma_addLicense_form);
 }
 
 function openabmma_deleteLicense ($id='')
@@ -2269,10 +2171,9 @@ function openabmma_deleteRole ($id='')
 	return '';
 }
 
-function openabmma_addLicense_form_submit ($formid, $edit)
-{
-	$query = "INSERT INTO openabm_license (license_text, url) VALUES ('%s', '%s')";
-	db_query ($query, $edit['name'], $edit ['url']);
+function openabmma_addLicense_form_submit ($formid, $edit) {
+    $query = "INSERT INTO openabm_license (name, license_text, url) VALUES ('%s', '%s', '%s')";
+    db_query ($query, $edit['name'], $edit['license_text'], $edit ['url']);
 }
 
 function openabmma_addLicense_form ()
@@ -2282,7 +2183,7 @@ function openabmma_addLicense_form ()
 		"#collapsible" => FALSE,
 		"#collapsed" => FALSE,
 		"#title" => null,
-		"#description" => t("You can add a new license type here."),
+		"#description" => t("You can add a new license here."),
 	);
 
 	$form ["details"]["name"] = array (
@@ -2291,6 +2192,13 @@ function openabmma_addLicense_form ()
 		"#default_value" => null,
 		"#description" => t("Name of the license"),
 		"#maxlength" => 210,
+		"#required" => true
+	);
+	$form ["details"]["license_text"] = array (
+		"#type" => "textarea",
+		"#title" => t("License Text:"),
+		"#default_value" => null,
+		"#description" => t("Full license text"),
 		"#required" => true
 	);
 
