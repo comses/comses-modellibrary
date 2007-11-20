@@ -570,8 +570,9 @@ function openabmma_add_framework ()
 function openabmma_askIfReview () {
 	global $user;
 	$pName = arg(2);
+        // FIXME: duplicated code all over the place
 	if ($user->name != openabmma_getModelOwner ($pName))
-		return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+            return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
 
         // FIXME: use CSS instead of repeating style elements over and over
         // again.  Cardinal programming sin - Don't Repeat Yourself.
@@ -728,7 +729,7 @@ function openabmma_inList ($value, $arr)
 	return 0;
 }
 
-function get_openabmma_js() {
+function get_openabmma_js_path() {
     return drupal_get_path('module', 'openabmma') . '/openabmma.js';
 }
 
@@ -736,13 +737,16 @@ function openabmma_addModel02 ($edit=null, $item=0) {
     global $user;
     $pName = arg(2);
 
-    drupal_add_js( get_openabmma_js() );
+    drupal_add_js( get_openabmma_js_path() );
+
+    // FIXME: duplicated code
     if ($user->name != openabmma_getModelOwner ($pName))
         return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
 
-    $query = "SELECT language.name as prog_lang, os, framework FROM openabm_model project INNER JOIN openabm_model_language language ON project.model_language_id=language.id WHERE language.name='%s'";
+    // FIXME:this doesn't work anymore.
+    $query = "SELECT language.name, os, framework FROM openabm_model m INNER JOIN openabm_model_language language ON m.model_language_id=language.id WHERE language.name='%s'";
     $result = (array) db_fetch_object (db_query ($query, $pName));
-    $progLang = $result ['prog_lang'];
+    $progLang = $result ['name'];
     $os = $result ['os'];
     $framework = $result ['framework'];
 
@@ -798,7 +802,7 @@ function openabmma_addModel02 ($edit=null, $item=0) {
             "#required" => false
             );
 
-// FIXME: add that crap that parses the show columns from openabm_model_version like 'os'
+// FIXME: add that crap that parses the output of "show columns from openabm_model_version like 'os'"
     $arrayElements = array ('Windows', 'Linux', 'Mac', 'Platform Independent', 'Other');
 
     $form ["details"]["os"] = array (
@@ -899,6 +903,7 @@ function openabmma_addModel03 ($edit=null, $item=0)
 	global $user;
 	$pName = arg(2);
 
+        // FIXME: duplicated code
 	if ($user->name != openabmma_getModelOwner ($pName))
             return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
 
@@ -999,6 +1004,7 @@ function openabmma_addModel04 ($edit=null, $item=0)
 {
 	global $user;
 	$pName = arg(2);
+        // FIXME: duplicated code
 	if ($user->name != openabmma_getModelOwner ($pName))
 		return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
 
@@ -1116,6 +1122,7 @@ function openabmma_addModel05 ($edit=null, $item=0)
 {
 	global $user;
 	$pName = arg(2);
+        // FIXME: duplicated code
 	if ($user->name != openabmma_getModelOwner ($pName))
 		return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
 
@@ -1208,8 +1215,9 @@ function openabmma_addModelComplete ()
 {
 	global $user;
 	$pName = arg(2);
+        // FIXME: duplicated code
 	if ($user->name != openabmma_getModelOwner ($pName))
-		return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+            return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
 
 	$query = "SELECT submittedReview FROM openabm_model WHERE name='%s'";
 	$result = (array) db_fetch_object (db_query ($query, $pName));
@@ -1224,99 +1232,106 @@ function openabmma_addModelComplete ()
 	return $output;
 }
 
-function openabmma_addModel01_submit ($form_id, $edit)
-{
-	$action = arg(1);
+function checkModelOwner( $pName ) {
+    global $user;
+    if ($user->name != openabmma_getModelOwner($pName)) {
 
-	global $user;
-	if ($edit ["newModel"] == "1")
-	{
-		$newModel = TRUE;
-		$pName = $edit ["model_name"];
-	}
-	else
-	{
-		$newModel = FALSE;
-		$pName = arg(2);
-	}
+    }
+    else {
+        return "";
+    }
+}
 
-	if (!$newModel)
-	{
-		if ($user->name != openabmma_getModelOwner ($pName))
-			return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
-	}
+function openabmma_addModel01_submit ($form_id, $edit) {
+    $action = arg(1);
 
-	if ($_POST ["op"] == "Cancel")
-		if ($action == "add")
-			drupal_goto ("models");
-		else if ($action == "edit")
-		{
-			$pName = arg(2);
-			drupal_goto ("mymodels/" . $pName);
-		}
+    global $user;
+    if ($edit ["newModel"] == "1") {
+        $newModel = TRUE;
+        $pName = $edit ["model_name"];
+    }
+    else {
+        $newModel = FALSE;
+        $pName = arg(2);
+    }
 
-	if ($pName == "" || $pName == null)
-	{
-		drupal_set_message ("<b><font color='red'>Model name is a required field</font></b>");
-		return;
-	}
+    if (!$newModel) {
+        $ownerName = openabmma_getModelOwner( $pName );
+        // FIXME: duplicated code
+        if ($user->name != $ownerName)
+            return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+    }
 
-	$pCount = strlen ($pName);
-	for ($i=0; $i<$pCount; $i++)
-	{
-		if ($pName [$i] == ' ')
-		{
-			$errorString = "Model name cannot contain spaces. Please re-enter the correct model name.";
-			drupal_set_message ("<b><font color='red'>" . $errorString . "</font></b>");
-			return;
-		}
-	}
+    if ($_POST ["op"] == "Cancel")
+        if ($action == "add")
+            drupal_goto ("models");
+        else if ($action == "edit")
+        {
+            $pName = arg(2);
+            drupal_goto ("mymodels/" . $pName);
+        }
 
-	$visible = $edit ["model_visibility"]["visibility"];
-	if ($visible != '0')
-		$visible = '1';
+    if ($pName == "" || $pName == null)
+    {
+        drupal_set_message ("<b><font color='red'>Model name is a required field</font></b>");
+        return;
+    }
 
-	$replicated = $edit ["model_replicated"]["replica"];
-	if ($replicated != '0')
-		$replicated = '1';
+    $pCount = strlen ($pName);
+    for ($i=0; $i<$pCount; $i++)
+    {
+        if ($pName [$i] == ' ')
+        {
+            $errorString = "Model name cannot contain spaces. Please re-enter the correct model name.";
+            drupal_set_message ("<b><font color='red'>" . $errorString . "</font></b>");
+            return;
+        }
+    }
 
-	if ($newModel == TRUE)
-	{
-		if (openabmma_getProjectId ($pName) != -1 && openabmma_getProjectId ($pName) != '') {
-                    drupal_set_message ("<b><font color='red'>Another project with the same name exists. Please choose a different name</font></b>");
+    $visible = $edit ["model_visibility"]["visibility"];
+    if ($visible != '0')
+        $visible = '1';
+
+    $replicated = $edit ["model_replicated"]["replica"];
+    if ($replicated != '0')
+        $replicated = '1';
+
+    if ($newModel == TRUE) {
+        if (openabmma_getProjectId ($pName) != -1 && openabmma_getProjectId ($pName) != '') {
+            drupal_set_message ("<b><font color='red'>Another project with the same name exists. Please choose a different name</font></b>");
+        }
+        else {
+            if ($replicated == '1') {
+                if ($edit ["model_repl"] == "" || $edit ["prof_refurl"] == "") {
+                    drupal_set_message ("<b><font color='red'>Since this project is a replicated one, you need to enter information about the replicators and the reference URL.</font></b>");
+                    return;
                 }
-		else {
-                    if ($replicated == '1') {
-                        if ($edit ["model_repl"] == "" || $edit ["prof_refurl"] == "") {
-                            drupal_set_message ("<b><font color='red'>Since this project is a replicated one, you need to enter information about the replicators and the reference URL.</font></b>");
-                            return;
-                        }
-                    }
-                    mkdir ("files/odd/" . $pName, 0755, TRUE);
-                    mkdir ("files/code/" . $pName, 0755, TRUE);
-                    mkdir ("files/other/" . $pName, 0755, TRUE);
-                    mkdir ("files/dataset/" . $pName, 0755, TRUE);
-                    mkdir ("files/sensitivity/" . $pName, 0755, TRUE);
-                    $query = "INSERT INTO openabm_model (owner_uid, name, title, description, visible, replicatedModel, replicators, reference_url) VALUES (%d, '%s', '%s', '%s', %d, %d, '%s', '%s')";
-                    db_query ($query, $user->uid, $pName, $edit ["model_title"], $edit ["model_description"], $visible, $replicated, $edit ["model_repl"], $edit ["model_refurl"]);
-                    drupal_goto ("models/add/" . $pName . "/step02");
-                }
-	}
-	else
-	{
-		if ($replicated == '1')
-		{
-			if ($edit ["model_repl"] == "" || $edit ["prof_refurl"] == "")
-			{
-				drupal_set_message ("<b><font color='red'>Since this project is a replicated one, you need to enter information about the replicators and the reference URL.</font></b>");
-				return;
-			}
-		}
+            }
+            mkdir ("files/odd/" . $pName, 0755, TRUE);
+            mkdir ("files/code/" . $pName, 0755, TRUE);
+            mkdir ("files/other/" . $pName, 0755, TRUE);
+            mkdir ("files/dataset/" . $pName, 0755, TRUE);
+            mkdir ("files/sensitivity/" . $pName, 0755, TRUE);
+            $query = "INSERT INTO openabm_model (owner_uid, name, title) VALUES (%d, '%s', '%s')";
+            db_query($query, $user->uid, $pName, $edit ["model_title"]);
+            drupal_goto("models/add/" . $pName . "/step02");
+        }
+    }
+    else
+    {
+        if ($replicated == '1')
+        {
+            if ($edit ["model_repl"] == "" || $edit ["prof_refurl"] == "")
+            {
+                drupal_set_message ("<b><font color='red'>Since this project is a replicated one, you need to enter information about the replicators and the reference URL.</font></b>");
+                return;
+            }
+        }
 
-		$query = "UPDATE openabm_model SET title='%s', description='%s', visible=%d, replicatedModel=%d, replicators='%s', reference_url='%s' WHERE name='%s'";
-		db_query ($query, $edit ["model_title"], $edit ["model_description"], $visible, $replicated, $edit ["model_repl"], $edit ["model_refurl"], $pName);
-		drupal_goto ("models/add/" . $pName . "/step02");
-	}
+        $query = "UPDATE openabm_model SET title='%s', description='%s', visible=%d, replicatedModel=%d, replicators='%s', reference_url='%s' WHERE name='%s'";
+        db_query ($query, $edit ["model_title"], $edit ["model_description"], $visible, $replicated, $edit ["model_repl"], $edit ["model_refurl"], $pName);
+        drupal_goto ("models/add/" . $pName . "/step02");
+    }
 }
 
 function openabmma_addModel01 ($edit=null, $item=0)
@@ -1334,8 +1349,9 @@ function openabmma_addModel01 ($edit=null, $item=0)
 
 	if ($newModel == "0")
 	{
-		if ($user->name != openabmma_getModelOwner ($pName))
-			return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+            // FIXME: duplicated code
+            if ($user->name != openabmma_getModelOwner ($pName))
+                return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
 	}
 
 	$desc = '';
