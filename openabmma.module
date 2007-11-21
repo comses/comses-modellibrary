@@ -61,6 +61,7 @@ function openabmma_menu($may_cache) {
             'callback arguments' => array('openabmma_newModel'),
             );
 */
+/*
             $items[] = array(
             'path' => 'models/add',
             'title' => t('Add a new model'),
@@ -68,6 +69,17 @@ function openabmma_menu($may_cache) {
             'access' => user_access ('modify models'),
             'callback' => 'openabmma_addModel',
             'type' => MENU_CALLBACK,
+            );
+*/
+
+            $items[] = array(
+            'path' => 'models/add',
+            'title' => t('Add a new model'),
+            'description' => t('Add a new model to the model archive.'),
+            'access' => user_access ('modify models'),
+            'callback' => 'drupal_get_form',
+            'type' => MENU_CALLBACK,
+            'callback arguments' => array ('openabmma_addModel')
             );
 
             $items[] = array(
@@ -136,6 +148,65 @@ function openabmma_menu($may_cache) {
     }
     else {
         $items[] = array(
+            'path' => 'mymodels/' . arg(1) . "/add/version",
+            'title' => t('Step 01 :: Adding a version to your model'),
+            'description' => "",
+            'access' => user_access ('modify models'),
+            'callback' => 'openabmma_addVersion',
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'mymodels/' . arg(1) . "/add/" . arg(3) . "/step01",
+            'title' => t('Step 01 :: Adding a version'),
+            'description' => "",
+            'access' => user_access ('modify models'),
+            'callback' => 'drupal_get_form',
+            'callback arguments' => array ('openabmma_addVersion01'),
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'mymodels/' . arg(1) . "/add/" . arg(3) . "/step02",
+            'title' => t('Step 02 :: Adding a version'),
+            'description' => "",
+            'access' => user_access ('modify models'),
+            'callback' => 'drupal_get_form',
+            'callback arguments' => array ('openabmma_addVersion02'),
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'mymodels/' . arg(1) . "/add/" . arg(3) . "/step03",
+            'title' => t('Step 03 :: Adding a version'),
+            'description' => "",
+            'access' => user_access ('modify models'),
+            'callback' => 'drupal_get_form',
+            'callback arguments' => array ('openabmma_addVersion03'),
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'mymodels/' . arg(1) . "/add/" . arg(3) . "/step04",
+            'title' => t('Step 04 :: Adding a version'),
+            'description' => "",
+            'access' => user_access ('modify models'),
+            'callback' => 'drupal_get_form',
+            'callback arguments' => array ('openabmma_addVersion04'),
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'mymodels/' . arg(1) . "/" . arg(2) . "/reviewnote",
+            'title' => t('Step 04 :: Adding a new model'),
+            'description' => "",
+            'access' => user_access ('modify models'),
+            'callback' => 'drupal_get_form',
+            'callback arguments' => array(openabmma_askIfReview),
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
             'path' => 'models/edit/' . arg(2) . "/step01",
             'title' => t('Step 01 :: Editing your model'),
             'description' => "",
@@ -171,16 +242,6 @@ function openabmma_menu($may_cache) {
             'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
             'callback arguments' => array(openabmma_addModel04),
-            'type' => MENU_CALLBACK
-            );
-
-        $items[] = array(
-            'path' => 'models/add/' . arg(2) . "/step01",
-            'title' => t('Step 01 :: Adding a new model'),
-            'description' => "",
-            'access' => user_access ('modify models'),
-            'callback' => 'drupal_get_form',
-            'callback arguments' => array(openabmma_addModel01),
             'type' => MENU_CALLBACK
             );
 
@@ -225,21 +286,11 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'models/add/' . arg(2) . "/reviewnote",
-            'title' => t('Step 04 :: Adding a new model'),
+            'path' => 'mymodels/' . arg(1) . '/add/' . arg(3) . "/complete",
+            'title' => t('Add new version complete'),
             'description' => "",
             'access' => user_access ('modify models'),
-            'callback' => 'drupal_get_form',
-            'callback arguments' => array(openabmma_askIfReview),
-            'type' => MENU_CALLBACK
-            );
-
-        $items[] = array(
-            'path' => 'models/add/' . arg(2) . "/complete",
-            'title' => t('Add new model complete'),
-            'description' => "",
-            'access' => user_access ('modify models'),
-            'callback' => 'openabmma_addModelComplete',
+            'callback' => 'openabmma_addVersionComplete',
             'type' => MENU_CALLBACK
             );
 
@@ -375,7 +426,7 @@ function openabmma_showMetaData ($pName='') {
     if ($owner == "")
         drupal_goto ("models");
 
-    if ($user->name != $owner && !openabmma_inList ($user->name, openabmma_getModelMembers ($pName)))
+    if ($user->name != $owner && openabmma_inList ($user->name, openabmma_getModelMembers ($pName)) == -1)
     {
         openabmma_accessError ('Only model members can view metadata for a model.');
         return '';
@@ -411,7 +462,7 @@ function openabmma_showMetaData ($pName='') {
 
     $keywordList = '';
     $query = "SELECT keyword FROM openabm_model_keywords WHERE model_id=%d";
-    $result = db_query ($query, openabmma_getProjectId ($pName));
+    $result = db_query ($query, openabmma_getModelId ($pName));
     while ($element = db_fetch_object ($result))
         $keywordList .= $element->keyword . ", ";
     $keywordList = substr ($keywordList, 0, strlen($keywordList)-2);
@@ -569,27 +620,27 @@ function openabmma_add_framework ()
 
 function openabmma_askIfReview () {
 	global $user;
-	$pName = arg(2);
+	$pName = arg(1);
         // FIXME: duplicated code all over the place
 	if ($user->name != openabmma_getModelOwner ($pName))
             return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
 
         // FIXME: use CSS instead of repeating style elements over and over
         // again.  Cardinal programming sin - Don't Repeat Yourself.
-	$output = "<br/><p><table border='0' cellpadding='0' cellspacing='0' width='100%'>";
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><b>Step 1</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>[Complete]</i></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'>Model name, description and visibility to public</td></tr>";
+
+
+	$output .= "<br/><p><table border='0' cellpadding='0' cellspacing='0' width='100%'>";
+$output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><b>Step 1</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>[Complete]</i></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'>Version description and visibility to public</td></tr>";
 $output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 2</b></td><td style='border-bottom: thin solid #aaaaaa'><i>[Complete]</i></td><td style='border-bottom: thin solid #aaaaaa'>Code files, language and platform details</td></tr>";
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 3</b></td><td style='border-bottom: thin solid #aaaaaa'><i>[Complete]</i></td><td style='border-bottom: thin solid #aaaaaa'>License information and keywords</td></tr>";
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 4</b></td><td style='border-bottom: thin solid #aaaaaa'><i>[Complete]</i></td><td style='border-bottom: thin solid #aaaaaa'>References, examples and senstivity information</td></tr>";
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 5</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='green'>Only for review</font></td><td style='border-bottom: thin solid #aaaaaa'>Sending model for review</td></tr>";
-$output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 6</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='green'>Only for review</font></td><td style='border-bottom: thin solid #aaaaaa'>Collecting documents for model review</td></tr>";
+$output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 3</b></td><td style='border-bottom: thin solid #aaaaaa'><i>[Complete]</i></td><td style='border-bottom: thin solid #aaaaaa'>License information, References, Examples and Sensitivity data</td></tr>";
+$output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 4</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='green'>Only for review</font></td><td style='border-bottom: thin solid #aaaaaa'>Collecting documents for model review</td></tr>";
 $output .= "</table>";
 
-$output .= "<p>&nbsp;<br/>At this point, you have completed the basic requirements of submitting a model and hosting it on OpenABM.org.<br/>You could complete the process of adding your model to the OpenABM repository by clicking on the 'Finish' button below.</p>";
+$output .= "<p>&nbsp;<br/>At this point, you have completed the basic requirements of submitting a version of a model to OpenABM.org.<br/>You could complete the process of adding your version to the OpenABM repository by clicking on the 'Finish' button below.</p>";
 
-$output .= "<p>Alternatively, you could indicate the model is ready for a review by the committee at OpenABM.org. If you wish to submit your model for review, click the 'Proceed to Submit Model for Review' button. In that case, you would be directed to a page that asks for some more information such as the ODD protocol.</p>";
+$output .= "<p>Alternatively, you could indicate the version is ready for a review by the committee at OpenABM.org. If you wish to submit your model for review, click the 'Proceed to Submit Version for Review' button. In that case, you would be directed to a page that asks for some more information such as the ODD protocol.</p>";
 
-$output .= "<p><u>Note: You can submit the model for review at any time by clicking on the \"Send this model for review\" link in the model workspace.</u></p>";
+$output .= "<p><u>Note: You can submit the version for review at any time by clicking on the \"Send this version for review\" link in the model workspace.</u></p>";
 
 	$form["details"] = array(
 		"#type" => 'fieldset',
@@ -609,13 +660,13 @@ $output .= "<p><u>Note: You can submit the model for review at any time by click
 
 	$form ["details"]["review"] = array (
 		"#type" => "submit",
-		"#value" => t("Proceed to Submit Model for Review"),
+		"#value" => t("Proceed to Submit Version for Review"),
 		"#submit" => TRUE
 	);
 
 	$form ["details"]["noreview"] = array (
 		"#type" => "submit",
-		"#value" => t("Finish the Add Model process"),
+		"#value" => t("Finish the Add Version process"),
 		"#submit" => TRUE
 	);
 
@@ -631,21 +682,24 @@ $output .= "<p><u>Note: You can submit the model for review at any time by click
 function openabmma_askIfReview_submit ($form_id, $edit)
 {
 	global $user;
-	$pName = arg(2);
+	$pName = arg(1);
 	if ($user->name != openabmma_getModelOwner ($pName))
 		return openabmma_accessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
 
-	if ($_POST ["op"] == "Proceed to Submit Model for Review")
-		drupal_goto ("models/add/" . $pName . "/step05");
-	else if ($_POST ["op"] == "Finish the Add Model process")
-		drupal_goto ("models/add/" . $pName . "/complete");
+	$versionString = arg (2);
+	$versionNumber = substr ($versionString, -1);
+
+	if ($_POST ["op"] == "Proceed to Submit Version for Review")
+		drupal_goto ("mymodels/" . $pName . "/add/version" . $versionNumber . "/step04");
+	else if ($_POST ["op"] == "Finish the Add Version process")
+		drupal_goto ("mymodels/" . $pName . "/add/version" . $versionNumber . "complete");
 	else if ($_POST ["op"] == "Back")
-		drupal_goto ("models/add/" . $pName . "/step04");
+		drupal_goto ("mymodels/" . $pName . "/add/version" . $versionNumber . "/step03");
 	else
 		drupal_goto ("/");
 }
 
-function openabmma_uploadFile ($subdir, $formVar, $permission=0660) {
+function openabmma_uploadFile ($subdir, $formVar, $permission=0760) {
     if ($formVar == '')
         return;
 
@@ -680,29 +734,24 @@ function openabmma_uploadFile ($subdir, $formVar, $permission=0660) {
         return null;
 }
 
-function openabmma_addModel02_submit ($form_id, $edit)
+function openabmma_addVersion02_submit ($form_id, $edit)
 {
 	global $user;
 	$errString = '';
-	$pName = arg(2);
+	$pName = arg(1);
 
 	if ($user->name != openabmma_getModelOwner ($pName))
-		return openabmma_accessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+		return openabmma_accessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
 
-	$action = arg(1);
+	$action = arg(2);
 	if ($_POST ["op"] == "Back")
-		drupal_goto ("models/" . $action . "/" . $pName . "/step01");
+		drupal_goto ("mymodels/" . $pName . "/add/version1/step01");
 
-	$pLang = $edit ["model_language"];
-	if ($pLang == "Other")
-	{
-		if ($edit ["other_language"] == '' || $edit ["other_language"] == null)
-			$errString = "Please type in the programming language used for this model, if it is not mentioned in the list.";
-		else
-			$pLang = $edit ["other_language"];
-	}
+	$versionString = arg(3);
+	$versionNumber = substr ($versionString, -1);
 
-	if (openabmma_uploadFile ('code/' . $pName, 'model_code_file') == null)
+	openabmma_cleantmp ($pName . '/v' . $versionNumber . '/code');
+	if (openabmma_uploadFile ($pName . '/v' . $versionNumber . '/code', 'version_code_file') == null)
 	{
 		drupal_set_message ("<font color='red'><b>Error uploading code file, please check the path of the file specified</b></font>");
 		return;
@@ -714,39 +763,47 @@ function openabmma_addModel02_submit ($form_id, $edit)
 		return;
 	}
 
-	$query = "UPDATE openabm_model SET model_language_id=%d, os='%s', framework='%s' WHERE name='%s'";
+	$query = "UPDATE openabm_model_version SET model_language_id=%d, os=%d, framework='%s' WHERE model_id=%d AND version_num=%d";
 
-	db_query ($query, $pLang, $edit ["os"], $edit ["framework"], $pName);
-	drupal_goto ("models/" . $action . "/" . $pName . "/step03");
+	db_query ($query, $edit ["version_language"], $edit ["os"], $edit ["framework"], openabmma_getModelId ($pName), $versionNumber);
+	drupal_goto ("mymodels/" . $pName . "/add/version" . $versionNumber . "/step03");
 }
 
 function openabmma_inList ($value, $arr)
 {
+	$c = 0;
 	foreach ($arr as $val)
+	{
 		if ($val == $value)
-			return 1;
+			return $c;
+		$c++;
+	}
 
-	return 0;
+	return -1;
 }
 
 function get_openabmma_js_path() {
     return drupal_get_path('module', 'openabmma') . '/openabmma.js';
 }
 
-function openabmma_addModel02 ($edit=null, $item=0) {
+function openabmma_addVersion02 ($edit=null, $item=0) {
     global $user;
-    $pName = arg(2);
+    $pName = arg(1);
 
     drupal_add_js( get_openabmma_js_path() );
 
     // FIXME: duplicated code
     if ($user->name != openabmma_getModelOwner ($pName))
-        return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+        return openabmma_formAccessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
+
+	$versionString = arg(3);
+	$versionNumber = substr ($versionString, -1);
 
     // FIXME:this doesn't work anymore.
-    $query = "SELECT language.name, os, framework FROM openabm_model m INNER JOIN openabm_model_language language ON m.model_language_id=language.id WHERE language.name='%s'";
-    $result = (array) db_fetch_object (db_query ($query, $pName));
-    $progLang = $result ['name'];
+    $query = "SELECT model_language_id, os, framework FROM openabm_model_version WHERE model_id=%d AND version_num=%d";
+    $result = (array) db_fetch_object (db_query ($query, openabmma_getModelId ($pName), $versionNumber));
+    $progLang = $result ['model_language_id'];
+
     $os = $result ['os'];
     $framework = $result ['framework'];
 
@@ -762,21 +819,7 @@ function openabmma_addModel02 ($edit=null, $item=0) {
             "#description" => null,
             );
 
-    /*	$form ["details"]["model_id"] = array (
-        "#type" => "item",
-        "#title" => t("Project ID:"),
-        "#value" => $id,
-        "#description" => t("Unique id for this project"),
-        );
-     */
-    $form ["details"]["model_name"] = array (
-            "#type" => "item",
-            "#title" => t("Model Name:"),
-            "#value" => $pName,
-            "#description" => null,
-            );
-
-    $form ["details"]["model_code_file"] = array (
+    $form ["details"]["version_code_file"] = array (
             "#type" => "file",
             "#title" => t("Code file (zipped):")
             );
@@ -786,11 +829,11 @@ function openabmma_addModel02 ($edit=null, $item=0) {
     while ($node = db_fetch_object ($result))
         $languages [$node->id] = $node->name;
 
-    $form ["details"]["model_language"] = array (
+    $form ["details"]["version_language"] = array (
             "#type" => "select",
             "#title" => t("Programming Language:"),
             "#options" => $languages,
-            "#default_value" => $edit ["prog_language"] == "" ? (openabmma_inList ($progLang, $languages) == 1 ? $progLang : "Other") : $edit ["prog_language"],
+            "#default_value" => $edit ["prog_language"] == "" ? $progLang : $edit ["prog_language"],
             "#description" => null
             );
 
@@ -798,7 +841,7 @@ function openabmma_addModel02 ($edit=null, $item=0) {
             "#type" => "textfield",
             "#title" => t("Other (if not mentioned in above list):"),
             "#maxlength" => 210,
-            "#default_value" => $edit ["other_language"] == "" ? (openabmma_inList ($progLang, $languages) != 1 ? $progLang : "") : $edit ["prog_language"],
+            "#default_value" => $edit ["other_language"],
             "#required" => false
             );
 
@@ -808,7 +851,7 @@ function openabmma_addModel02 ($edit=null, $item=0) {
     $form ["details"]["os"] = array (
             "#type" => "select",
             "#title" => t("Operating System:"),
-            "#default_value" => $edit ["os"] == "" ? $os : $edit ["os"],
+            "#default_value" => $edit ["os"] == "" ? openabmma_inList ($os, $arrayElements) : $edit ["os"],
             "#options" => $arrayElements,
             "#description" => null
             );
@@ -827,20 +870,6 @@ function openabmma_addModel02 ($edit=null, $item=0) {
             "#description" => null
             );
 
-    /*
-       $licenseTypes = array ();
-       $result = db_query ("SELECT id, license, url FROM openabm_license");
-       while ($node = db_fetch_object ($result))
-       $licenseTypes [$node->id] = $node->license . " [" . $node->url . "]";
-
-       $form ["details"]["model_licenseId"] = array (
-       "#type" => "select",
-       "#title" => t("License:"),
-       "#default_value" => $edit ["model_licenseId"],
-       "#options" => $licenseTypes,
-       "#description" => null
-       );
-     */
     $form ["details"]["submit"] = array (
             "#type" => "submit",
             "#value" => t("Submit"),
@@ -856,162 +885,64 @@ function openabmma_addModel02 ($edit=null, $item=0) {
     return ($form);	
 }
 
-function openabmma_addModel03_submit ($form_id, $edit)
+function openabmma_cleantmp($directory)
 {
-	global $user;
-	$pName = arg(2);
-	if ($user->name != openabmma_getModelOwner ($pName))
-		return openabmma_accessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+	//FIXME: Better security checks to see which folder/files are being deleted
+	if ($directory [0] == '/' || strpos ($directory, "../") != FALSE)
+		return;
 
-	$action = arg(1);
-	if ($_POST ["op"] == "Back")
-		drupal_goto ("models/" . $action . "/" . $pName . "/step02");
+	if( !$dirhandle = @opendir("files/" . $directory))
+		return;
 
-	$keywordList = $edit ["keywords"];
-	$replaceList = "!@#$%^&*()+-|\\[]{}:;'\"<>,/?~` ";
-	$replaceLen = strlen ($replaceList);
-	for ($i=0; $i<$replaceLen; $i = $i+1)
-            $keywordList = str_replace ($replaceList [$i], ",", $keywordList);
-
-	$keywords = explode (",", $keywordList);
-
-	$pId = openabmma_getProjectId ($pName);
-	$query = "DELETE FROM openabm_model_keywords WHERE model_id=%d";
-	db_query ($query, $pId);
-
-	$query = "INSERT INTO openabm_model_keywords (model_id, keyword) VALUES (%d, '%s')";
-	for ($i=0; $i<count($keywords); $i++)
+	while(false !== ($filename = readdir($dirhandle)) )
 	{
-		if ($keywords [$i] == '')
-			continue;
-//		$query = "INSERT INTO openabm_model_keywords (model_id, keyword) VALUES (" . openabmma_getProjectId ($pName) .  ", '" . $keywords [$i] . "');";
-		db_query ($query, $pId, trim ($keywords [$i]));
+		if( $filename != "." && $filename != ".." )
+		{
+			$filename = $directory. "/". $filename;
+//			drupal_set_message ($filename);
+			@unlink($filename);
+		}
 	}
-
-	$query = "UPDATE openabm_model SET license_id=%d WHERE name='%s'";
-//	$query = "UPDATE openabm_model SET license_id=" . $edit ["model_licenseId"] . " WHERE name='" . $pName . "'";
-
-	db_query ($query, $edit ["model_licenseId"], $pName);
-
-//	drupal_set_message ($query);
-
-	drupal_goto ("models/" . $action . "/" . $pName . "/step04");
 }
 
-function openabmma_addModel03 ($edit=null, $item=0)
+function openabmma_addVersion03_submit ($form_id, $edit)
 {
 	global $user;
-	$pName = arg(2);
+	$pName = arg(1);
 
-        // FIXME: duplicated code
 	if ($user->name != openabmma_getModelOwner ($pName))
-            return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+		return openabmma_accessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
 
-	$query = "SELECT license_id FROM openabm_model WHERE name='%s'";
-	$result = (array) db_fetch_object (db_query ($query, $pName));
-	$licenseId = $result ['license_id'];
+	$versionString = arg(3);
+	$versionNumber = substr ($versionString, -1);
 
-	$keywordList = '';
-	$query = "SELECT keyword FROM openabm_model_keywords WHERE model_id=%d";
-	$result = db_query ($query, openabmma_getProjectId ($pName));
-	while ($element = db_fetch_object ($result))
-		$keywordList .= $element->keyword . ", ";
-	$keywordList = substr ($keywordList, 0, strlen($keywordList)-2);
-
-	$form["details"] = array(
-		"#type" => 'fieldset',
-		"#collapsible" => FALSE,
-		"#collapsed" => FALSE,
-		"#title" => null,
-		"#description" => null,
-	);
-
-/*	$form ["details"]["model_id"] = array (
-		"#type" => "item",
-		"#title" => t("Project ID:"),
-		"#value" => $id,
-		"#description" => t("Unique id for this project"),
-	);
-*/
-	$form ["details"]["model_name"] = array (
-		"#type" => "item",
-		"#title" => t("Model Name:"),
-		"#value" => $pName,
-		"#description" => null,
-	);
-
-	$licenseTypes = array ();
-	$result = db_query ("SELECT id, name, url FROM openabm_license");
-	while ($node = db_fetch_object ($result))
-            $licenseTypes [$node->id] = $node->name . " [" . $node->url . "]";
-
-	$form ["details"]["model_licenseId"] = array (
-		"#type" => "select",
-		"#title" => t("License:"),
-		"#default_value" => $edit ["model_licenseId"] == "" ? $licenseId : $edit ['model_licenseId'],
-		"#options" => $licenseTypes,
-		"#description" => null
-	);
-
-	$form ["details"]["keywords"] = array (
-		"#type" => "textfield",
-		"#title" => "Keywords:",
-		"#default_value" => $edit ["keywords"] == "" ? $keywordList : $edit ["keywords"],
-		"#maxlength" => 210,
-		"#required" => false
-	);
-
-	$form ["details"]["submit"] = array (
-		"#type" => "submit",
-		"#value" => t("Submit"),
-		"#submit" => TRUE
-	);
-
-	$form ["details"]["cancel"] = array (
-		"#type" => "submit",
-		"#value" => t("Back"),
-		"#submit" => TRUE
-	);
-
-	return ($form);	
-}
-
-function openabmma_addModel04_submit ($form_id, $edit) {
-	global $user;
-	$pName = arg(2);
-	if ($user->name != openabmma_getModelOwner ($pName))
-            return openabmma_accessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
-
-	$action = arg(1);
+	$action = arg(2);
 	if ($_POST ["op"] == "Back")
-            drupal_goto ("models/" . $action . "/" . $pName . "/step03");
+		drupal_goto ("mymodels/" . $pName . "/add/version" . $versionNumber . "/step02");
 
-        openabmma_uploadFile ('sensitivity/' . $pName, 'model_sensitivity');
-	$query = "UPDATE openabm_model SET reference_text='%s', examples='%s' WHERE name='%s'";
-//	$query = "UPDATE openabm_model SET reference_text='" . $edit ["model_ref"] . "', examples='" . $edit ["model_examples"] . "' WHERE name='" . $pName . "'";
+	openabmma_cleantmp ($pName . '/v' . $versionNumber . '/sensitivity');
+        openabmma_uploadFile ($pName . '/v' . $versionNumber . '/sensitivity', 'version_sensitivity');
+	$query = "UPDATE openabm_model_version SET license_id=%d, reference_text='%s', examples='%s' WHERE model_id=%d AND version_num=%d";
+	db_query ($query, $edit ["version_licenseId"], $edit ["version_ref"], $edit ["version_examples"], openabmma_getModelId ($pName), $versionNumber);
 
-	db_query ($query, $edit ["model_ref"], $edit ["model_examples"], $pName);
-//	drupal_set_message ($query);
-
-	if ($action == "add")
-		drupal_goto ("models/add/" . $pName . "/reviewnote");
-	else
-		if ($action == "edit")
-			drupal_goto ("mymodels/" . $pName);
+	drupal_goto ("mymodels/" . $pName . "/version" . $versionNumber . "/reviewnote");
 }
 
-function openabmma_addModel04 ($edit=null, $item=0)
+function openabmma_addVersion03 ($edit=null, $item=0)
 {
 	global $user;
-	$pName = arg(2);
+	$pName = arg(1);
+
         // FIXME: duplicated code
 	if ($user->name != openabmma_getModelOwner ($pName))
-		return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+            return openabmma_formAccessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
 
-	$query = "SELECT reference_text, examples FROM openabm_model WHERE name='%s'";
-	$result = (array) db_fetch_object (db_query ($query, $pName));
-	$refText = $result ['reference_text'];
-	$examples = $result ['examples'];
+	$versionString = arg(3);
+	$versionNumber = substr ($versionString, -1);
+
+	$query = "SELECT license_id, reference_text, examples FROM openabm_model_version WHERE id=%d AND version_num=%d";
+	$result = (array) db_fetch_object (db_query ($query, openabmma_getModelId ($pName), $versionNumber));
+	$licenseId = $result ['license_id'];
 
 	$form['#attributes'] = array('enctype' => "multipart/form-data");
 
@@ -1020,55 +951,41 @@ function openabmma_addModel04 ($edit=null, $item=0)
 		"#collapsible" => FALSE,
 		"#collapsed" => FALSE,
 		"#title" => null,
-		"#description" => "Optional components",
-	);
-
-/*	$form ["details"]["model_id"] = array (
-		"#type" => "item",
-		"#title" => t("Project ID:"),
-		"#value" => $id,
-		"#description" => t("Unique id for this project"),
-	);
-*/
-	$form ["details"]["model_name"] = array (
-		"#type" => "item",
-		"#title" => t("Model Name:"),
-		"#value" => $pName,
 		"#description" => null,
 	);
-/*
-	$licenseTypes = array ();
-	$result = db_query ("SELECT id, license, url FROM openabm_license");
-	while ($node = db_fetch_object ($result))
-		$licenseTypes [$node->id] = $node->license . " [" . $node->url . "]";
 
-	$form ["details"]["model_licenseId"] = array (
+	$licenseTypes = array ();
+	$result = db_query ("SELECT id, name, url FROM openabm_license");
+	while ($node = db_fetch_object ($result))
+            $licenseTypes [$node->id] = $node->name . " [" . $node->url . "]";
+
+	$form ["details"]["version_licenseId"] = array (
 		"#type" => "select",
 		"#title" => t("License:"),
-		"#default_value" => $edit ["model_licenseId"],
+		"#default_value" => $edit ["version_licenseId"] == "" ? $licenseId : $edit ['version_licenseId'],
 		"#options" => $licenseTypes,
 		"#description" => null
 	);
-*/
-	$form ["details"]["model_ref"] = array (
+
+	$form ["details"]["version_ref"] = array (
 		"#type" => "textarea",
 		"#title" => "References:",
-		"#default_value" => $edit ["model_ref"] == "" ? $refText : $edit ["model_ref"],
+		"#default_value" => $edit ["version_ref"] == "" ? $refText : $edit ["version_ref"],
 		"#maxlength" => 210,
 		"#description" => t("Links to other hosted material of reference"),
 		"#required" => false
 	);
 
-	$form ["details"]["model_examples"] = array (
+	$form ["details"]["version_examples"] = array (
 		"#type" => "textarea",
 		"#title" => "Examples:",
-		"#default_value" => $edit ["model_examples"] == "" ? $examples : $edit ["model_examples"],
+		"#default_value" => $edit ["version_examples"] == "" ? $examples : $edit ["version_examples"],
 		"#maxlength" => 210,
-		"#description" => t("Notes on how to use the model"),
+		"#description" => t("Notes on how to use the version"),
 		"#required" => false
 	);
 
-	$form ["details"]["model_sensitivity"] = array (
+	$form ["details"]["version_sensitivity"] = array (
 		"#type" => "file",
 		"#description" => t("File containing sensitivity analysis"),
 		"#title" => t("Sensitivity analysis:")
@@ -1089,45 +1006,56 @@ function openabmma_addModel04 ($edit=null, $item=0)
 	return ($form);	
 }
 
-function openabmma_addModel05_submit ($form_id, $edit)
+function openabmma_addVersion04_submit ($form_id, $edit)
 {
 	global $user;
-	$pName = arg(2);
+	$pName = arg(1);
+
+	$versionString = arg(3);
+	$versionNumber = substr($versionString, -1);
+
 	if ($user->name != openabmma_getModelOwner ($pName))
-		return openabmma_accessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+		return openabmma_accessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
 
 	if ($_POST ["op"] == "Back")
-		drupal_goto ("models/add/" . $pName . "/reviewnote");
+		drupal_goto ("mymymodels/" . $pName . "/add/version" . $versionNumber . "/reviewnote");
 
 	if ($edit ["model_inst"]['commented'] == '0' || $edit ["model_inst"]['cleanup'] == '0' || $edit ["model_inst"]['running'] == '0')
 		drupal_set_message ("<b><font color='red'>Well-commented, cleanedup and running code is required before you submit your model for review!</font></b><br/>[Should we have a link to let the user still submit the model for review along with comments to the editor to justify that he should still be able to send his model for review?]");
 	else
 	{
-		if (openabmma_uploadFile ('odd/' . $pName, 'model_odd_file') == null)
+		openabmma_cleantmp ($pName . '/v' . $versionNumber . '/odd');
+		if (openabmma_uploadFile ($pName . '/v' . $versionNumber . '/odd', 'version_odd_file') == null)
 		{
 			drupal_set_message ("<font color='red'><b>Error uploading ODD file, please check the path of the file specified</b></font>");
 			return;
 		}
 
-		openabmma_uploadFile ('dataset/' . $pName, 'model_dataset');
-		openabmma_uploadFile ('other/' . $pName, 'model_other');
+		openabmma_cleantmp ($pName . '/v' . $versionNumber . '/dataset');
+		openabmma_uploadFile ($pName . '/v' . $versionNumber . '/dataset', 'version_dataset');
 
-		$query = "UPDATE openabm_model SET submittedReview=1, run_conditions='%s' WHERE name='%s'";
-		db_query ($query, $edit ["model_conditions"], $pName);
-		drupal_goto ("models/add/" . arg(2) . "/complete");
+		openabmma_cleantmp ($pName . '/v' . $versionNumber . '/other');
+		openabmma_uploadFile ($pName . '/v' . $versionNumber . '/other', 'version_other');
+
+		$query = "UPDATE openabm_model_version SET submittedReview=1, run_conditions='%s' WHERE model_id=%d AND version_num=%d";
+		db_query ($query, $edit ["version_conditions"], openabmma_getModelId ($pName), $versionNumber);
+		drupal_goto ("mymodels/" . $pName . "/add/version" . $versionNumber . "/complete");
 	}
 }
 
-function openabmma_addModel05 ($edit=null, $item=0)
+function openabmma_addVersion04 ($edit=null, $item=0)
 {
 	global $user;
-	$pName = arg(2);
+	$pName = arg(1);
         // FIXME: duplicated code
 	if ($user->name != openabmma_getModelOwner ($pName))
-		return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+		return openabmma_formAccessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
 
-	$query = "SELECT run_conditions FROM openabm_model WHERE name='%s'";
-	$result = (array) db_fetch_object (db_query ($query, $pName));
+	$versionString = arg(3);
+	$versionNumber = substr ($versionString, -1);
+
+	$query = "SELECT run_conditions FROM openabm_model_version WHERE model_id=%d AND version_num=%d";
+	$result = (array) db_fetch_object (db_query ($query, openabmma_getModelId ($pName), $versionNumber));
 	$run_conditions = $result ['run_conditions'];
 
 	$form['#attributes'] = array('enctype' => "multipart/form-data");
@@ -1140,58 +1068,38 @@ function openabmma_addModel05 ($edit=null, $item=0)
 		"#description" => "Components required for review",
 	);
 
-	$form ["details"]["model_name"] = array (
-		"#type" => "item",
-		"#title" => t("Model Name:"),
-		"#value" => $pName,
-		"#description" => null,
-	);
-/*
-	$licenseTypes = array ();
-	$result = db_query ("SELECT id, license, url FROM openabm_license");
-	while ($node = db_fetch_object ($result))
-		$licenseTypes [$node->id] = $node->license . " [" . $node->url . "]";
-
-	$form ["details"]["model_licenseId"] = array (
-		"#type" => "select",
-		"#title" => t("License:"),
-		"#default_value" => $edit ["model_licenseId"],
-		"#options" => $licenseTypes,
-		"#description" => null
-	);
-*/
-	$form ["details"]["model_odd_file"] = array (
+	$form ["details"]["version_odd_file"] = array (
 		"#type" => "file",
 		"#title" => t("ODD file (required):")
 	);
 
-	$form ["details"]["model_dataset"] = array (
+	$form ["details"]["version_dataset"] = array (
 		"#type" => "file",
-		"#title" => t("Test data set (for running the model) - optional:")
+		"#title" => t("Test data set (for running the version) - optional:")
 	);
 
-	$form ["details"]["model_conditions"] = array (
+	$form ["details"]["version_conditions"] = array (
 		"#type" => "textarea",
 		"#title" => "Conditions or comments for running the code:",
 		"#default_value" => $edit ["model_conditions"] == "" ? $run_conditions : $edit ["model_conditions"],
 		"#maxlength" => 210,
-		"#description" => t("Optional notes on running of model"),
+		"#description" => t("Optional notes on running of version"),
 		"#required" => false
 	);
 
-	$form ["details"]["model_other"] = array (
+	$form ["details"]["version_other"] = array (
 		"#type" => "file",
-		"#title" => t("Additional document to be included with model submission (optional):")
+		"#title" => t("Additional document to be included with version submission (optional):")
 	);
 
-	$form["details"]["model_inst"] = array(
+	$form["details"]["version_inst"] = array(
 	'#type' => 'checkboxes',
-	'#title' => t('Model requirements:'),
+	'#title' => t('Submission requirements:'),
 	'#default_value' => "false",
 	'#options' => array(
-	'commented' => t('The code submitted has been commented well'),
-	'cleanup' => t('Clean up code'),
-	'running' => t('Running code'),
+	'commented' => t('The code has been well commented'),
+	'cleanup' => t('The code has been cleaned up'),
+	'running' => t('The version can be run'),
 		),
 	'#description' => t(''),
 	);
@@ -1211,16 +1119,19 @@ function openabmma_addModel05 ($edit=null, $item=0)
 	return ($form);	
 }
 
-function openabmma_addModelComplete ()
+function openabmma_addVersionComplete ()
 {
 	global $user;
-	$pName = arg(2);
+	$pName = arg(1);
         // FIXME: duplicated code
 	if ($user->name != openabmma_getModelOwner ($pName))
-            return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+            return openabmma_formAccessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
 
-	$query = "SELECT submittedReview FROM openabm_model WHERE name='%s'";
-	$result = (array) db_fetch_object (db_query ($query, $pName));
+	$versionString = arg(3);
+	$versionNumber = substr ($versionString, -1);
+
+	$query = "SELECT submittedReview FROM openabm_model_version WHERE model_id=%d and version_num=%d";
+	$result = (array) db_fetch_object (db_query ($query, $pName, $versionNumber));
 	if ($result ['submittedReview'] == "1")
 		$output = "<p><br/>Congratulations! Your model has been uploaded and submitted for review!</p>";
 	else
@@ -1242,7 +1153,193 @@ function checkModelOwner( $pName ) {
     }
 }
 
-function openabmma_addModel01_submit ($form_id, $edit) {
+function openabmma_ownerError ()
+{
+	return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+}
+
+function openabmma_addVersion01_submit ($form_id, $edit) {
+    $pName = arg(1);
+	$action = arg(2);
+
+    global $user;
+    if ($edit ["newVersion"] == "1") {
+        $newVersion = TRUE;
+    }
+    else {
+        $newVersion = FALSE;
+    }
+
+        $ownerName = openabmma_getModelOwner( $pName );
+        // FIXME: duplicated code
+        if ($user->name != $ownerName)
+            return openabmma_ownerError ();
+
+    if ($pName == "" || $pName == null)
+    {
+        drupal_set_message ("<b><font color='red'>Model name is required</font></b>");
+        return;
+    }
+
+    if ($_POST ["op"] == "Cancel")
+        drupal_goto ("mymodels/" . $pName);
+
+    $pCount = strlen ($pName);
+    for ($i=0; $i<$pCount; $i++)
+    {
+        if ($pName [$i] == ' ')
+        {
+            $errorString = "Model name cannot contain spaces.";
+            drupal_set_message ("<b><font color='red'>" . $errorString . "</font></b>");
+            return;
+        }
+    }
+
+	$versionNumber = $edit ["versionNumber"];
+    $visible = $edit ["version_visibility"]["visibility"];
+    if ($visible != '0')
+        $visible = '1';
+
+	if ($newVersion)
+	{
+            mkdir ("files/" . $pName . "/v" . $versionNumber . "/odd", 0755, TRUE);
+            mkdir ("files/" . $pName . "/v" . $versionNumber . "/code", 0755, TRUE);
+            mkdir ("files/" . $pName . "/v" . $versionNumber . "/other", 0755, TRUE);
+            mkdir ("files/" . $pName . "/v" . $versionNumber . "/dataset", 0755, TRUE);
+            mkdir ("files/" . $pName . "/v" . $versionNumber . "/sensitivity", 0755, TRUE);
+
+            $query = "INSERT INTO openabm_model_version (model_id, description, visible, version_num, date_created) VALUES (%d, '%s', %d, %d, '%s')";
+            db_query($query, openabmma_getModelId ($pName), $edit ["version_description"], $visible, $versionNumber, date("Y-m-d H:i:s"));
+            drupal_goto("mymodels/" . $pName . "/add/version" . $versionNumber . "/step02");
+        }
+    else
+    {
+        $query = "UPDATE openabm_model_version SET version_num=%d, description='%s', visible=%d WHERE model_id=%d";
+        db_query ($query, $versionNumber, $edit ["version_description"], $visible, openabmma_getModelId ($pName));
+        drupal_goto("mymodels/" . $pName . "/add/version" . $versionNumber . "/step02");
+    }
+}
+
+function openabmma_addVersion01 ($edit=null, $item=0)
+{
+	global $user;
+
+	$pName = arg(1);
+	$action = arg(2);
+
+	$versionString = arg(3);
+	$versionNumber = substr ($versionString, -1);
+
+	if (is_numeric ($versionNumber))	// version number specified in URL
+//	if ($action == "edit" || $action == "add")
+		$newVersion = "0";
+	else
+		$newVersion = "1";
+
+	if ($newVersion == "0")
+	{
+            // FIXME: duplicated code
+            if ($user->name != openabmma_getModelOwner ($pName))
+                return openabmma_formAccessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
+	}
+
+	$result = (array) db_fetch_object (db_query ("SELECT max(id) FROM openabm_model_version WHERE model_id=%d", openabmma_getModelId ($pName)));
+	$versionNumber = $result['max(id)'] + 1;
+
+	$desc = '';
+	$visible = FALSE;
+	if ($newVersion == "0")
+	{
+		$query = "SELECT description, visible FROM openabm_model_version WHERE model_id=%d";
+		$result = (array) db_fetch_object (db_query ($query, openabmma_getModelId ($pName)));
+
+		$desc = $result ['description'];
+		$visible = $result ['visible'];
+		if ($visible == "1")
+			$visible = TRUE;
+		else
+			$visible = FALSE;
+	}
+
+	$form["details"] = array(
+		"#type" => 'fieldset',
+		"#collapsible" => FALSE,
+		"#collapsed" => FALSE,
+		"#title" => null,
+		"#description" => null,
+	);
+
+	$form ["details"]["newVersion"] = array (
+		"#type" => "hidden",
+		"#value" => $newVersion
+	);
+
+	$form ["details"]["versionNumber"] = array (
+		"#type" => "hidden",
+		"#value" => $versionNumber
+	);
+/*
+	$form ["details"]["model_name"] = array (
+		"#type" => "item",
+		"#title" => t("Model name:"),
+		"#description" => null,
+		"#value" => $pName,
+//		"#required" => true,		// Commented because clicking Cancel validates this field too!
+		"#maxlength" => 210
+//		'#autocomplete_path' => 'user/autocomplete',
+	);
+*/
+	$form ["details"]["version_description"] = array (
+		"#type" => "textarea",
+		"#title" => t("Description of this version:"),
+		"#default_value" => $edit ["version_description"] == "" ? $desc : $edit ["version_description"],
+		"#description" => null,
+		"#required" => false
+	);
+
+	if ($visible)
+	{
+		$form["details"]["version_visibility"] = array(
+		'#type' => 'checkboxes',
+		'#title' => t('Version visibility:'),
+		"#attributes" => array ('checked' => 'checked'),
+	//	'#default_value' => array (TRUE),
+		'#options' => array(
+		'visibility' => t('I want to make this version visible to all'),
+			),
+		'#description' => t('Enabling this option will make this version visible to public'),
+		);
+	}
+	else
+	{
+		$form["details"]["version_visibility"] = array(
+		'#type' => 'checkboxes',
+		'#title' => t('Version visibility:'),
+	//	'#default_value' => array (TRUE),
+		'#options' => array(
+		'visibility' => t('I want to make this version visible to all'),
+			),
+		'#description' => t('Enabling this option will make this version visible to public'),
+		);
+	}
+
+	$form ["details"]["submit"] = array (
+		"#type" => "submit",
+		"#value" => t("Submit"),
+		"#submit" => TRUE
+	);
+
+	$form ["details"]["cancel"] = array (
+		"#type" => "submit",
+		"#value" => t("Cancel"),
+		"#submit" => TRUE
+	);
+
+	return ($form);
+}
+
+function openabmma_addModel_submit ($form_id, $edit)
+{
     $action = arg(1);
 
     global $user;
@@ -1255,13 +1352,6 @@ function openabmma_addModel01_submit ($form_id, $edit) {
         $pName = arg(2);
     }
 
-    if (!$newModel) {
-        $ownerName = openabmma_getModelOwner( $pName );
-        // FIXME: duplicated code
-        if ($user->name != $ownerName)
-            return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
-    }
-
     if ($_POST ["op"] == "Cancel")
         if ($action == "add")
             drupal_goto ("models");
@@ -1270,6 +1360,13 @@ function openabmma_addModel01_submit ($form_id, $edit) {
             $pName = arg(2);
             drupal_goto ("mymodels/" . $pName);
         }
+
+    if (!$newModel) {
+        $ownerName = openabmma_getModelOwner( $pName );
+        // FIXME: duplicated code
+        if ($user->name != $ownerName)
+            return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
+    }
 
     if ($pName == "" || $pName == null)
     {
@@ -1288,61 +1385,96 @@ function openabmma_addModel01_submit ($form_id, $edit) {
         }
     }
 
-    $visible = $edit ["model_visibility"]["visibility"];
-    if ($visible != '0')
-        $visible = '1';
-
     $replicated = $edit ["model_replicated"]["replica"];
     if ($replicated != '0')
         $replicated = '1';
 
     if ($newModel == TRUE) {
-        if (openabmma_getProjectId ($pName) != -1 && openabmma_getProjectId ($pName) != '') {
+        if (openabmma_getModelId ($pName) != -1 && openabmma_getModelId ($pName) != '') {
             drupal_set_message ("<b><font color='red'>Another project with the same name exists. Please choose a different name</font></b>");
         }
         else {
             if ($replicated == '1') {
-                if ($edit ["model_repl"] == "" || $edit ["prof_refurl"] == "") {
+                if ($edit ["model_repl"] == "" || $edit ["model_refurl"] == "") {
                     drupal_set_message ("<b><font color='red'>Since this project is a replicated one, you need to enter information about the replicators and the reference URL.</font></b>");
                     return;
                 }
             }
-            mkdir ("files/odd/" . $pName, 0755, TRUE);
-            mkdir ("files/code/" . $pName, 0755, TRUE);
-            mkdir ("files/other/" . $pName, 0755, TRUE);
-            mkdir ("files/dataset/" . $pName, 0755, TRUE);
-            mkdir ("files/sensitivity/" . $pName, 0755, TRUE);
-            $query = "INSERT INTO openabm_model (owner_uid, name, title) VALUES (%d, '%s', '%s')";
-            db_query($query, $user->uid, $pName, $edit ["model_title"]);
-            drupal_goto("models/add/" . $pName . "/step02");
+
+            $query = "INSERT INTO openabm_model (owner_uid, name, title, replicators, replicatedModel, reference) VALUES (%d, '%s', '%s', '%s', %d, '%s')";
+            db_query($query, $user->uid, $pName, $edit ["model_title"], $edit ["model_repl"], $replicated, $edit ["model_refurl"]);
+
+	$keywordList = $edit ["keywords"];
+	$replaceList = "!@#$%^&*()+-|\\[]{}:;'\"<>,/?~` ";
+	$replaceLen = strlen ($replaceList);
+	for ($i=0; $i<$replaceLen; $i = $i+1)
+            $keywordList = str_replace ($replaceList [$i], ",", $keywordList);
+
+	$keywords = explode (",", $keywordList);
+
+	$pId = openabmma_getModelId ($pName);
+	$query = "DELETE FROM openabm_model_keywords WHERE model_id=%d";
+	db_query ($query, $pId);
+
+	$query = "INSERT INTO openabm_model_keywords (model_id, keyword) VALUES (%d, '%s')";
+	for ($i=0; $i<count($keywords); $i++)
+	{
+		if ($keywords [$i] == '')
+			continue;
+		db_query ($query, $pId, trim ($keywords [$i]));
+	}
+
+	    drupal_goto("mymodels/" . $pName);
         }
     }
     else
     {
         if ($replicated == '1')
         {
-            if ($edit ["model_repl"] == "" || $edit ["prof_refurl"] == "")
+            if ($edit ["model_repl"] == "" || $edit ["model_refurl"] == "")
             {
+		drupal_set_message ("|" . $edit ["model_repl"] . "|" . $edit ["model_refurl"] . "|");
                 drupal_set_message ("<b><font color='red'>Since this project is a replicated one, you need to enter information about the replicators and the reference URL.</font></b>");
                 return;
             }
         }
 
-        $query = "UPDATE openabm_model SET title='%s', description='%s', visible=%d, replicatedModel=%d, replicators='%s', reference_url='%s' WHERE name='%s'";
-        db_query ($query, $edit ["model_title"], $edit ["model_description"], $visible, $replicated, $edit ["model_repl"], $edit ["model_refurl"], $pName);
-        drupal_goto ("models/add/" . $pName . "/step02");
+        $query = "UPDATE openabm_model SET title='%s', replicatedModel=%d, replicators='%s', reference='%s' WHERE name='%s'";
+        db_query ($query, $edit ["model_title"], $replicated, $edit ["model_repl"], $edit ["model_refurl"], $pName);
+
+	$keywordList = $edit ["keywords"];
+	$replaceList = "!@#$%^&*()+-|\\[]{}:;'\"<>,/?~` ";
+	$replaceLen = strlen ($replaceList);
+	for ($i=0; $i<$replaceLen; $i = $i+1)
+            $keywordList = str_replace ($replaceList [$i], ",", $keywordList);
+
+	$keywords = explode (",", $keywordList);
+
+	$pId = openabmma_getModelId ($pName);
+	$query = "DELETE FROM openabm_model_keywords WHERE model_id=%d";
+	db_query ($query, $pId);
+
+	$query = "INSERT INTO openabm_model_keywords (model_id, keyword) VALUES (%d, '%s')";
+	for ($i=0; $i<count($keywords); $i++)
+	{
+		if ($keywords [$i] == '')
+			continue;
+		db_query ($query, $pId, trim ($keywords [$i]));
+	}
+
+
+        drupal_goto("mymodels/" . $pName);
     }
 }
 
-function openabmma_addModel01 ($edit=null, $item=0)
+function openabmma_addModel ()
 {
 	global $user;
 
+	$action = arg(1);
 	$pName = arg(2);
-	for ($argc=0; arg($argc) != ''; $argc++)
-		;
 
-	if ($argc == 4)
+	if ($action == "edit")
 		$newModel = "0";
 	else
 		$newModel = "1";
@@ -1354,11 +1486,10 @@ function openabmma_addModel01 ($edit=null, $item=0)
                 return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
 	}
 
-	$desc = '';
-	$visible = "false";
+	$replicated = FALSE;	// Value for new models
 	if ($newModel == "0")
 	{
-		$query = "SELECT title, replicatedModel, replicators, reference_url, description, visible FROM openabm_model WHERE name='%s'";
+		$query = "SELECT title, replicatedModel, replicators, reference FROM openabm_model WHERE name='%s'";
 		$result = (array) db_fetch_object (db_query ($query, $pName));
 		$replicated = $result ['replicatedModel'];
 		$projTitle = $result ['title'];
@@ -1368,19 +1499,12 @@ function openabmma_addModel01 ($edit=null, $item=0)
 			$replicated = FALSE;
 
 		$replicators = $result ['replicators'];
-		$refurl = $result ['reference_url'];
-//		drupal_set_message 
+		$refurl = $result ['reference'];
 
 		$desc = $result ['description'];
-		$visible = $result ['visible'];
-		if ($visible == "1")
-			$visible = TRUE;
-		else
-			$visible = FALSE;
 	}
 
-	$result = (array) db_fetch_object (db_query ("SELECT max(id) FROM
-        openabm_model"));
+	$result = (array) db_fetch_object (db_query ("SELECT max(id) FROM openabm_model"));
 	$id = $result['max(id)'] + 1;
 
 	$form["details"] = array(
@@ -1412,7 +1536,6 @@ function openabmma_addModel01 ($edit=null, $item=0)
 			"#description" => null,
 	//		"#required" => true,		// Commented because clicking Cancel validates this field too!
 			"#maxlength" => 210
-	//		'#autocomplete_path' => 'user/autocomplete',
 		);
 	}
 	else
@@ -1424,7 +1547,6 @@ function openabmma_addModel01 ($edit=null, $item=0)
 			"#value" => arg(2),
 	//		"#required" => true,		// Commented because clicking Cancel validates this field too!
 			"#maxlength" => 210
-	//		'#autocomplete_path' => 'user/autocomplete',
 		);
 	}
 
@@ -1435,14 +1557,6 @@ function openabmma_addModel01 ($edit=null, $item=0)
 		"#description" => null,
 //		"#required" => true,		// Commented because clicking Cancel validates this field too!
 		"#maxlength" => 210
-	);
-
-	$form ["details"]["model_description"] = array (
-		"#type" => "textarea",
-		"#title" => t("Description of model:"),
-		"#default_value" => $edit ["model_description"] == "" ? $desc : $edit ["model_description"],
-		"#description" => null,
-		"#required" => false
 	);
 
 	if ($replicated)
@@ -1485,31 +1599,14 @@ function openabmma_addModel01 ($edit=null, $item=0)
 		"#maxlength" => 255
 	);
 
-	if ($visible)
-	{
-		$form["details"]["model_visibility"] = array(
-		'#type' => 'checkboxes',
-		'#title' => t('Model visibility:'),
-		"#attributes" => array ('checked' => 'checked'),
-	//	'#default_value' => array (TRUE),
-		'#options' => array(
-		'visibility' => t('I want to make my model visible to all'),
-			),
-		'#description' => t('Enabling this option will make your model visible to all registered users of this site.'),
-		);
-	}
-	else
-	{
-		$form["details"]["model_visibility"] = array(
-		'#type' => 'checkboxes',
-		'#title' => t('Model visibility:'),
-	//	'#default_value' => array (TRUE),
-		'#options' => array(
-		'visibility' => t('I want to make my model visible to all'),
-			),
-		'#description' => t('Enabling this option will make your model visible to all registered users of this site.'),
-		);
-	}
+	$form ["details"]["keywords"] = array (
+		"#type" => "textfield",
+		"#title" => "Keywords:",
+		"#description" => t("Special words related to your project (separated by commas)"),
+		"#default_value" => $edit ["keywords"] == "" ? $keywordList : $edit ["keywords"],
+		"#maxlength" => 210,
+		"#required" => false
+	);
 
 	$form ["details"]["submit"] = array (
 		"#type" => "submit",
@@ -1526,20 +1623,25 @@ function openabmma_addModel01 ($edit=null, $item=0)
 	return ($form);
 }
 
-function openabmma_addModel ()
+function openabmma_addVersion ()
 {
-    $output = "<p><br/>To upload a new model, it can take a number of steps. If you want your model to be reviewed  for review or not. The first three steps are mandatory.<p>&nbsp;</p>";
+	global $user;
+	$pName = arg(1);
+
+	if ($user->name != openabmma_getModelOwner ($pName))
+               return openabmma_accessError ("Only model owners can add versions to any model. You are not registered as the owner of this model");
+
+    $output = "<p><br/>To upload a new model version, it can take a number of steps. The first three steps are mandatory.<p>&nbsp;</p>";
     $output .= "<table border='0' cellpadding='0' cellspacing='0' width='100%'>";
-    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><b>Step 1</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><font color='red'>Mandatory</font></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'>Model name, description and visibility to public</td></tr>";
+    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><b>Step 1</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><font color='red'>Mandatory</font></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'>Version description and visibility to public</td></tr>";
     $output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 2</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='red'>Mandatory</font></td><td style='border-bottom: thin solid #aaaaaa'>Code files, language and platform details</td></tr>";
-    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 3</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='red'>Mandatory</font></td><td style='border-bottom: thin solid #aaaaaa'>License information and keywords</td></tr>";
-    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 4</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='green'>Optional</font></td><td style='border-bottom: thin solid #aaaaaa'>References, examples and senstivity information</td></tr>";
-    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 5</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='green'>Only for review</font></td><td style='border-bottom: thin solid #aaaaaa'>Sending model for review</td></tr>";
-    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 6</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='green'>Only for review</font></td><td style='border-bottom: thin solid #aaaaaa'>Collecting documents for model review</td></tr>";
+    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 3</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='red'>Mandatory</font></td><td style='border-bottom: thin solid #aaaaaa'>License information, References, Examples and Sensitivity data</td></tr>";
+    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa'><b>Step 4</b></td><td style='border-bottom: thin solid #aaaaaa'><font color='green'>Only for review</font></td><td style='border-bottom: thin solid #aaaaaa'>Collecting documents for version review</td></tr>";
     $output .= "</table>";
-    $output .= "<p>&nbsp;</p>" . l ("Click here to proceed to first step", "models/add/step01");	
+    $output .= "<p>&nbsp;</p>" . l ("Click here to proceed to first step", "mymodels/" . $pName . "/add/version/step01");	
     return $output;
 }
+
 
 function openabmma_searchProjects ()
 {
@@ -1666,7 +1768,7 @@ function openabmma_metadata ()
 
 	$form ["details"]["projId"] = array (
 		'#type' => "hidden",
-		'#value' => openabmma_getProjectId ($name)
+		'#value' => openabmma_getModelId ($name)
 	);
 
 	$form ["details"]["model_description"] = array (
@@ -1737,7 +1839,7 @@ function openabmma_deleteMember ($name, $uid)
 
 	$query = "DELETE FROM openabm_model_member WHERE project_id=%d AND user_id=%d";
 
-	$projectId = openabmma_getProjectId ($name);
+	$projectId = openabmma_getModelId ($name);
 
 	if ($projectId == -1)
 		return "Invalid project name";
@@ -1901,7 +2003,7 @@ function openabmma_addMember_submit ($form_id, $edit)
 
 	$projName = $edit ["projName"];
 	// get identifier (number) of the project
-	$model_id = openabmma_getProjectid ($projName);
+	$model_id = openabmma_getModelId ($projName);
 
 	$query = "SELECT id FROM openabm_role WHERE name='Developer'";
 	$result = (array) db_fetch_object (db_query ($query));
@@ -1920,7 +2022,7 @@ function openabmma_addMember_submit ($form_id, $edit)
 //	drupal_goto ("roles");
 }
 
-function openabmma_getProjectId ($name)
+function openabmma_getModelId ($name)
 {
 	if ($name == '')
 		return -1;
@@ -2015,28 +2117,53 @@ function openabmma_getModelOwner ($name='')
 	return $owner;
 }
 
-function openabmma_openProject ($id='')
+function openabmma_openProject ($pName='')
 {
 	global $user;
-	if ($id == '')
+	if ($pName == '')
 		drupal_goto ("models");
 
-	$owner = openabmma_getModelOwner ($id);
+	$owner = openabmma_getModelOwner ($pName);
 
-	$query = "SELECT visible FROM openabm_model WHERE name='%s'";
-	$result = (array) db_fetch_object (db_query ($query, $id));
-	if (($result ["visible"] == 0 || $result ["visible"] == "0") && $user->name != $owner /* && in (model_member_list, $user->name) */)
-		return "This is a privately managed model.";
-
-	$output .= l ("View current metadata configuration for this model", "mymodels/" . $id . "/viewMetadata");
+	$output = "<br/>";
+	$output .= l ("View current metadata configuration for this model", "mymodels/" . $pName . "/viewMetadata");
 
 	if ($owner == $user->name)
 	{
-		$output .= "<br/>&nbsp;<br/>" . l ("Manage members in this model", "mymodels/" . $id . "/members");
-		$output .= "<br/>" . l ("Change model meta-data", "models/edit/" . $id . "/step01");
+		$output .= "<br/>&nbsp;<br/>Owner options:";
+		$output .= "<br/>" . l ("Manage members in this model", "mymodels/" . $pName . "/members");
+		$output .= "<br/>" . l ("Change model metadata", "models/edit/" . $pName . "/step01");
 	}
 
+	$output .= openabmma_getFormattedVersionList ($pName);
+
 	return $output;
+}
+
+function openabmma_getFormattedVersionList ($pName)
+{
+	if ($pName == '')
+		return "";
+
+	$versionCount = 0;
+	$output  = "<p>&nbsp;</p><table border='0' width='100%' cellpadding='0' cellspacing='0'>";
+	$output .= "<tr><td><b>Version Number</b></td><td><b>Description</b></td><td><b>Date Created</b></td><td>&nbsp;</td><td>&nbsp;</td></tr>";
+
+	$query = "SELECT id, substr(description, 0, 100) as `descSummary`, date_created FROM openabm_model_version WHERE model_id = %d";
+	$result = db_query ($query, openabmma_getModelId ($pName));
+	while ($item = db_fetch_object ($result))
+	{
+		$versionCount++;
+		$output .= "<tr><td>" . $item->id . "</td><td>" . $item->descSummary . "</td><td>" . $node->date_created . "</td><td>" . l ("edit", "mymodels/" . $pName . "/edit/version" . $item->id) . "</td><td>" . l ("delete", "mymodels/delete/version" . $item->id) . "</td></tr>";
+	}
+
+	$output .= "</table>";
+
+	$finalOutput = "<p>&nbsp;</p>Currently there are " . $versionCount . " version(s) in this model.<br/>To add a new version, click " . l ("here", "mymodels/" . $pName . "/add/version") . "<br/>";
+	if ($versionCount != 0)
+		$finalOutput .= $output;
+
+	return $finalOutput;
 }
 
 function openabmma_showProjects ()
@@ -2045,7 +2172,7 @@ function openabmma_showProjects ()
 
 	$count = 0;
 	$output .= '<br/><u>Owned models:</u><p>&nbsp;</p><hr/><br/>';
-	$query = "SELECT m.name, m.title, v.description, v.visible FROM openabm_model m inner join openabm_model_version v on m.id=v.model_id WHERE m.owner_uid=%d";
+	$query = "SELECT m.name, m.title FROM openabm_model m WHERE m.owner_uid=%d";
 	$result = db_query ($query, $user->uid);
 	while ($node = db_fetch_object ($result))
 	{

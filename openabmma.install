@@ -42,7 +42,8 @@ function openabmma_install() {
             // versioning information table
             db_query("CREATE TABLE openabm_model_version (
                 id              INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
-                model_id        INT(10) UNSIGNED,
+		version_num	INT(10) UNSIGNED NOT NULL,
+                model_id        INT(10) UNSIGNED NOT NULL,
                 description     MEDIUMTEXT NOT NULL,
                 model_language_id INT(10) UNSIGNED,
                 os              enum('Linux', 'Mac', 'Windows', 'Platform Independent', 'Other'),
@@ -51,6 +52,7 @@ function openabmma_install() {
                 examples        TEXT,
                 submittedReview bool default 0,
 		visible		bool default 0,
+		date_created	DATETIME,
 		run_conditions  TEXT NULL,
                 license_id      INT(10) UNSIGNED,
                 PRIMARY KEY(id),
