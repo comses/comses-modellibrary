@@ -148,6 +148,15 @@ function openabmma_menu($may_cache) {
     }
     else {
         $items[] = array(
+            'path' => 'mymodels/' . arg(1) . "/" . arg(2) . "/metadata",
+            'title' => t('Model version metadata'),
+            'description' => "",
+            'access' => user_access ('modify models'),
+            'callback' => 'openabmma_versionMetadata',
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
             'path' => 'mymodels/' . arg(1) . "/add/version",
             'title' => t('Step 01 :: Adding a version to your model'),
             'description' => "",
@@ -467,6 +476,61 @@ function openabmma_menu($may_cache) {
     return $items;
 }
 
+function openabmma_versionMetadata ()
+{
+    global $user;
+	$pName = arg(1);
+    if ($pName == '')
+        return '';
+
+	$versionNumber = openabmma_getVersionNumber (arg(2));
+    $owner = openabmma_getModelOwner ($pName);
+
+    if ($user->name != $owner && openabmma_inList ($user->name, openabmma_getModelMembers ($pName)) == -1)
+    {
+        openabmma_accessError ('Only model members can view metadata for a model.');
+        return '';
+    }
+
+    drupal_add_css (openabmma_get_css_path ());
+
+    $query = "SELECT description, model_language_id, os, framework, reference_text, examples, submittedReview, visible, date_modified, run_conditions, license_id from openabm_model_version WHERE model_id=%d AND version_num=%d";
+    $result = (array) db_fetch_object (db_query ($query, openabmma_getModelId ($pName), $versionNumber));
+    $description = $result ['description'];
+    $model_language_id = $result ['model_language_id'];
+    $os = $result ['os'];
+    $framework = $result ['framework'];
+    $reference_text = $result ['reference_text'];
+    $examples = $result ['examples'];
+    $submittedReview = $result ['submittedReview'] == "1" ? "Yes" : "No";
+    $visible = $result ['visible'] == "1" ? "Yes" : "No";
+    $license_id = $result ['license_id'];
+
+    $query = "SELECT name from openabm_model_language WHERE id=%d";
+    $result = (array) db_fetch_object (db_query ($query, $model_language_id));
+    $model_language_id = $result ['name'];
+
+    $query = "SELECT name from openabm_license WHERE id=%d";
+    $result = (array) db_fetch_object (db_query ($query, $license_id));
+    $license_id = $result ['name'];
+
+    $output = "<br/><p><table border='0' cellpadding='0' cellspacing='0' width='100%'>";
+    $output .= "<tr class='openabmData'><td width='30%'><b>Version description:</b></td><td><i>" . substr($description,0,100) . "...</i></td></tr>";
+    $output .= "<tr class='openabmData'><td><b>Visible to public:</b></td><td><i>" . $visible . "</i></td></tr>";
+    $output .= "<tr class='openabmData'><td><b>Programming language:</b></td><td><i>" . $model_language_id . "</i></td></tr>";
+    $output .= "<tr class='openabmData'><td><b>Operating System:</b></td><td><i>" . $os . "</i></td></tr>";
+    $output .= "<tr class='openabmData'><td><b>Framework:</b></td><td><i>" . $framework . "</i></td></tr>";
+    $output .= "<tr class='openabmData'><td><b>License:</b></td><td><i>" . $license_id . "</i></td></tr>";
+    $output .= "<tr class='openabmData'><td><b>References:</b></td><td><i>" . $reference_text . "</i></td></tr>";
+    $output .= "<tr class='openabmData'><td><b>Examples:</b></td><td><i>" . $examples . "</i></td></tr>";
+    $output .= "<tr class='openabmData'><td><b>Submitted for review:</b></td><td><i>" . $submittedReview . "</i></td></tr>";
+
+    $output .= "</table>";
+
+    $output .= "<p></p>" . l ("To change your metadata settings, click here", "models/edit/" . $pName . "/step01");
+    return $output;
+}
+
 function openabmma_showMetaData ($pName='') {
     global $user;
     if ($pName == '')
@@ -484,33 +548,14 @@ function openabmma_showMetaData ($pName='') {
 
     drupal_add_css (openabmma_get_css_path ());
 
-    $query = "SELECT owner_uid, name, title, description, model_language_id, os, framework, reference_text, examples, submittedReview, visible, replicatedModel, replicators, reference_url, license_id from openabm_model WHERE name='%s'";
+    $query = "SELECT owner_uid, name, title, replicatedModel, replicators, reference from openabm_model WHERE name='%s'";
     $result = (array) db_fetch_object (db_query ($query, $pName));
     $owner_uid = $result ['owner_uid'];
     $name = $result ['name'];
     $title = $result ['title'];
-    $description = $result ['description'];
     $replicated = $result ['replicatedModel'] == "1" ? "Yes" : "No";
     $replicators = $result ['replicators'];
-    $reference_url = $result ['reference_url'];
-    $model_language_id = $result ['model_language_id'];
-    $os = $result ['os'];
-    $framework = $result ['framework'];
-    $reference_text = $result ['reference_text'];
-    $examples = $result ['examples'];
-    $submittedReview = $result ['submittedReview'] == "1" ? "Yes" : "No";
-    $visible = $result ['visible'] == "1" ? "Yes" : "No";
-    $replicators = $result ['replicators'];
-    $reference_url = $result ['reference_url'];
-    $license_id = $result ['license_id'];
-
-    $query = "SELECT name from openabm_model_language WHERE id=%d";
-    $result = (array) db_fetch_object (db_query ($query, $model_language_id));
-    $model_language_id = $result ['name'];
-
-    $query = "SELECT license_text from openabm_license WHERE id=%d";
-    $result = (array) db_fetch_object (db_query ($query, $license_id));
-    $license_id = $result ['license_text'];
+    $reference_url = $result ['reference'];
 
     $keywordList = '';
     $query = "SELECT keyword FROM openabm_model_keywords WHERE model_id=%d";
@@ -520,25 +565,17 @@ function openabmma_showMetaData ($pName='') {
     $keywordList = substr ($keywordList, 0, strlen($keywordList)-2);
 
     $output = "<br/><p><table border='0' cellpadding='0' cellspacing='0' width='100%'>";
-    $output .= "<tr class='openabmData'><tdwidth='30%'><b>Model name:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $name . "</i></td></tr>";
-    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Model description:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $description . "</i></td></tr>";
-    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Model title:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $title . "</i></td></tr>";
-    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Replicated model:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $replicated . "</i></td></tr>";
+    $output .= "<tr class='openabmData'><td width='30%'><b>Model name:</b></td><td><i>" . $name . "</i></td></tr>";
+    $output .= "<tr class='openabmData'><td><b>Model owner:</b></td><td><i>" . openabmma_getModelOwner ($name) . "</i></td></tr>";
+    $output .= "<tr class='openabmData'><td><b>Model title:</b></td><td><i>" . $title . "</i></td></tr>";
+    $output .= "<tr class='openabmData'><td><b>Replicated model:</b></td><td><i>" . $replicated . "</i></td></tr>";
     if ($replicated == "Yes")
     {
-        $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Replicators:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $replicators . "</i></td></tr>";
-        $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Reference URL:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $reference_url . "</i></td></tr>";
+        $output .= "<tr class='openabmData'><td><b>Replicators:</b></td><td><i>" . $replicators . "</i></td></tr>";
+        $output .= "<tr class='openabmData'><td><b>Reference URL:</b></td><td><i>" . $reference_url . "</i></td></tr>";
     }
 
-    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Visible to public:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $visible . "</i></td></tr>";
-    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Programming language:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $model_language_id . "</i></td></tr>";
-    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Operating System:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $os . "</i></td></tr>";
-    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Framework:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $framework . "</i></td></tr>";
-    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>License:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $license_id . "</i></td></tr>";
-    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Model keywords:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $keywordList . "</i></td></tr>";
-    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>References:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $reference_text . "</i></td></tr>";
-    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Examples:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $examples . "</i></td></tr>";
-    $output .= "<tr><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa' width='30%'><b>Submitted for review:</b></td><td style='border-bottom: thin solid #aaaaaa; border-top: thin solid #aaaaaa'><i>" . $submittedReview . "</i></td></tr>";
+    $output .= "<tr class='openabmData'><td><b>Model keywords:</b></td><td><i>" . $keywordList . "</i></td></tr>";
 
     $output .= "</table>";
 
@@ -745,7 +782,7 @@ function openabmma_askIfReview_submit ($form_id, $edit)
 	if ($_POST ["op"] == "Proceed to Submit Version for Review")
 		drupal_goto ("mymodels/" . $pName . "/add/version" . $versionNumber . "/step04");
 	else if ($_POST ["op"] == "Finish the Add Version process")
-		drupal_goto ("mymodels/" . $pName . "/add/version" . $versionNumber . "complete");
+		drupal_goto ("mymodels/" . $pName . "/add/version" . $versionNumber . "/complete");
 	else if ($_POST ["op"] == "Back")
 		drupal_goto ("mymodels/" . $pName . "/add/version" . $versionNumber . "/step03");
 	else
@@ -1260,7 +1297,7 @@ function openabmma_addVersion01_submit ($form_id, $edit) {
             mkdir ("files/" . $pName . "/v" . $versionNumber . "/dataset", 0755, TRUE);
             mkdir ("files/" . $pName . "/v" . $versionNumber . "/sensitivity", 0755, TRUE);
 
-            $query = "INSERT INTO openabm_model_version (model_id, description, visible, version_num, date_created, submittedReview) VALUES (%d, '%s', %d, %d, '%s', %d)";
+            $query = "INSERT INTO openabm_model_version (model_id, description, visible, version_num, date_modified, submittedReview) VALUES (%d, '%s', %d, %d, '%s', %d)";
             db_query($query, openabmma_getModelId ($pName), $edit ["version_description"], $visible, $versionNumber, date("Y-m-d H:i:s"), 0);
 
 	//FIXME: Add code to invalidate the copy if it has already been sent for review
@@ -2234,15 +2271,15 @@ function openabmma_getFormattedVersionList ($pName)
 	drupal_add_css (openabmma_get_css_path ());
 	$versionCount = 0;
 	$output  = "<p>&nbsp;</p><table border='0' cellpadding='1' cellspacing='0' width='100%'>";
-	$output .= "<tr class='openabmData'><td class='openabmCol' width='10%'><b>Version Num</b></td><td class='openabmCol' width='50%'><b>Description</b></td><td class='openabmCol' width='5%'><b>Submitted</b></td><td class='openabmCol' width='20%'><b>Date Created</b></td><td>&nbsp;</td><td>&nbsp;</td></tr>";
+	$output .= "<tr class='openabmData'><td class='openabmCol' width='10%'><b>Version Num</b></td><td class='openabmCol' width='50%'><b>Description</b></td><td class='openabmCol' width='5%'><b>Submitted</b></td><td class='openabmCol' width='20%'><b>Date last modified</b></td><td>&nbsp;</td><td>&nbsp;</td></tr>";
 
-	$query = "SELECT version_num, description, date_created, submittedReview FROM openabm_model_version WHERE model_id = %d";
+	$query = "SELECT version_num, description, date_modified, submittedReview FROM openabm_model_version WHERE model_id = %d";
 	$result = db_query ($query, openabmma_getModelId ($pName));
 	while ($item = db_fetch_object ($result))
 	{
 		$versionCount++;
 		$submitted = $item->submittedReview == "1" ? "Yes" : "No";
-		$output .= "<tr class='openabmData'><td class='openabmCol'>" . $item->version_num . "</td><td class='openabmCol'>" . substr ($item->description, 0, 100) . "</td><td class='openabmCol'>" . $submitted . "</td><td class='openabmCol'>". $item->date_created . "</td><td>" . l ("edit", "mymodels/" . $pName . "/edit/version" . $item->version_num . "/step01") . "</td><td>" . "<a href=\"javascript:if(confirm('Are you sure you want to delete this version?\\nOnce deleted, no recovery is possible.')) window.location.replace('" . url("mymodels/" . $pName . "/delete/version" . $item->version_num) . "');\">delete</a>" . "</td></tr>";
+		$output .= "<tr class='openabmData'><td class='openabmCol'>" . $item->version_num . "</td><td class='openabmCol'>" . l (substr ($item->description, 0, 100), "mymodels/". $pName . "/version" . $item->version_num . "/metadata") . "</td><td class='openabmCol'>" . $submitted . "</td><td class='openabmCol'>". $item->date_modified . "</td><td>" . l ("edit", "mymodels/" . $pName . "/edit/version" . $item->version_num . "/step01") . "</td><td>" . "<a href=\"javascript:if(confirm('Are you sure you want to delete this version?\\nOnce deleted, no recovery is possible.')) window.location.replace('" . url("mymodels/" . $pName . "/delete/version" . $item->version_num) . "');\">delete</a>" . "</td></tr>";
 	}
 
 	$output .= "</table>";
