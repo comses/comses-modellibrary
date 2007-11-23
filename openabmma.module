@@ -217,7 +217,7 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'mymodels/' . arg(1) . "/edit/" . arg(3) . "/step01",
-            'title' => t('Step 01 :: Adding a version'),
+            'title' => t('Step 01 :: Editing a version'),
             'description' => "",
             'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
@@ -227,7 +227,7 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'mymodels/' . arg(1) . "/edit/" . arg(3) . "/step02",
-            'title' => t('Step 02 :: Adding a version'),
+            'title' => t('Step 02 :: Editing a version'),
             'description' => "",
             'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
@@ -237,7 +237,7 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'mymodels/' . arg(1) . "/edit/" . arg(3) . "/step03",
-            'title' => t('Step 03 :: Adding a version'),
+            'title' => t('Step 03 :: Editing a version'),
             'description' => "",
             'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
@@ -247,7 +247,7 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'mymodels/' . arg(1) . "/edit/" . arg(3) . "/step04",
-            'title' => t('Step 04 :: Adding a version'),
+            'title' => t('Step 04 :: Editing a version'),
             'description' => "",
             'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
@@ -256,8 +256,48 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'mymodels/' . arg(1) . "/" . arg(2) . "/reviewnote",
-            'title' => t('Step 04 :: Adding a new model'),
+            'path' => 'mymodels/' . arg(1) . "/edit/" . arg(3) . "/files_basic",
+            'title' => t('Step 04 :: Editing a version'),
+            'description' => null,
+            'access' => user_access ('modify models'),
+            'callback' => 'drupal_get_form',
+            'callback arguments' => array ('openabmma_basicFiles'),
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'mymodels/' . arg(1) . "/edit/" . arg(3) . "/files_opt",
+            'title' => t('Step 05 :: Editing a version'),
+            'description' => null,
+            'access' => user_access ('modify models'),
+            'callback' => 'drupal_get_form',
+            'callback arguments' => array ('openabmma_optFiles'),
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'mymodels/' . arg(1) . "/edit/" . arg(3) . "/files_basic/delete/" . arg(6),
+            'title' => null,
+            'description' => null,
+            'access' => user_access ('modify models'),
+            'callback' => 'drupal_get_form',
+            'callback arguments' => array ('openabmma_basicFiles_delete'),
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'mymodels/' . arg(1) . "/edit/" . arg(3) . "/files_opt/delete/" . arg(6),
+            'title' => null,
+            'description' => null,
+            'access' => user_access ('modify models'),
+            'callback' => 'drupal_get_form',
+            'callback arguments' => array ('openabmma_optFiles_delete'),
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'mymodels/' . arg(1) . "/" . arg(2) . "/" . arg(3) . "/reviewnote",
+            'title' => t('Step 04 :: Review step'),
             'description' => "",
             'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
@@ -774,19 +814,34 @@ function openabmma_askIfReview_submit ($form_id, $edit)
 {
 	global $user;
 	$pName = arg(1);
+	$action = arg(2);
 	if ($user->name != openabmma_getModelOwner ($pName))
 		return openabmma_accessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
 
 	$versionNumber = openabmma_getVersionNumber (arg(3));
 
-	if ($_POST ["op"] == "Proceed to Submit Version for Review")
-		drupal_goto ("mymodels/" . $pName . "/add/version" . $versionNumber . "/step04");
-	else if ($_POST ["op"] == "Finish the Add Version process")
-		drupal_goto ("mymodels/" . $pName . "/add/version" . $versionNumber . "/complete");
-	else if ($_POST ["op"] == "Back")
-		drupal_goto ("mymodels/" . $pName . "/add/version" . $versionNumber . "/step03");
+	if ($action == "edit")
+	{
+		if ($_POST ["op"] == "Proceed to Submit Version for Review")
+			drupal_goto ("mymodels/" . $pName . "/edit/version" . $versionNumber . "/step04");
+		else if ($_POST ["op"] == "Finish the Add Version process")
+			drupal_goto ("mymodels/" . $pName . "/edit/version" . $versionNumber . "/complete");
+		else if ($_POST ["op"] == "Back")
+			drupal_goto ("mymodels/" . $pName . "/edit/version" . $versionNumber . "/files_basic");
+		else
+			drupal_goto ("/");
+	}
 	else
-		drupal_goto ("/");
+	{
+		if ($_POST ["op"] == "Proceed to Submit Version for Review")
+			drupal_goto ("mymodels/" . $pName . "/add/version" . $versionNumber . "/step04");
+		else if ($_POST ["op"] == "Finish the Add Version process")
+			drupal_goto ("mymodels/" . $pName . "/add/version" . $versionNumber . "/complete");
+		else if ($_POST ["op"] == "Back")
+			drupal_goto ("mymodels/" . $pName . "/add/version" . $versionNumber . "/step03");
+		else
+			drupal_goto ("/");
+	}
 }
 
 function openabmma_uploadFile ($subdir, $formVar, $permission=0760) {
@@ -839,11 +894,14 @@ function openabmma_addVersion02_submit ($form_id, $edit)
 
 	$versionNumber = openabmma_getVersionNumber (arg(3));
 
-	openabmma_cleantmp ($pName . '/v' . $versionNumber . '/code');
-	if (openabmma_uploadFile ($pName . '/v' . $versionNumber . '/code', 'version_code_file') == null)
+	if ($action != "edit")
 	{
-		drupal_set_message ("<font color='red'><b>Error uploading code file, please check the path of the file specified</b></font>");
-		return;
+		openabmma_cleantmp ($pName . '/v' . $versionNumber . '/code');
+		if (openabmma_uploadFile ($pName . '/v' . $versionNumber . '/code', 'version_code_file') == null)
+		{
+			drupal_set_message ("<font color='red'><b>Error uploading code file, please check the path of the file specified</b></font>");
+			return;
+		}
 	}
 
 	if ($errString != "")
@@ -854,7 +912,7 @@ function openabmma_addVersion02_submit ($form_id, $edit)
 
 	$query = "UPDATE openabm_model_version SET model_language_id=%d, os=%d, framework='%s' WHERE model_id=%d AND version_num=%d";
 
-	db_query ($query, $edit ["version_language"], $edit ["os"], $edit ["framework"], openabmma_getModelId ($pName), $versionNumber);
+	db_query ($query, $edit ["version_language"], $edit ["os"]+1, $edit ["framework"], openabmma_getModelId ($pName), $versionNumber);
 	drupal_goto ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/step03");
 }
 
@@ -882,6 +940,8 @@ function openabmma_get_css_path() {
 function openabmma_addVersion02 ($edit=null, $item=0) {
     global $user;
     $pName = arg(1);
+
+    $action = arg(2);
 
     drupal_add_js( openabmma_get_js_path() );
 
@@ -911,10 +971,13 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
             "#description" => null,
             );
 
-    $form ["details"]["version_code_file"] = array (
-            "#type" => "file",
-            "#title" => t("Code file (zipped):")
-            );
+    if ($action != "edit")
+    {
+	    $form ["details"]["version_code_file"] = array (
+		    "#type" => "file",
+		    "#title" => t("Code file (zipped):")
+		    );
+    }
 
     $languages = array ();
     $result = db_query ("SELECT id, name FROM openabm_model_language ORDER BY name");
@@ -938,7 +1001,7 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
             );
 
 // FIXME: add that crap that parses the output of "show columns from openabm_model_version like 'os'"
-    $arrayElements = array ('Windows', 'Linux', 'Mac', 'Platform Independent', 'Other');
+    $arrayElements = array ('Linux', 'Mac', 'Windows', 'Platform Independent', 'Other');
 
     $form ["details"]["os"] = array (
             "#type" => "select",
@@ -983,7 +1046,8 @@ function openabmma_cleantmp($directory)
 	if ($directory [0] == '/' || strpos ($directory, "../") != FALSE)
 		return;
 
-	if( !$dirhandle = @opendir("files/" . $directory))
+	$directory = "files/" . $directory;
+	if( !$dirhandle = @opendir($directory))
 		return;
 
 	while(false !== ($filename = readdir($dirhandle)) )
@@ -992,7 +1056,7 @@ function openabmma_cleantmp($directory)
 		{
 			$filename = $directory. "/". $filename;
 //			drupal_set_message ($filename);
-			@unlink($filename);
+			unlink($filename);
 		}
 	}
 }
@@ -1011,12 +1075,19 @@ function openabmma_addVersion03_submit ($form_id, $edit)
 	if ($_POST ["op"] == "Back")
 		drupal_goto ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/step02");
 
-	openabmma_cleantmp ($pName . '/v' . $versionNumber . '/sensitivity');
-        openabmma_uploadFile ($pName . '/v' . $versionNumber . '/sensitivity', 'version_sensitivity');
+	if ($action != "edit")
+	{
+		openabmma_cleantmp ($pName . '/v' . $versionNumber . '/sensitivity');
+		openabmma_uploadFile ($pName . '/v' . $versionNumber . '/sensitivity', 'version_sensitivity');
+	}
+
 	$query = "UPDATE openabm_model_version SET license_id=%d, reference_text='%s', examples='%s' WHERE model_id=%d AND version_num=%d";
 	db_query ($query, $edit ["version_licenseId"], $edit ["version_ref"], $edit ["version_examples"], openabmma_getModelId ($pName), $versionNumber);
 
-	drupal_goto ("mymodels/" . $pName . "/version" . $versionNumber . "/reviewnote");
+	if ($action != "edit")
+		drupal_goto ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/reviewnote");
+	else
+		drupal_goto ("mymodels/" . $pName . "/edit/version" . $versionNumber . "/files_basic");
 }
 
 function openabmma_addVersion03 ($edit=null, $item=0)
@@ -1024,13 +1095,14 @@ function openabmma_addVersion03 ($edit=null, $item=0)
 	global $user;
 	$pName = arg(1);
 
+	$action = arg(2);
         // FIXME: duplicated code
 	if ($user->name != openabmma_getModelOwner ($pName))
             return openabmma_formAccessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
 
 	$versionNumber = openabmma_getVersionNumber (arg(3));
 
-	$query = "SELECT license_id, reference_text, examples FROM openabm_model_version WHERE id=%d AND version_num=%d";
+	$query = "SELECT license_id, reference_text, examples FROM openabm_model_version WHERE model_id=%d AND version_num=%d";
 	$result = (array) db_fetch_object (db_query ($query, openabmma_getModelId ($pName), $versionNumber));
 	$licenseId = $result ['license_id'];
 	$refText = $result ['reference_text'];
@@ -1077,11 +1149,14 @@ function openabmma_addVersion03 ($edit=null, $item=0)
 		"#required" => false
 	);
 
-	$form ["details"]["version_sensitivity"] = array (
-		"#type" => "file",
-		"#description" => t("File containing sensitivity analysis"),
-		"#title" => t("Sensitivity analysis:")
-	);
+	if ($action != "edit")
+	{
+		$form ["details"]["version_sensitivity"] = array (
+			"#type" => "file",
+			"#description" => t("File containing sensitivity analysis"),
+			"#title" => t("File containing sensitivity data:")
+		);
+	}
 
 	$form ["details"]["submit"] = array (
 		"#type" => "submit",
@@ -1098,10 +1173,283 @@ function openabmma_addVersion03 ($edit=null, $item=0)
 	return ($form);	
 }
 
+function openabmma_optFiles_delete ()
+{
+	global $user;
+	$pName = arg(1);
+	$versionNumber = openabmma_getVersionNumber (arg(3));
+	$target = arg(6);
+
+	if ($user->name != openabmma_getModelOwner ($pName))
+		return openabmma_formAccessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
+
+	$versionURL = "mymodels/" . $pName . "/edit/version" . $versionNumber . "/files_opt";
+	if ($target != "odd" && $target != "dataset" && $target != "other")
+		drupal_goto ($versionURL);
+
+	openabmma_cleantmp ($pName . "/v" . $versionNumber . "/" . $target);
+	drupal_goto ("mymodels/" . $pName . "/edit/version" . $versionNumber . "/files_opt");
+}
+
+function openabmma_basicFiles_delete ()
+{
+	global $user;
+	$pName = arg(1);
+	$versionNumber = openabmma_getVersionNumber (arg(3));
+	$target = arg(6);
+
+	if ($user->name != openabmma_getModelOwner ($pName))
+		return openabmma_formAccessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
+
+	$versionURL = "mymodels/" . $pName . "/edit/version" . $versionNumber . "/files_basic";
+	if ($target != "code" && $target != "sensitivity")
+		drupal_goto ($versionURL);
+
+	openabmma_cleantmp ($pName . "/v" . $versionNumber . "/" . $target);
+	drupal_goto ("mymodels/" . $pName . "/edit/version" . $versionNumber . "/files_basic");
+}
+
+function openabmma_basicFiles_submit ()
+{
+	global $user;
+	$pName = arg(1);
+        // FIXME: duplicated code
+	if ($user->name != openabmma_getModelOwner ($pName))
+		return openabmma_formAccessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
+
+	$versionNumber = openabmma_getVersionNumber (arg(3));
+
+	$directory = "files/" . $pName . "/v" . $versionNumber . "/sensitivity";
+	$fileCount = openabmma_getFileCount ($directory);
+	if ($fileCount == 0)
+	{
+		openabmma_cleantmp ($pName . "/v" . $versionNumber . "/sensitivity");
+		openabmma_uploadFile ($pName . "/v" . $versionNumber . "/sensitivity", 'version_sensitivity');
+	}
+
+	$directory = "files/" . $pName . "/v" . $versionNumber . "/code";
+	$fileCount = openabmma_getFileCount ($directory);
+	if ($fileCount == 0)
+	{
+		openabmma_cleantmp ($pName . "/v" . $versionNumber . "/code");
+		if (openabmma_uploadFile ($pName . "/v" . $versionNumber . "/code", 'version_code_file') == null)
+		{
+			drupal_set_message ("<font color='red'><b>Error uploading code file, please check the path of the file specified</b></font>");
+			return;
+		}
+	}
+
+	drupal_goto ("mymodels/" . $pName . "/edit/version" . $versionNumber . "/reviewnote");
+}
+
+function openabmma_basicFiles ()
+{
+	global $user;
+	$pName = arg(1);
+        // FIXME: duplicated code
+	if ($user->name != openabmma_getModelOwner ($pName))
+		return openabmma_formAccessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
+
+	$versionNumber = openabmma_getVersionNumber (arg(3));
+
+	$form['#attributes'] = array('enctype' => "multipart/form-data");
+
+	$form["details"] = array(
+		"#type" => 'fieldset',
+		"#collapsible" => FALSE,
+		"#collapsed" => FALSE,
+		"#title" => null,
+		"#description" => "Components required for review",
+	);
+
+	$directory = "files/" . $pName . "/v" . $versionNumber . "/code";
+	$fileCount = openabmma_getFileCount ($directory);
+	if ($fileCount > 0)
+		$form ["details"]["version_code_file"] = array (
+			"#type" => "item",
+			"#value" => "The file '" . openabmma_getFirstFile ($directory) . "' has been uploaded as the code file. To delete this file and upload a different one, click <a href='" . url ("mymodels/" . $pName . "/edit/version" . $versionNumber . "/files_basic/delete/code") . "'>delete</a>."
+		);
+	else
+		$form ["details"]["version_code_file"] = array (
+			"#type" => "file",
+			"#title" => t("Code file (required):")
+		);
+
+	$directory = "files/" . $pName . "/v" . $versionNumber . "/sensitivity";
+	$fileCount = openabmma_getFileCount ($directory);
+	if ($fileCount > 0)
+		$form ["details"]["version_sensitivity"] = array (
+			"#type" => "item",
+			"#value" => "The file '" . openabmma_getFirstFile ($directory) . "' has been uploaded as the sensitivity file. To delete this file and upload a different one, click <a href='" . url ("mymodels/" . $pName . "/edit/version" . $versionNumber . "/files_basic/delete/sensitivity") . "'>delete</a>."
+		);
+	else
+		$form ["details"]["version_sensitivity"] = array (
+			"#type" => "file",
+			"#title" => t("File containing senstivity data:")
+		);
+
+	$form ["details"]["submit"] = array (
+		"#type" => "submit",
+		"#value" => t("Submit"),
+		"#submit" => TRUE
+	);
+
+	$form ["details"]["cancel"] = array (
+		"#type" => "submit",
+		"#value" => t("Back"),
+		"#submit" => TRUE
+	);
+
+	return ($form);	
+}
+
+function openabmma_optFiles_submit ()
+{
+	global $user;
+	$pName = arg(1);
+        // FIXME: duplicated code
+	if ($user->name != openabmma_getModelOwner ($pName))
+		return openabmma_formAccessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
+
+	$versionNumber = openabmma_getVersionNumber (arg(3));
+
+	$directory = "files/" . $pName . "/v" . $versionNumber . "/dataset";
+	$fileCount = openabmma_getFileCount ($directory);
+	if ($fileCount == 0)
+	{
+		openabmma_cleantmp ($pName . "/v" . $versionNumber . "/dataset");
+		openabmma_uploadFile ($pName . "/v" . $versionNumber . "/dataset", 'version_dataset');
+	}
+
+	$directory = "files/" . $pName . "/v" . $versionNumber . "/other";
+	$fileCount = openabmma_getFileCount ($directory);
+	if ($fileCount == 0)
+	{
+		openabmma_cleantmp ($pName . "/v" . $versionNumber . "/other");
+		openabmma_uploadFile ($pName . "/v" . $versionNumber . "/other", 'version_other');
+	}
+
+	$directory = "files/" . $pName . "/v" . $versionNumber . "/odd";
+	$fileCount = openabmma_getFileCount ($directory);
+	if ($fileCount == 0)
+	{
+		openabmma_cleantmp ($pName . "/v" . $versionNumber . "/odd");
+		if (openabmma_uploadFile ($pName . "/v" . $versionNumber . "/odd", 'version_odd_file') == null)
+		{
+			drupal_set_message ("<font color='red'><b>Error uploading ODD file, please check the path of the file specified</b></font>");
+			return;
+		}
+	}
+
+	$query = "UPDATE openabm_model_version SET submittedReview=1 WHERE model_id=%d AND version_num=%d";
+	db_query ($query, openabmma_getModelId ($pName), $versionNumber);
+
+	drupal_goto ("mymodels/" . $pName);
+}
+
+function openabmma_optFiles ()
+{
+	global $user;
+	$pName = arg(1);
+        // FIXME: duplicated code
+	if ($user->name != openabmma_getModelOwner ($pName))
+		return openabmma_formAccessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
+
+	$versionNumber = openabmma_getVersionNumber (arg(3));
+
+	$form['#attributes'] = array('enctype' => "multipart/form-data");
+
+	$form["details"] = array(
+		"#type" => 'fieldset',
+		"#collapsible" => FALSE,
+		"#collapsed" => FALSE,
+		"#title" => null,
+		"#description" => "Components required for review",
+	);
+
+	$directory = "files/" . $pName . "/v" . $versionNumber . "/odd";
+	$fileCount = openabmma_getFileCount ($directory);
+	if ($fileCount > 0)
+		$form ["details"]["version_odd_file"] = array (
+			"#type" => "item",
+			"#value" => "The file '" . openabmma_getFirstFile ($directory) . "' has been uploaded as the ODD file. To delete this file and upload a different one, click <a href='" . url ("mymodels/" . $pName . "/edit/version" . $versionNumber . "/files_opt/delete/odd") . "'>delete</a>."
+		);
+	else
+		$form ["details"]["version_odd_file"] = array (
+			"#type" => "file",
+			"#title" => t("ODD file (required):")
+		);
+
+	$directory = "files/" . $pName . "/v" . $versionNumber . "/dataset";
+	$fileCount = openabmma_getFileCount ($directory);
+	if ($fileCount > 0)
+		$form ["details"]["version_dataset"] = array (
+			"#type" => "item",
+			"#value" => "The file '" . openabmma_getFirstFile ($directory) . "' has been uploaded as the dataset file. To delete this file and upload a different one, click <a href='" . url ("mymodels/" . $pName . "/edit/version" . $versionNumber . "/files_opt/delete/dataset") . "'>delete</a>."
+		);
+	else
+		$form ["details"]["version_dataset"] = array (
+			"#type" => "file",
+			"#title" => t("File containing dataset information:")
+		);
+
+	$directory = "files/" . $pName . "/v" . $versionNumber . "/other";
+	$fileCount = openabmma_getFileCount ($directory);
+	if ($fileCount > 0)
+		$form ["details"]["version_other"] = array (
+			"#type" => "item",
+			"#value" => "The file '" . openabmma_getFirstFile ($directory) . "' has already been uploaded as the additional file. To delete this file and upload a different one, click <a href='" . url ("mymodels/" . $pName . "/edit/version" . $versionNumber . "/files_opt/delete/other") . "'>delete</a>."
+		);
+	else
+		$form ["details"]["version_other"] = array (
+			"#type" => "file",
+			"#title" => t("Additional files (optional):")
+		);
+
+	$form ["details"]["submit"] = array (
+		"#type" => "submit",
+		"#value" => t("Submit"),
+		"#submit" => TRUE
+	);
+
+	$form ["details"]["cancel"] = array (
+		"#type" => "submit",
+		"#value" => t("Back"),
+		"#submit" => TRUE
+	);
+
+	return ($form);	
+}
+
+function openabmma_getFileCount ($directory)
+{
+	$d = dir($directory);
+	$count = 0;
+	while (false !== ($entry = $d->read()))
+		$count++;
+
+	$d->close();
+
+	return $count-2;	// Exclude "." and ".."
+}
+
+function openabmma_getFirstFile ($directory)
+{
+	$d = dir($directory);
+	while (false !== ($entry = $d->read()))
+		if ($entry != "." && $entry != "..")
+			return $entry;
+
+	$d->close();
+
+	return "";	// Exclude "." and ".."
+}
+
 function openabmma_addVersion04_submit ($form_id, $edit)
 {
 	global $user;
 	$pName = arg(1);
+	$action = arg(2);
 
 	$versionNumber = openabmma_getVersionNumber (arg(3));
 
@@ -1109,28 +1457,39 @@ function openabmma_addVersion04_submit ($form_id, $edit)
 		return openabmma_accessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
 
 	if ($_POST ["op"] == "Back")
-		drupal_goto ("mymodels/" . $pName . "/add/version" . $versionNumber . "/reviewnote");
+		drupal_goto ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/reviewnote");
 
 	if ($edit ["model_inst"]['commented'] == '0' || $edit ["model_inst"]['cleanup'] == '0' || $edit ["model_inst"]['running'] == '0')
 		drupal_set_message ("<b><font color='red'>Well-commented, cleanedup and running code is required before you submit your model for review!</font></b><br/>[Should we have a link to let the user still submit the model for review along with comments to the editor to justify that he should still be able to send his model for review?]");
 	else
 	{
-		openabmma_cleantmp ($pName . '/v' . $versionNumber . '/odd');
-		if (openabmma_uploadFile ($pName . '/v' . $versionNumber . '/odd', 'version_odd_file') == null)
+		if ($action != "edit")
 		{
-			drupal_set_message ("<font color='red'><b>Error uploading ODD file, please check the path of the file specified</b></font>");
-			return;
+			openabmma_cleantmp ($pName . '/v' . $versionNumber . '/odd');
+			if (openabmma_uploadFile ($pName . '/v' . $versionNumber . '/odd', 'version_odd_file') == null)
+			{
+				drupal_set_message ("<font color='red'><b>Error uploading ODD file, please check the path of the file specified</b></font>");
+				return;
+			}
+
+			openabmma_cleantmp ($pName . '/v' . $versionNumber . '/dataset');
+			openabmma_uploadFile ($pName . '/v' . $versionNumber . '/dataset', 'version_dataset');
+
+			openabmma_cleantmp ($pName . '/v' . $versionNumber . '/other');
+			openabmma_uploadFile ($pName . '/v' . $versionNumber . '/other', 'version_other');
 		}
 
-		openabmma_cleantmp ($pName . '/v' . $versionNumber . '/dataset');
-		openabmma_uploadFile ($pName . '/v' . $versionNumber . '/dataset', 'version_dataset');
+		if ($action != "edit")
+			$query = "UPDATE openabm_model_version SET submittedReview=1, run_conditions='%s' WHERE model_id=%d AND version_num=%d";
+		else
+			$query = "UPDATE openabm_model_version SET run_conditions='%s' WHERE model_id=%d AND version_num=%d";
 
-		openabmma_cleantmp ($pName . '/v' . $versionNumber . '/other');
-		openabmma_uploadFile ($pName . '/v' . $versionNumber . '/other', 'version_other');
-
-		$query = "UPDATE openabm_model_version SET submittedReview=1, run_conditions='%s' WHERE model_id=%d AND version_num=%d";
 		db_query ($query, $edit ["version_conditions"], openabmma_getModelId ($pName), $versionNumber);
-		drupal_goto ("mymodels/" . $pName . "/add/version" . $versionNumber . "/complete");
+
+		if ($action != "edit")
+			drupal_goto ("mymodels/" . $pName . "/add/version" . $versionNumber . "/complete");
+		else
+			drupal_goto ("mymodels/" . $pName . "/edit/version" . $versionNumber . "/filesopt");
 	}
 }
 
@@ -1138,6 +1497,8 @@ function openabmma_addVersion04 ($edit=null, $item=0)
 {
 	global $user;
 	$pName = arg(1);
+	$action = arg(2);
+
         // FIXME: duplicated code
 	if ($user->name != openabmma_getModelOwner ($pName))
 		return openabmma_formAccessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
@@ -1158,15 +1519,17 @@ function openabmma_addVersion04 ($edit=null, $item=0)
 		"#description" => "Components required for review",
 	);
 
-	$form ["details"]["version_odd_file"] = array (
-		"#type" => "file",
-		"#title" => t("ODD file (required):")
-	);
+	if ($action != "edit")
+		$form ["details"]["version_odd_file"] = array (
+			"#type" => "file",
+			"#title" => t("ODD file (required):")
+		);
 
-	$form ["details"]["version_dataset"] = array (
-		"#type" => "file",
-		"#title" => t("Test data set (for running the version) - optional:")
-	);
+	if ($action != "edit")
+		$form ["details"]["version_dataset"] = array (
+			"#type" => "file",
+			"#title" => t("Test data set (for running the version) - optional:")
+		);
 
 	$form ["details"]["version_conditions"] = array (
 		"#type" => "textarea",
@@ -1177,22 +1540,24 @@ function openabmma_addVersion04 ($edit=null, $item=0)
 		"#required" => false
 	);
 
-	$form ["details"]["version_other"] = array (
-		"#type" => "file",
-		"#title" => t("Additional document to be included with version submission (optional):")
-	);
+	if ($action != "edit")
+		$form ["details"]["version_other"] = array (
+			"#type" => "file",
+			"#title" => t("Additional document to be included with version submission (optional):")
+		);
 
-	$form["details"]["version_inst"] = array(
-	'#type' => 'checkboxes',
-	'#title' => t('Submission requirements:'),
-	'#default_value' => "false",
-	'#options' => array(
-	'commented' => t('The code has been well commented'),
-	'cleanup' => t('The code has been cleaned up'),
-	'running' => t('The version can be run'),
-		),
-	'#description' => t(''),
-	);
+	if ($action != "edit")
+		$form["details"]["version_inst"] = array(
+		'#type' => 'checkboxes',
+		'#title' => t('Submission requirements:'),
+		'#default_value' => "false",
+		'#options' => array(
+		'commented' => t('The code has been well commented'),
+		'cleanup' => t('The code has been cleaned up'),
+		'running' => t('The version can be run'),
+			),
+		'#description' => t(''),
+		);
 
 	$form ["details"]["submit"] = array (
 		"#type" => "submit",
