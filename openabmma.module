@@ -82,16 +82,6 @@ function openabmma_menu($may_cache) {
             'callback arguments' => array ('openabmma_addModel')
             );
 
-            $items[] = array(
-            'path' => 'models/add/step01',
-            'title' => t('Step 01 :: Adding a new model'),
-            'description' => t('Add a new model to the model archive.'),
-            'access' => user_access ('modify models'),
-            'callback' => 'drupal_get_form',
-            'type' => MENU_CALLBACK,
-            'callback arguments' => array('openabmma_addModel01'),
-            );
-
         $items[] = array(
             'path' => 'models/search',
             'title' => t('Search Models'),
@@ -147,6 +137,16 @@ function openabmma_menu($may_cache) {
             );
     }
     else {
+	$items[] = array(
+            'path' => 'models/edit/' . arg(2),
+            'title' => t('Edit model metadata'),
+            'description' => null,
+            'access' => user_access ('modify models'),
+            'callback' => 'drupal_get_form',
+            'type' => MENU_CALLBACK,
+            'callback arguments' => array ('openabmma_addModel')
+            );
+
         $items[] = array(
             'path' => 'mymodels/' . arg(1) . "/" . arg(2) . "/metadata",
             'title' => t('Model version metadata'),
@@ -302,85 +302,6 @@ function openabmma_menu($may_cache) {
             'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
             'callback arguments' => array(openabmma_askIfReview),
-            'type' => MENU_CALLBACK
-            );
-
-        $items[] = array(
-            'path' => 'models/edit/' . arg(2) . "/step01",
-            'title' => t('Step 01 :: Editing your model'),
-            'description' => "",
-            'access' => user_access ('modify models'),
-            'callback' => 'drupal_get_form','callback arguments' => array(openabmma_addModel01),
-            'type' => MENU_CALLBACK
-            );
-
-        $items[] = array(
-            'path' => 'models/edit/' . arg(2) . "/step02",
-            'title' => t('Step 02 :: Editing your model'),
-            'description' => "",
-            'access' => user_access ('modify models'),
-            'callback' => 'drupal_get_form',
-            'callback arguments' => array(openabmma_addModel02),
-            'type' => MENU_CALLBACK
-            );
-
-        $items[] = array(
-            'path' => 'models/edit/' . arg(2) . "/step03",
-            'title' => t('Step 03 :: Editing your model'),
-            'description' => "",
-            'access' => user_access ('modify models'),
-            'callback' => 'drupal_get_form',
-            'callback arguments' => array(openabmma_addModel03),
-            'type' => MENU_CALLBACK
-            );
-
-        $items[] = array(
-            'path' => 'models/edit/' . arg(2) . "/step04",
-            'title' => t('Step 04 :: Editing your model'),
-            'description' => "",
-            'access' => user_access ('modify models'),
-            'callback' => 'drupal_get_form',
-            'callback arguments' => array(openabmma_addModel04),
-            'type' => MENU_CALLBACK
-            );
-
-        $items[] = array(
-            'path' => 'models/add/' . arg(2) . "/step02",
-            'title' => t('Step 02 :: Adding a new model'),
-            'description' => "",
-            'access' => user_access ('modify models'),
-            'callback' => 'drupal_get_form',
-            'callback arguments' => array(openabmma_addModel02),
-            'type' => MENU_CALLBACK
-            );
-
-        $items[] = array(
-            'path' => 'models/add/' . arg(2) . "/step03",
-            'title' => t('Step 03 :: Adding a new model'),
-            'description' => "",
-            'access' => user_access ('modify models'),
-            'callback' => 'drupal_get_form',
-            'callback arguments' => array(openabmma_addModel03),
-            'type' => MENU_CALLBACK
-            );
-
-        $items[] = array(
-            'path' => 'models/add/' . arg(2) . "/step04",
-            'title' => t('Step 04 :: Adding a new model'),
-            'description' => "",
-            'access' => user_access ('modify models'),
-            'callback' => 'drupal_get_form',
-            'callback arguments' => array(openabmma_addModel04),
-            'type' => MENU_CALLBACK
-            );
-
-        $items[] = array(
-            'path' => 'models/add/' . arg(2) . "/step05",
-            'title' => t('Step 05 :: Adding a new model'),
-            'description' => "",
-            'access' => user_access ('modify models'),
-            'callback' => 'drupal_get_form',
-            'callback arguments' => array(openabmma_addModel05),
             'type' => MENU_CALLBACK
             );
 
@@ -567,7 +488,10 @@ function openabmma_versionMetadata ()
 
     $output .= "</table>";
 
-    $output .= "<p></p>" . l ("To change your metadata settings, click here", "models/edit/" . $pName . "/step01");
+	if ($user->name == $owner)
+	    $output .= "<p></p>" . l ("To change your metadata settings, click here", "models/edit/" . $pName . "/step01");
+
+	$output .= "<p></p>" . l ("To go to model workspace, click here", "mymodels/" . $pName);
     return $output;
 }
 
@@ -619,7 +543,10 @@ function openabmma_showMetaData ($pName='') {
 
     $output .= "</table>";
 
-    $output .= "<p></p>" . l ("To change your metadata settings, click here", "models/edit/" . $pName . "/step01");
+	if ($user->name == $owner)
+	    $output .= "<p></p>" . l ("To change your metadata settings, click here", "models/edit/" . $pName);
+
+	$output .= "<p></p>" . l ("To go to model workspace, click here", "mymodels/" . $pName);
     return $output;
 }
 
@@ -888,11 +815,11 @@ function openabmma_addVersion02_submit ($form_id, $edit)
 	if ($user->name != openabmma_getModelOwner ($pName))
 		return openabmma_accessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
 
+	$versionNumber = openabmma_getVersionNumber (arg(3));
+
 	$action = arg(2);
 	if ($_POST ["op"] == "Back")
-		drupal_goto ("mymodels/" . $pName . "/" . $action . "/version1/step01");
-
-	$versionNumber = openabmma_getVersionNumber (arg(3));
+		drupal_goto ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/step01");
 
 	if ($action != "edit")
 	{
@@ -1424,6 +1351,8 @@ function openabmma_optFiles ()
 function openabmma_getFileCount ($directory)
 {
 	$d = dir($directory);
+//	drupal_set_message ($directory);
+//	return 0;
 	$count = 0;
 	while (false !== ($entry = $d->read()))
 		$count++;
@@ -1671,8 +1600,8 @@ function openabmma_addVersion01_submit ($form_id, $edit) {
         }
     else
     {
-        $query = "UPDATE openabm_model_version SET description='%s', visible=%d, submittedReview=%d WHERE model_id=%d AND version_num=%d";
-        db_query ($query, $edit ["version_description"], $visible, 0, openabmma_getModelId ($pName), $versionNumber);
+        $query = "UPDATE openabm_model_version SET description='%s', date_modified='%s', visible=%d, submittedReview=%d WHERE model_id=%d AND version_num=%d";
+        db_query ($query, $edit ["version_description"], date ("Y-m-d H:i:s"), $visible, 0, openabmma_getModelId ($pName), $versionNumber);
 
 	//FIXME: Add code to invalidate the copy if it has already been sent for review
 
@@ -1704,16 +1633,16 @@ function openabmma_addVersion01 ($edit=null, $item=0)
 
 	if ($newVersion == "1")
 	{
-		$result = (array) db_fetch_object (db_query ("SELECT max(id) FROM openabm_model_version WHERE model_id=%d", openabmma_getModelId ($pName)));
-		$versionNumber = $result['max(id)'] + 1;
+		$result = (array) db_fetch_object (db_query ("SELECT max(version_num) FROM openabm_model_version WHERE model_id=%d", openabmma_getModelId ($pName)));
+		$versionNumber = $result['max(version_num)'] + 1;
 	}
 
 	$desc = '';
 	$visible = FALSE;
 	if ($newVersion == "0")
 	{
-		$query = "SELECT description, visible FROM openabm_model_version WHERE model_id=%d";
-		$result = (array) db_fetch_object (db_query ($query, openabmma_getModelId ($pName)));
+		$query = "SELECT description, visible FROM openabm_model_version WHERE model_id=%d AND version_num=%d";
+		$result = (array) db_fetch_object (db_query ($query, openabmma_getModelId ($pName), $versionNumber));
 
 		$desc = $result ['description'];
 		$visible = $result ['visible'];
@@ -1723,9 +1652,6 @@ function openabmma_addVersion01 ($edit=null, $item=0)
 			$visible = FALSE;
 	}
 
-	if ($newVersion == "0")
-		drupal_set_message ("<u><b>Note:</b></u> If this model has previously been submitted for review, it will automatically be invalidated from the reviewer's list and you would have to submit it again.");
-
 	$form["details"] = array(
 		"#type" => 'fieldset',
 		"#collapsible" => FALSE,
@@ -1733,6 +1659,12 @@ function openabmma_addVersion01 ($edit=null, $item=0)
 		"#title" => null,
 		"#description" => null,
 	);
+
+	if ($newVersion == "0")
+		$form ["details"]["reviewNote"] = array (
+			"#type" => "item",
+			"#value" => "<u><b>Note:</b></u> If this model has previously been submitted for review, it will automatically be invalidated from the reviewer's list and you would have to submit it again."
+		);
 
 	$form ["details"]["newVersion"] = array (
 		"#type" => "hidden",
@@ -1967,6 +1899,13 @@ function openabmma_addModel ()
 		$refurl = $result ['reference'];
 
 		$desc = $result ['description'];
+
+	    $keywordList = '';
+	    $query = "SELECT keyword FROM openabm_model_keywords WHERE model_id=%d";
+	    $result = db_query ($query, openabmma_getModelId ($pName));
+	    while ($element = db_fetch_object ($result))
+		$keywordList .= $element->keyword . ", ";
+	    $keywordList = substr ($keywordList, 0, strlen($keywordList)-2);
 	}
 
 	$result = (array) db_fetch_object (db_query ("SELECT max(id) FROM openabm_model"));
@@ -2361,11 +2300,12 @@ function openabmma_manageMembers ($name='')
 	if ($name == '')
 		drupal_goto ("models");
 
+
 	$owner = openabmma_getModelOwner ($name);
-	$query = "SELECT visible FROM openabm_model WHERE name='%s'";
-	$result = (array) db_fetch_object (db_query ($query, $name));
-	if (($result ["visible"] == 0 || $result ["visible"] == "0") && $user->name != $owner /* && in (model_member_list, $user->name) */)
-		return "This is a privately managed model.";
+#	$query = "SELECT visible FROM openabm_model WHERE name='%s'";
+#	$result = (array) db_fetch_object (db_query ($query, $name));
+#	if (($result ["visible"] == 0 || $result ["visible"] == "0") && $user->name != $owner /* && in (model_member_list, $user->name) */)
+#		return "This is a privately managed model.";
 
 	$output = "<br/><u>Owner</u>: " . $owner;
 
@@ -2376,6 +2316,8 @@ function openabmma_manageMembers ($name='')
 
 	if ($user->name == $owner)
 		$output .= "<br/>&nbsp;<br/>" . drupal_get_form (openabmma_addMember);
+
+	$output .= "<p></p>To go to the model workspace, click " . l ("here", "mymodels/" . $name);
 
 	return $output;
 }
@@ -2425,8 +2367,7 @@ function openabmma_addMember ()
 		'#autocomplete_path' => 'user/autocomplete',
 		"#default_value" => null,
 		"#description" => "",
-		"#maxlength" => 210,
-		"#required" => true
+		"#maxlength" => 210
 	);
 
 /*	$roleTypes = array ();
@@ -2448,13 +2389,38 @@ function openabmma_addMember ()
 		"#submit" => TRUE
 	);
 
+	$form ["details"]["cancel"] = array (
+		"#type" => "submit",
+		"#value" => t("Back"),
+		"#submit" => TRUE
+	);
+
 	return ($form);
 }
 
 function openabmma_addMember_submit ($form_id, $edit)
 {
 	global $user;
+	$pName = arg(1);
+
+	if ($_POST ["op"] == "Back")
+		drupal_goto ("mymodels/" . $pName);
+
 	$username = $edit ["name"];
+	$projName = arg(1);
+
+	if ($user->name != openabmma_getModelOwner ($projName))
+	{
+	        openabmma_accessError ('Only model members can view metadata for a model.');
+		return;
+	}
+
+	if ($username == "")
+	{
+		drupal_set_message ("<b><font color='red'>Please enter the name of user whom you want to add into your project</font></b>");
+		return;
+	}
+
 	if ($username == $user->name)
 	{
 		drupal_set_message ("You already have owner privileges. You cannot add yourself as a Developer for this model.");
@@ -2536,6 +2502,7 @@ function openabmma_getModelMembers ($name='')
 
 function openabmma_showModelMembers ($name='')
 {
+	global $user;
 	if ($name == '')
 		return "";
 
@@ -2546,8 +2513,11 @@ function openabmma_showModelMembers ($name='')
 	$query = "SELECT user_id, role FROM openabm_model_member WHERE project_id=%d";
 	$result = db_query ($query, $model_id);
 	while ($users = db_fetch_object ($result))
-		$output .= "<br/>" . openabmma_getUserName ($users->user_id) . "&nbsp;<small>[" . openabmma_getRoleName ($users->role) . "] - " . "<a href=\"javascript:if(confirm('Are you sure you want to remove this user from your model?')) window.location.replace('" . url("mymodels/" . $name . "/members/delete/" . $users->user_id) . "');\">Remove this user from my model</a></small>";
-//l ("Remove this user from my model", "javascript:if(confirm('Really?')) window.location.replace('mymodels/" . $name . "/embers/delete/" . $users->user_id . "');") . "</small>";
+	{
+		$output .= "<br/>" . openabmma_getUserName ($users->user_id) . "&nbsp;<small>[" . openabmma_getRoleName ($users->role) . "]";
+		if ($user->name == openabmma_getModelOwner ($name))
+			 $output .= " - " . "<a href=\"javascript:if(confirm('Are you sure you want to remove this user from your model?')) window.location.replace('" . url("mymodels/" . $name . "/members/delete/" . $users->user_id) . "');\">Remove this user from my model</a></small>";
+	}
 
 	return $output;
 }
@@ -2599,7 +2569,7 @@ function openabmma_openProject ($pName='')
 	{
 		$output .= "<br/>&nbsp;<br/>Owner options:";
 		$output .= "<br/>" . l ("Manage members in this model", "mymodels/" . $pName . "/members");
-		$output .= "<br/>" . l ("Change model metadata", "models/edit/" . $pName . "/step01");
+		$output .= "<br/>" . l ("Change model metadata", "models/edit/" . $pName);
 	}
 
 	$output .= openabmma_getFormattedVersionList ($pName);
