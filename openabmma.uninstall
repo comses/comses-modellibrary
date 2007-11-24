@@ -2,6 +2,7 @@ drop table if exists openabm_framework;
 drop table if exists openabm_model_member;
 drop table if exists openabm_role;
 drop table if exists openabm_model_keywords;
+drop table if exists openabm_model_version;
 drop table if exists openabm_model;
 drop table if exists openabm_license;
 drop table if exists openabm_model_language;

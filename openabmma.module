@@ -1729,6 +1729,7 @@ function openabmma_addVersion01_submit ($form_id, $edit) {
 
 	if ($newVersion)
 	{
+            // FIXME: rename to doc not 'odd'.
             mkdir ("files/" . $pName . "/v" . $versionNumber . "/odd", 0755, TRUE);
             mkdir ("files/" . $pName . "/v" . $versionNumber . "/code", 0755, TRUE);
             mkdir ("files/" . $pName . "/v" . $versionNumber . "/other", 0755, TRUE);

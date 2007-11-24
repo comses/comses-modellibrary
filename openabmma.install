@@ -95,37 +95,33 @@ function openabmma_install() {
                 );");
 
 		// default values
-		db_query ("INSERT INTO openabm_framework (name) VALUES ('Ascape 5');");
-		db_query ("INSERT INTO openabm_framework (name) VALUES ('Breve');");
-		db_query ("INSERT INTO openabm_framework (name) VALUES ('Cormas');");
-		db_query ("INSERT INTO openabm_framework (name) VALUES ('DEVSJAVA');");
-		db_query ("INSERT INTO openabm_framework (name) VALUES ('Ecolab');");
-		db_query ("INSERT INTO openabm_framework (name) VALUES ('Mason');");
-		db_query ("INSERT INTO openabm_framework (name) VALUES ('MASS');");
-		db_query ("INSERT INTO openabm_framework (name) VALUES ('MobiDyc');");
-		db_query ("INSERT INTO openabm_framework (name) VALUES ('NetLogo');");
-		db_query ("INSERT INTO openabm_framework (name) VALUES ('Repast');");
-		db_query ("INSERT INTO openabm_framework (name) VALUES ('Sesam');");
-		db_query ("INSERT INTO openabm_framework (name) VALUES ('StarLogo');");
-		db_query ("INSERT INTO openabm_framework (name) VALUES ('Swarm');");
+            db_query ("INSERT INTO openabm_framework (name) VALUES ('Ascape 5');");
+            db_query ("INSERT INTO openabm_framework (name) VALUES ('Breve');");
+            db_query ("INSERT INTO openabm_framework (name) VALUES ('Cormas');");
+            db_query ("INSERT INTO openabm_framework (name) VALUES ('DEVSJAVA');");
+            db_query ("INSERT INTO openabm_framework (name) VALUES ('Ecolab');");
+            db_query ("INSERT INTO openabm_framework (name) VALUES ('Mason');");
+            db_query ("INSERT INTO openabm_framework (name) VALUES ('MASS');");
+            db_query ("INSERT INTO openabm_framework (name) VALUES ('MobiDyc');");
+            db_query ("INSERT INTO openabm_framework (name) VALUES ('NetLogo');");
+            db_query ("INSERT INTO openabm_framework (name) VALUES ('Repast');");
+            db_query ("INSERT INTO openabm_framework (name) VALUES ('Sesam');");
+            db_query ("INSERT INTO openabm_framework (name) VALUES ('StarLogo');");
+            db_query ("INSERT INTO openabm_framework (name) VALUES ('Swarm');");
 
-		db_query ("INSERT INTO openabm_license (name, url, license_text) VALUES ('GNU GPL', 'http://www.gnu.org/copyleft/gpl.html', '');");
-		db_query ("INSERT INTO openabm_license (name, url, license_text) VALUES ('Apache License, Version 2.0', 'http://www.apache.org/licenses/LICENSE-2.0.html', '');");
+            db_query ("INSERT INTO openabm_license (name, url, license_text) VALUES ('GNU GPL', 'http://www.gnu.org/copyleft/gpl.html', '');");
+            db_query ("INSERT INTO openabm_license (name, url, license_text) VALUES ('Apache License, Version 2.0', 'http://www.apache.org/licenses/LICENSE-2.0.html', '');");
 
-		db_query ("INSERT INTO openabm_model_language (name) VALUES ('C');");
-		db_query ("INSERT INTO openabm_model_language (name) VALUES ('C++');");
-		db_query ("INSERT INTO openabm_model_language (name) VALUES ('Java');");
-		db_query ("INSERT INTO openabm_model_language (name) VALUES ('NetLogo');");
-		db_query ("INSERT INTO openabm_model_language (name) VALUES ('Perl');");
-		db_query ("INSERT INTO openabm_model_language (name) VALUES ('Python');");
-		db_query ("INSERT INTO openabm_model_language (name) VALUES ('Other');");
+            db_query ("INSERT INTO openabm_model_language (name) VALUES ('C');");
+            db_query ("INSERT INTO openabm_model_language (name) VALUES ('C++');");
+            db_query ("INSERT INTO openabm_model_language (name) VALUES ('Java');");
+            db_query ("INSERT INTO openabm_model_language (name) VALUES ('NetLogo');");
+            db_query ("INSERT INTO openabm_model_language (name) VALUES ('Perl');");
+            db_query ("INSERT INTO openabm_model_language (name) VALUES ('Python');");
+            db_query ("INSERT INTO openabm_model_language (name) VALUES ('Other');");
 
-		db_query ("INSERT INTO openabm_os (name) VALUES ('Linux');");
-		db_query ("INSERT INTO openabm_os (name) VALUES ('Mac');");
-		db_query ("INSERT INTO openabm_os (name) VALUES ('Windows');");
-
-		db_query ("INSERT INTO openabm_role (name) VALUES ('Owner');");
-		db_query ("INSERT INTO openabm_role (name) VALUES ('Developer');");
+            db_query ("INSERT INTO openabm_role (name) VALUES ('Owner');");
+            db_query ("INSERT INTO openabm_role (name) VALUES ('Developer');");
 
             break;
         case 'pgsql':
