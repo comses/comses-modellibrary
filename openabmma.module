@@ -529,7 +529,7 @@ function openabmma_versionMetadata ()
     $output .= "</table>";
 
 	if ($user->name == $owner)
-	    $output .= "<p></p>" . l ("To change your metadata settings, click here", "models/edit/" . $pName . "/step01");
+	    $output .= "<p></p>" . l ("To change your metadata settings, click here", "mymodels/" . $pName . "/edit/version" . $versionNumber . "/step01");
 
 	$output .= "<p></p>" . l ("To go to model workspace, click here", "mymodels/" . $pName);
     return $output;
@@ -884,7 +884,7 @@ function openabmma_addVersion02_submit ($form_id, $edit)
 function openabmma_inList ($value, $arr)
 {
 	$c = 0;
-	if ($value == null || $array == null)
+	if ($value == null || $arr == null)
 		return -1;
 
 	foreach ($arr as $val)
@@ -1478,8 +1478,8 @@ function openabmma_addVersion04_submit ($form_id, $edit)
 	if ($_POST ["op"] == "Back")
 		drupal_goto ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/reviewnote");
 
-	if ($edit ["model_inst"]['commented'] == '0' || $edit ["model_inst"]['cleanup'] == '0' || $edit ["model_inst"]['running'] == '0')
-		drupal_set_message ("<b><font color='red'>Well-commented, cleanedup and running code is required before you submit your model for review!</font></b><br/>[Should we have a link to let the user still submit the model for review along with comments to the editor to justify that he should still be able to send his model for review?]");
+	if ($edit ["version_inst"]['commented'] == '0' || $edit ["version_inst"]['cleanup'] == '0' || $edit ["version_inst"]['running'] == '0')
+		drupal_set_message ("<b><font color='red'>Well-commented, cleanedup and running code is required before you submit your model version for review!</font></b><br/>[Should we have a link to let the user still submit the model for review along with comments to the editor to justify that he should still be able to send his model for review?]");
 	else
 	{
 		$directory = "files/" . $pName . "/v" . $versionNumber . "/odd";
@@ -1613,7 +1613,7 @@ function openabmma_addVersion04 ($edit=null, $item=0)
 		}
 	}
 
-	if ($action != "edit")
+//	if ($action != "edit")
 		$form["details"]["version_inst"] = array(
 		'#type' => 'checkboxes',
 		'#title' => t('Submission requirements:'),
@@ -2225,19 +2225,58 @@ function openabmma_doSearch ($searchText='')
 
 	$count=0;
 
-	$ltext = strtolower ($searchText);
-	$query = "SELECT name, description from openabm_model WHERE visible=1 AND (lower(name) LIKE '%%%s%%' OR lower(description) LIKE '%%%s%%' OR lower(reference_url) LIKE '%%%s%%' OR lower(keywords) LIKE '%%%s%%')";
-	$result = db_query ($query, $ltext, $ltext, $ltext, $ltext);
+	$searchText = strtolower ($searchText);
+
+	$searchText = str_replace ('\'', '\\\'', $searchText);	// escape string because not using %s later, in db_query
+	$searchText = str_replace ('"', '\\"', $searchText);	// escape string because not using %s later, in db_query
+	$searchText = str_replace (',', ' ', $searchText);	// replace commas by spaces to assist searching
+
+	$searchArray = explode (' ', $searchText);
+	$keyCount = count ($searchArray);
+	for ($i=0; $i<$keyCount; $i++)
+		$searchArray [$i] = "'" . $searchArray [$i] . "'";
+
+	$searchText = implode (",", $searchArray);
+
+	// doing only plain keyword search. not checking title, description or other fields...
+	$query = "SELECT DISTINCT (model_id) FROM openabm_model_keywords WHERE keyword IN (" . $searchText . ")";
+	// not using %s because the quotes should not be escaped
+	$result = db_query ($query);
+//	$query = "SELECT name FROM openabm_model WHERE id=%d";
+
+//	$query = "SELECT m.name, m.title, v.description, v.visible from openabm_model m JOIN openabm_model_version v ON m.id=v.model_id WHERE visible=1 AND (lower(name) LIKE '%%%s%%' OR lower(description) LIKE '%%%s%%' OR lower(reference_url) LIKE '%%%s%%' OR lower(keywords) LIKE '%%%s%%')";
+//	$result = db_query ($query, $ltext, $ltext, $ltext, $ltext);
+
 	$count = count ($result);
 
 	while ($proj = db_fetch_object ($result))
 	{
 		$count++;
-		$output .= l ($proj->name, "mymodels/" . $proj->name) . "<br/><small>" . $proj->description . "</small><br/>&nbsp;<br/>";
+		$output .= l (openabmma_getModelTitle ($proj->model_id) . " [" . openabmma_getModelName ($proj->model_id) . "]", "mymodels/" . openabmma_getModelName ($proj->model_id)) . "<br/>&nbsp;<br/>";
 	}
 
 	$output = $count-1 . " result(s) matched your query.<br/>&nbsp;<br/>" . $output;
 	return $output;
+}
+
+function openabmma_getModelName ($id)
+{
+	if ($id == '' || $id < 0)
+		return '';
+
+	$query = "SELECT name FROM openabm_model WHERE id=%d";
+	$result = (array) db_fetch_object (db_query ($query, $id));
+	return $result ['name'];
+}
+
+function openabmma_getModelTitle ($id)
+{
+	if ($id == '' || $id < 0)
+		return '';
+
+	$query = "SELECT title FROM openabm_model WHERE id=%d";
+	$result = (array) db_fetch_object (db_query ($query, $id));
+	return $result ['title'];
 }
 
 function openabmma_getSearchText_submit ($form_id, $edit)
