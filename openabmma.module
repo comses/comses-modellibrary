@@ -21,7 +21,11 @@ function openabmma_block ($op='list', $delta=0)
         return $block;
     }
     else if ($op == 'view') {
-        $block_content = l ("My models", "models/") . "<br/>"
+        //if (user_access ('review models')) {
+            $block_content = "<br/>" . l ("Review Models", "review") . "<br/>";
+        //}
+
+        $block_content .= l ("My models", "models/") . "<br/>"
             . l ("Search models", "models/search") . "<br/>";
         //if (user_access ('administer content')) {
             $block_content .= "<br/>" . l ("Model licenses", "config/licenses");
@@ -29,6 +33,7 @@ function openabmma_block ($op='list', $delta=0)
             $block_content .= "<br/>" . l ("Programming languages", "config/planguages");
             $block_content .= "<br/>" . l ("Frameworks", "config/frameworks");
         //}
+
         $block['subject'] = 'Model Archive';
         $block['content'] = $block_content;
         return $block;
@@ -1978,9 +1983,9 @@ function openabmma_addVersion01_submit ($form_id, $edit) {
     $pCount = strlen ($pName);
     for ($i=0; $i<$pCount; $i++)
     {
-        if ($pName [$i] == ' ')
+        if ($pName [$i] == ' ' || $pName [$i] == '`' || $pName [$i] == '~' || $pName [$i] == '/')
         {
-            $errorString = "Model name cannot contain spaces.";
+            $errorString = "Invalid characters in model name. Model name cannot contain spaces, `, ~ and /.";
             drupal_set_message ("<b><font color='red'>" . $errorString . "</font></b>");
             return;
         }
