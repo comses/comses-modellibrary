@@ -3132,9 +3132,6 @@ function openabmma_showProjects ()
             $count++;
             $output .= "<b>" . l ($node->title . " (" . $node->name . ")", "mymodels/" . $node->name) . "</b>&nbsp;";
 
-            if ($node->visible == 1)	$output .= "[Public]";
-            else				$output .= "[Private]";
-
             $output .= "&nbsp;<br/><small>" . $node->description . "<hr/>";
             $output .= "</small><br/>";
         }
