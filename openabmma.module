@@ -787,6 +787,63 @@ function openabmma_versionMetadata ()
     $output .= "<tr class='openabmData'><td><b>Examples:</b></td><td><i>" . $examples . "</i></td></tr>";
     $output .= "<tr class='openabmData'><td><b>Submitted for review:</b></td><td><i>" . $submittedReview . "</i></td></tr>";
 
+    $files_root = "files/" . $pName . "/v" . $versionNumber;
+    if (openabmma_getFileCount ($files_root . "/code") == 0)
+        $codeStr = "None";
+    else
+    {
+        $filename = openabmma_getFirstFile ($files_root . "/code");
+	$codeStr = l ($filename, "download/" . $pName . "/version" . $versionNumber . "/code");
+//        $codeStr = "<a href='file://" . realpath ($files_root . "/code/" . $filename) . "'>" . $filename . "</a>";
+    }
+
+    $files_root = "files/" . $pName . "/v" . $versionNumber;
+    if (openabmma_getFileCount ($files_root . "/odd") == 0)
+        $oddStr = "None";
+    else
+    {
+        $filename = openabmma_getFirstFile ($files_root . "/odd");
+	$oddStr = l ($filename, "download/" . $pName . "/version" . $versionNumber . "/odd");
+//        $oddStr = "<a href='file://" . realpath ($files_root . "/odd/" . $filename) . "'>" . $filename . "</a>";
+    }
+
+    $files_root = "files/" . $pName . "/v" . $versionNumber;
+    if (openabmma_getFileCount ($files_root . "/sensitivity") == 0)
+        $sensitivityStr = "None";
+    else
+    {
+        $filename = openabmma_getFirstFile ($files_root . "/sensitivity");
+	$sensitivityStr = l ($filename, "download/" . $pName . "/version" . $versionNumber . "/sensitivity");
+//        $sensitivityStr = "<a href='file://" . realpath ($files_root . "/sensitivity/" . $filename) . "'>" . $filename . "</a>";
+    }
+
+    $files_root = "files/" . $pName . "/v" . $versionNumber;
+    if (openabmma_getFileCount ($files_root . "/dataset") == 0)
+        $datasetStr = "None";
+    else
+    {
+        $filename = openabmma_getFirstFile ($files_root . "/dataset");
+	$datasetStr = l ($filename, "download/" . $pName . "/version" . $versionNumber . "/dataset");
+//        $datasetStr = "<a href='file://" . realpath ($files_root . "/dataset/" . $filename) . "'>" . $filename . "</a>";
+    }
+
+    $files_root = "files/" . $pName . "/v" . $versionNumber;
+    if (openabmma_getFileCount ($files_root . "/other") == 0)
+        $additionalStr = "None";
+    else
+    {
+        $filename = openabmma_getFirstFile ($files_root . "/other");
+	$additionalStr = l ($filename, "download/" . $pName . "/version" . $versionNumber . "/other");
+//        $additionalStr = "<a href='file://" . realpath ($files_root . "/other/" . $filename) . "'>" . $filename . "</a>";
+    }
+
+    $output .= "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>";
+    $output .= "<tr><td><u><i>Files:</i></u></td><td>&nbsp;</td></tr>";
+    $output .= "<tr class='openabmData'><td><b>Code:</b></td><td><i>" . $codeStr . "</i></td></tr>";
+    $output .= "<tr class='openabmData'><td><b>ODD:</b></td><td><i>" . $oddStr . "</i></td></tr>";
+    $output .= "<tr class='openabmData'><td><b>Sensitivity:</b></td><td><i>" . $sensitivityStr . "</i></td></tr>";
+    $output .= "<tr class='openabmData'><td><b>Dataset:</b></td><td><i>" . $datasetStr . "</i></td></tr>";
+    $output .= "<tr class='openabmData'><td><b>Additional file:</b></td><td><i>" . $additionalStr . "</i></td></tr>";
     $output .= "</table>";
 
 	if ($user->name == $owner)
