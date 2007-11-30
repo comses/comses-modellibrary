@@ -155,7 +155,7 @@ function openabmma_menu($may_cache) {
             'path' => 'download/' . arg(1) . '/' . arg(2) . '/' . arg(3),
             'title' => t('Download file'),
             'description' => null,
-            'access' => user_access ('review models'),
+            'access' => user_access ('review models') || user_access ('view models'),
             'callback' => 'openabmma_downloadFile',
             'type' => MENU_CALLBACK
             );
@@ -639,13 +639,13 @@ function openabmma_reviewThisModel ()
     }
 
     $files_root = "files/" . $pName . "/v" . $versionNumber;
-    if (openabmma_getFileCount ($files_root . "/odd") == 0)
-        $oddStr = "None";
+    if (openabmma_getFileCount ($files_root . "/doc") == 0)
+        $docStr = "None";
     else
     {
-        $filename = openabmma_getFirstFile ($files_root . "/odd");
-	$oddStr = l ($filename, "download/" . $pName . "/version" . $versionNumber . "/odd");
-//        $oddStr = "<a href='file://" . realpath ($files_root . "/odd/" . $filename) . "'>" . $filename . "</a>";
+        $filename = openabmma_getFirstFile ($files_root . "/doc");
+	$docStr = l ($filename, "download/" . $pName . "/version" . $versionNumber . "/doc");
+//        $docStr = "<a href='file://" . realpath ($files_root . "/doc/" . $filename) . "'>" . $filename . "</a>";
     }
 
     $files_root = "files/" . $pName . "/v" . $versionNumber;
@@ -681,7 +681,7 @@ function openabmma_reviewThisModel ()
     $output .= "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>";
     $output .= "<tr><td><u><i>Files:</i></u></td><td>&nbsp;</td></tr>";
     $output .= "<tr class='openabmData'><td><b>Code:</b></td><td><i>" . $codeStr . "</i></td></tr>";
-    $output .= "<tr class='openabmData'><td><b>ODD:</b></td><td><i>" . $oddStr . "</i></td></tr>";
+    $output .= "<tr class='openabmData'><td><b>Documentation:</b></td><td><i>" . $docStr . "</i></td></tr>";
     $output .= "<tr class='openabmData'><td><b>Sensitivity:</b></td><td><i>" . $sensitivityStr . "</i></td></tr>";
     $output .= "<tr class='openabmData'><td><b>Dataset:</b></td><td><i>" . $datasetStr . "</i></td></tr>";
     $output .= "<tr class='openabmData'><td><b>Additional file:</b></td><td><i>" . $additionalStr . "</i></td></tr>";
@@ -798,13 +798,13 @@ function openabmma_versionMetadata ()
     }
 
     $files_root = "files/" . $pName . "/v" . $versionNumber;
-    if (openabmma_getFileCount ($files_root . "/odd") == 0)
-        $oddStr = "None";
+    if (openabmma_getFileCount ($files_root . "/doc") == 0)
+        $docStr = "None";
     else
     {
-        $filename = openabmma_getFirstFile ($files_root . "/odd");
-	$oddStr = l ($filename, "download/" . $pName . "/version" . $versionNumber . "/odd");
-//        $oddStr = "<a href='file://" . realpath ($files_root . "/odd/" . $filename) . "'>" . $filename . "</a>";
+        $filename = openabmma_getFirstFile ($files_root . "/doc");
+	$docStr = l ($filename, "download/" . $pName . "/version" . $versionNumber . "/doc");
+//        $docStr = "<a href='file://" . realpath ($files_root . "/doc/" . $filename) . "'>" . $filename . "</a>";
     }
 
     $files_root = "files/" . $pName . "/v" . $versionNumber;
@@ -840,7 +840,7 @@ function openabmma_versionMetadata ()
     $output .= "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>";
     $output .= "<tr><td><u><i>Files:</i></u></td><td>&nbsp;</td></tr>";
     $output .= "<tr class='openabmData'><td><b>Code:</b></td><td><i>" . $codeStr . "</i></td></tr>";
-    $output .= "<tr class='openabmData'><td><b>ODD:</b></td><td><i>" . $oddStr . "</i></td></tr>";
+    $output .= "<tr class='openabmData'><td><b>Documentation:</b></td><td><i>" . $docStr . "</i></td></tr>";
     $output .= "<tr class='openabmData'><td><b>Sensitivity:</b></td><td><i>" . $sensitivityStr . "</i></td></tr>";
     $output .= "<tr class='openabmData'><td><b>Dataset:</b></td><td><i>" . $datasetStr . "</i></td></tr>";
     $output .= "<tr class='openabmData'><td><b>Additional file:</b></td><td><i>" . $additionalStr . "</i></td></tr>";
@@ -1058,7 +1058,7 @@ $output .= "</table>";
 
 $output .= "<p>&nbsp;<br/>At this point, you have completed the basic requirements of submitting a version of a model to OpenABM.org.<br/>You could complete the process of adding your version to the OpenABM repository by clicking on the 'Finish' button below.</p>";
 
-$output .= "<p>Alternatively, you could indicate the version is ready for a review by the committee at OpenABM.org. If you wish to submit your model for review, click the 'Proceed to Submit Version for Review' button. In that case, you would be directed to a page that asks for some more information such as the ODD protocol.</p>";
+$output .= "<p>Alternatively, you could indicate the version is ready for a review by the committee at OpenABM.org. If you wish to submit your model for review, click the 'Proceed to Submit Version for Review' button. In that case, you would be directed to a page that asks for some more information such as the Documentation.</p>";
 
 $output .= "<p><u>Note: You can submit the version for review at any time by clicking on the \"Send this version for review\" link in the model workspace.</u></p>";
 
@@ -1376,14 +1376,14 @@ function openabmma_addVersion03_submit ($form_id, $edit)
 	if ($_POST ["op"] == "Back")
 		drupal_goto ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/step02");
 
-	$directory = "files/" . $pName . "/v" . $versionNumber . "/odd";
+	$directory = "files/" . $pName . "/v" . $versionNumber . "/doc";
 	$fileCount = openabmma_getFileCount ($directory);
 	if ($fileCount == 0)
 	{
-		// openabmma_cleantmp ($pName . '/v' . $versionNumber . '/odd');
-		if (openabmma_uploadFile ($pName . '/v' . $versionNumber . '/odd', 'version_odd_file') == null)
+		// openabmma_cleantmp ($pName . '/v' . $versionNumber . '/doc');
+		if (openabmma_uploadFile ($pName . '/v' . $versionNumber . '/doc', 'version_doc_file') == null)
 		{
-			drupal_set_message ("<font color='red'><b>Error uploading ODD file, please check the path of the file specified</b></font>");
+			drupal_set_message ("<font color='red'><b>Error uploading Documentation, please check the path of the file specified</b></font>");
 			return;
 		}
 	}
@@ -1466,20 +1466,20 @@ function openabmma_addVersion03 ($edit=null, $item=0)
 
 //	if ($action != "edit")
 	{
-		$directory = "files/" . $pName . "/v" . $versionNumber . "/odd";
+		$directory = "files/" . $pName . "/v" . $versionNumber . "/doc";
 		$fileCount = openabmma_getFileCount ($directory);
 		if ($fileCount > 0)
 		{
-			$form ["details"]["version_odd_file"] = array (
+			$form ["details"]["version_doc_file"] = array (
 				"#type" => "item",
-				"#value" => "The file '<b>" . openabmma_getFirstFile ($directory) . "</b>' has been uploaded as the ODD file. To delete this file and upload a different one, click <a href='" . url ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/files_opt/delete/odd") . "'>delete</a>."
+				"#value" => "The file '<b>" . openabmma_getFirstFile ($directory) . "</b>' has been uploaded as the Documentation. To delete this file and upload a different one, click <a href='" . url ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/files_opt/delete/doc") . "'>delete</a>."
 			);
 		}
 		else
 		{
-			$form ["details"]["version_odd_file"] = array (
+			$form ["details"]["version_doc_file"] = array (
 				"#type" => "file",
-				"#title" => t("ODD file (required):")
+				"#title" => t("Documentation (required):")
 			);
 		}
 	}
@@ -1531,7 +1531,7 @@ function openabmma_optFiles_delete ()
 		return openabmma_formAccessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
 
 	$versionURL = "mymodels/" . $pName; // . "/" . $action . "/version" . $versionNumber . "/" . $target;
-	if ($target != "odd" && $target != "dataset" && $target != "other")
+	if ($target != "doc" && $target != "dataset" && $target != "other")
 		drupal_goto ($versionURL);
 
 	openabmma_cleantmp ($pName . "/v" . $versionNumber . "/" . $target);
@@ -1539,7 +1539,7 @@ function openabmma_optFiles_delete ()
 	$gotoURL = "mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/";
 	switch ($target)
 	{
-		case "odd":	$gotoURL .= "step03";	break;
+		case "doc":	$gotoURL .= "step03";	break;
 		case "dataset":
 		case "other":	$gotoURL .= "step04";	break;
 	}
@@ -1697,14 +1697,14 @@ function openabmma_optFiles_submit ()
 		openabmma_uploadFile ($pName . "/v" . $versionNumber . "/other", 'version_other');
 	}
 
-	$directory = "files/" . $pName . "/v" . $versionNumber . "/odd";
+	$directory = "files/" . $pName . "/v" . $versionNumber . "/doc";
 	$fileCount = openabmma_getFileCount ($directory);
 	if ($fileCount == 0)
 	{
-		openabmma_cleantmp ($pName . "/v" . $versionNumber . "/odd");
-		if (openabmma_uploadFile ($pName . "/v" . $versionNumber . "/odd", 'version_odd_file') == null)
+		openabmma_cleantmp ($pName . "/v" . $versionNumber . "/doc");
+		if (openabmma_uploadFile ($pName . "/v" . $versionNumber . "/doc", 'version_doc_file') == null)
 		{
-			drupal_set_message ("<font color='red'><b>Error uploading ODD file, please check the path of the file specified</b></font>");
+			drupal_set_message ("<font color='red'><b>Error uploading Documentation, please check the path of the file specified</b></font>");
 			return;
 		}
 	}
@@ -1736,17 +1736,17 @@ function openabmma_optFiles ()
 		"#description" => "Components required for review",
 	);
 
-	$directory = "files/" . $pName . "/v" . $versionNumber . "/odd";
+	$directory = "files/" . $pName . "/v" . $versionNumber . "/doc";
 	$fileCount = openabmma_getFileCount ($directory);
 	if ($fileCount > 0)
-		$form ["details"]["version_odd_file"] = array (
+		$form ["details"]["version_doc_file"] = array (
 			"#type" => "item",
-			"#value" => "The file '" . openabmma_getFirstFile ($directory) . "' has been uploaded as the ODD file. To delete this file and upload a different one, click <a href='" . url ("mymodels/" . $pName . "/edit/version" . $versionNumber . "/files_opt/delete/odd") . "'>delete</a>."
+			"#value" => "The file '" . openabmma_getFirstFile ($directory) . "' has been uploaded as the Documentation. To delete this file and upload a different one, click <a href='" . url ("mymodels/" . $pName . "/edit/version" . $versionNumber . "/files_opt/delete/doc") . "'>delete</a>."
 		);
 	else
-		$form ["details"]["version_odd_file"] = array (
+		$form ["details"]["version_doc_file"] = array (
 			"#type" => "file",
-			"#title" => t("ODD file (required):")
+			"#title" => t("Documentation (required):")
 		);
 
 	$directory = "files/" . $pName . "/v" . $versionNumber . "/dataset";
@@ -2055,8 +2055,8 @@ function openabmma_addVersion01_submit ($form_id, $edit) {
 
 	if ($newVersion)
 	{
-            // FIXME: rename to doc not 'odd'.
-            mkdir ("files/" . $pName . "/v" . $versionNumber . "/odd", 0755, TRUE);
+            // FIXME: rename to doc not 'doc'.
+            mkdir ("files/" . $pName . "/v" . $versionNumber . "/doc", 0755, TRUE);
             mkdir ("files/" . $pName . "/v" . $versionNumber . "/code", 0755, TRUE);
             mkdir ("files/" . $pName . "/v" . $versionNumber . "/other", 0755, TRUE);
             mkdir ("files/" . $pName . "/v" . $versionNumber . "/dataset", 0755, TRUE);
