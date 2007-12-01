@@ -3137,7 +3137,7 @@ function openabmma_getFormattedVersionList ($pName)
 	drupal_add_css (openabmma_get_css_path ());
 	$versionCount = 0;
 	$output  = "<p>&nbsp;</p><table border='0' cellpadding='1' cellspacing='0' width='100%'>";
-	$output .= "<tr class='openabmData'><td class='openabmCol' width='10%'><b>Version Num</b></td><td class='openabmCol' width='50%'><b>Description</b></td><td class='openabmCol' width='5%'><b>Public</b></td><td class='openabmCol' width='5%'><b>Submitted</b></td><td class='openabmCol' width='20%'><b>Date last modified</b></td><td>&nbsp;</td><td>&nbsp;</td></tr>";
+	$output .= "<tr class='openabmData'><td class='openabmCol' width='10%'><b>Version Num</b></td><td class='openabmCol' width='50%'><b>Description</b></td><td class='openabmCol' width='5%'><b>Download</b></td><td class='openabmCol' width='5%'><b>Public</b></td><td class='openabmCol' width='5%'><b>Submitted</b></td><td class='openabmCol' width='20%'><b>Date last modified</b></td><td>&nbsp;</td><td>&nbsp;</td></tr>";
 
 	$query = "SELECT visible, version_num, description, date_modified, submittedReview FROM openabm_model_version WHERE model_id = %d";
 	$result = db_query ($query, openabmma_getModelId ($pName));
@@ -3148,9 +3148,44 @@ function openabmma_getFormattedVersionList ($pName)
 		$visible = $item->visible == "1" ? "Yes" : "No";
 		$desc = substr ($item->description, 0, 49);
 
+		$dlStr = "";
+	    $files_root = "files/" . $pName . "/v" . $versionCount;
+	    if (openabmma_getFileCount ($files_root . "/code") != 0)
+	    {
+		$filename = openabmma_getFirstFile ($files_root . "/code");
+		$dlStr = l ("Code", "download/" . $pName . "/version" . $versionCount . "/code") . "<br/>";
+	    }
+
+	    $files_root = "files/" . $pName . "/v" . $versionCount;
+	    if (openabmma_getFileCount ($files_root . "/doc") != 0)
+	    {
+		$filename = openabmma_getFirstFile ($files_root . "/doc");
+		$dlStr .= l ("Documentation", "download/" . $pName . "/version" . $versionCount . "/doc") . "<br/>";
+	    }
+
+	    $files_root = "files/" . $pName . "/v" . $versionCount;
+	    if (openabmma_getFileCount ($files_root . "/sensitivity") != 0)
+	    {
+		$filename = openabmma_getFirstFile ($files_root . "/sensitivity");
+		$dlStr .= l ("Sensitivity", "download/" . $pName . "/version" . $versionCount . "/sensitivity") . "<br/>";
+	    }
+
+	    $files_root = "files/" . $pName . "/v" . $versionCount;
+	    if (openabmma_getFileCount ($files_root . "/dataset") != 0)
+	    {
+		$filename = openabmma_getFirstFile ($files_root . "/dataset");
+		$dlStr .= l ("Dataset", "download/" . $pName . "/version" . $versionCount . "/dataset") . "<br/>";
+	    }
+
+	    $files_root = "files/" . $pName . "/v" . $versionCount;
+	    if (openabmma_getFileCount ($files_root . "/other") != 0)
+	    {
+		$filename = openabmma_getFirstFile ($files_root . "/other");
+		$dlStr .= l ("Other", "download/" . $pName . "/version" . $versionCount . "/other") . "<br/>";
+	    }
 		if (strlen ($item->description) > 50)
 			$desc .= "...";
-		$output .= "<tr class='openabmData'><td class='openabmCol'>" . $item->version_num . "</td><td class='openabmCol'>" . l ($desc, "mymodels/". $pName . "/version" . $item->version_num . "/metadata") . "</td><td class='openabmCol'>" . $visible . "</td><td class='openabmCol'>" . $submitted . "</td><td class='openabmCol'>". $item->date_modified . "</td><td>";
+		$output .= "<tr class='openabmData'><td class='openabmCol'>" . $item->version_num . "</td><td class='openabmCol'>" . l ($desc, "mymodels/". $pName . "/version" . $item->version_num . "/metadata") . "</td><td class='openabmCol'>" . $dlStr . "</td><td class='openabmCol'>" . $visible . "</td><td class='openabmCol'>" . $submitted . "</td><td class='openabmCol'>". $item->date_modified . "</td><td>";
 
 		if ($user->name == $owner)
 			$output .= l ("edit", "mymodels/" . $pName . "/edit/version" . $item->version_num . "/step01");
