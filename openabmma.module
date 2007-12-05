@@ -1341,7 +1341,7 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
     return ($form);	
 }
 
-function openabmma_cleantmp($directory)
+function openabmma_cleantmp($directory, $recursive=false)
 {
 	//FIXME: Better security checks to see which folder/files are being deleted
 	if ($directory [0] == '/' || strpos ($directory, "../") != FALSE)
@@ -1356,10 +1356,24 @@ function openabmma_cleantmp($directory)
 		if( $filename != "." && $filename != ".." )
 		{
 			$filename = $directory. "/". $filename;
-//			drupal_set_message ($filename);
-			unlink($filename);
+
+			if ($recursive && is_dir ($filename))
+			{
+				// drupal_set_message ($filename);
+				// remove the first 'files' from the path because it will automatically be re-attached in the next call
+				$pathArray = explode ('/', $filename);
+				array_shift ($pathArray);
+				$dirName = implode ('/', $pathArray);
+				openabmma_cleantmp ($dirName);
+				rmdir ('files/' . $dirName);
+			}
+			else
+				unlink($filename);
 		}
 	}
+
+	if ($recursive)
+		rmdir ($directory);
 }
 
 function openabmma_addVersion03_submit ($form_id, $edit)
@@ -1798,9 +1812,10 @@ function openabmma_optFiles ()
 
 function openabmma_getFileCount ($directory)
 {
-	$d = dir($directory);
-//	drupal_set_message ($directory);
-//	return 0;
+	$d = @dir($directory);
+	if ($d == null || $d == false)
+		return;
+
 	$count = 0;
 	while (false !== ($entry = $d->read()))
 		$count++;
@@ -1812,7 +1827,10 @@ function openabmma_getFileCount ($directory)
 
 function openabmma_getFirstFile ($directory)
 {
-	$d = dir($directory);
+	$d = @dir($directory);
+	if ($d == null || $d == false)
+		return;
+
 	while (false !== ($entry = $d->read()))
 		if ($entry != "." && $entry != "..")
 			return $entry;
@@ -1837,7 +1855,7 @@ function openabmma_addVersion04_submit ($form_id, $edit)
 		drupal_goto ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/reviewnote");
 
 	if ($edit ["version_inst"]['commented'] == '0' || $edit ["version_inst"]['cleanup'] == '0' || $edit ["version_inst"]['running'] == '0')
-		drupal_set_message ("<b><font color='red'>Well-commented, cleanedup and running code is required before you submit your model version for review!</font></b><br/>[Should we have a link to let the user still submit the model for review along with comments to the editor to justify that he should still be able to send his model for review?]");
+		drupal_set_message ("<b><font color='red'>Well-commented, cleanedup and running code is required before you submit your model version for review!</font></b><br/>]");
 	else
 	{
 		$directory = "files/" . $pName . "/v" . $versionNumber . "/dataset";
@@ -3121,7 +3139,7 @@ function openabmma_deleteVersion ()
 	$query = "DELETE FROM openabm_model_version WHERE model_id=%d AND version_num=%d";
 	db_query ($query, openabmma_getModelId ($pName), $versionNumber);
 
-	openabmma_cleantmp ($pName . '/v' . $versionNumber);
+	openabmma_cleantmp ($pName . '/v' . $versionNumber, true);
 
 	drupal_goto ("mymodels/" . $pName);
 	return "";
@@ -3149,39 +3167,39 @@ function openabmma_getFormattedVersionList ($pName)
 		$desc = substr ($item->description, 0, 49);
 
 		$dlStr = "";
-	    $files_root = "files/" . $pName . "/v" . $versionCount;
+	    $files_root = "files/" . $pName . "/v" . $item->version_num;
 	    if (openabmma_getFileCount ($files_root . "/code") != 0)
 	    {
 		$filename = openabmma_getFirstFile ($files_root . "/code");
-		$dlStr = l ("Code", "download/" . $pName . "/version" . $versionCount . "/code") . "<br/>";
+		$dlStr = l ("Code", "download/" . $pName . "/version" . $item->version_num . "/code") . "<br/>";
 	    }
 
-	    $files_root = "files/" . $pName . "/v" . $versionCount;
+	    $files_root = "files/" . $pName . "/v" . $item->version_num;
 	    if (openabmma_getFileCount ($files_root . "/doc") != 0)
 	    {
 		$filename = openabmma_getFirstFile ($files_root . "/doc");
-		$dlStr .= l ("Documentation", "download/" . $pName . "/version" . $versionCount . "/doc") . "<br/>";
+		$dlStr .= l ("Documentation", "download/" . $pName . "/version" . $item->version_num . "/doc") . "<br/>";
 	    }
 
-	    $files_root = "files/" . $pName . "/v" . $versionCount;
+	    $files_root = "files/" . $pName . "/v" . $item->version_num;
 	    if (openabmma_getFileCount ($files_root . "/sensitivity") != 0)
 	    {
 		$filename = openabmma_getFirstFile ($files_root . "/sensitivity");
-		$dlStr .= l ("Sensitivity", "download/" . $pName . "/version" . $versionCount . "/sensitivity") . "<br/>";
+		$dlStr .= l ("Sensitivity", "download/" . $pName . "/version" . $item->version_num . "/sensitivity") . "<br/>";
 	    }
 
-	    $files_root = "files/" . $pName . "/v" . $versionCount;
+	    $files_root = "files/" . $pName . "/v" . $item->version_num;
 	    if (openabmma_getFileCount ($files_root . "/dataset") != 0)
 	    {
 		$filename = openabmma_getFirstFile ($files_root . "/dataset");
-		$dlStr .= l ("Dataset", "download/" . $pName . "/version" . $versionCount . "/dataset") . "<br/>";
+		$dlStr .= l ("Dataset", "download/" . $pName . "/version" . $item->version_num . "/dataset") . "<br/>";
 	    }
 
-	    $files_root = "files/" . $pName . "/v" . $versionCount;
+	    $files_root = "files/" . $pName . "/v" . $item->version_num;
 	    if (openabmma_getFileCount ($files_root . "/other") != 0)
 	    {
 		$filename = openabmma_getFirstFile ($files_root . "/other");
-		$dlStr .= l ("Other", "download/" . $pName . "/version" . $versionCount . "/other") . "<br/>";
+		$dlStr .= l ("Other", "download/" . $pName . "/version" . $item->version_num . "/other") . "<br/>";
 	    }
 		if (strlen ($item->description) > 50)
 			$desc .= "...";
