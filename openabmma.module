@@ -2470,7 +2470,7 @@ function openabmma_addModel ()
 		'#options' => array(
 		'replica' => t('Check this box is this a replicated model instead of an original model'),
 			),
-		'#description' => t('If the model you are submitting is your own implementation but an idea of somebody else, put a check mark here. If your model is your own idea, leave this box blank.'),
+		'#description' => t('If the model you are submitting is your own implementation a replica of an existing model of somebody else, put a check mark here. If this is an original model, leave this box blank.'),
 		);
 	}
 	else
@@ -2481,7 +2481,7 @@ function openabmma_addModel ()
 		'#options' => array(
 		'replica' => t('Check this box is this a replicated model instead of an original model'),
 			),
-		'#description' => t('If the model you are submitting is your own implementation but an idea of somebody else, put a check mark here. If your model is your own idea, leave this box blank.'),
+		'#description' => t('If the model you are submitting is your own implementation a replica of an existing model of somebody else, put a check mark here. If this is an original model, leave this box blank.'),
 		);
 	}
 
@@ -3110,14 +3110,14 @@ function openabmma_openProject ($pName='')
 
 	$owner = openabmma_getModelOwner ($pName);
 
-	$output = "<br/>";
+	$output = "<br/>You can now add or change information on the model project, or add versions of the model.<br/>&nbsp;<br/><u>Metadata information:</u><br/>";
 	$output .= l ("View current metadata configuration for this model", "mymodels/" . $pName . "/viewMetadata");
 
 	if ($owner == $user->name)
 	{
-		$output .= "<br/>&nbsp;<br/>Owner options:";
-		$output .= "<br/>" . l ("Manage members in this model", "mymodels/" . $pName . "/members");
+//		$output .= "<br/>&nbsp;<br/>Owner options:";
 		$output .= "<br/>" . l ("Change model metadata", "models/edit/" . $pName);
+		$output .= "<br/>" . l ("Manage members in this model", "mymodels/" . $pName . "/members");
 	}
 
 	$output .= openabmma_getFormattedVersionList ($pName);
@@ -3226,7 +3226,7 @@ function openabmma_getFormattedVersionList ($pName)
 
 	$output .= "</table>";
 
-	$finalOutput = "<p>&nbsp;</p>Currently there are " . $versionCount . " version(s) in this model.<br/>To add a new version, click " . l ("here", "mymodels/" . $pName . "/add/version") . "<br/>";
+	$finalOutput = "<br/>&nbsp;<br/><u>Add model versions (Currently there are " . $versionCount . " version(s) in this model):</u><br/>" . l ("Upload a new version", "mymodels/" . $pName . "/add/version") . "<br/>";
 	if ($versionCount != 0)
 		$finalOutput .= $output;
 
