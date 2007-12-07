@@ -15,24 +15,28 @@
  */
 function openabmma_block ($op='list', $delta=0)
 {
+    global $user;
     // listing of blocks, such as on the admin/block page
     if ($op == "list") {
         $block[0]["info"] = t("OpenABM Resource Links");
         return $block;
     }
     else if ($op == 'view') {
-        //if (user_access ('review models')) {
-            $block_content = "<br/>" . l ("Review Models", "review") . "<br/>";
-        //}
+        $block_content = l("Browse models", "models/browse") . "<br/>" . l("Search models", "models/search") . "<br/>";
 
-        $block_content .= l ("My models", "models/") . "<br/>"
-            . l ("Search models", "models/search") . "<br/>";
-        //if (user_access ('administer content')) {
+        if ($user->uid != 0) {
+            $block_content .= l("My models", "models/") . "<br/>" . l("Add a new model", "models/add") . "<br/>";
+        }
+
+        if (user_access ('review models')) {
+            $block_content .= "<hr/>" . l ("Review Models", "review") . "<br/>";
+        }
+        if (user_access ('administer content')) {
             $block_content .= "<br/>" . l ("Model licenses", "config/licenses");
             $block_content .= "<br/>" . l ("Member roles", "config/roles");
             $block_content .= "<br/>" . l ("Programming languages", "config/planguages");
             $block_content .= "<br/>" . l ("Frameworks", "config/frameworks");
-        //}
+        }
 
         $block['subject'] = 'Model Archive';
         $block['content'] = $block_content;
@@ -1819,10 +1823,8 @@ function openabmma_getFileCount ($directory)
 
 	$count = 0;
 	while (false !== ($entry = $d->read()))
-		$count++;
-
+            $count++;
 	$d->close();
-
 	return $count-2;	// Exclude "." and ".."
 }
 
