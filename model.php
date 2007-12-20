@@ -403,10 +403,9 @@ function openabmma_doSearch ($searchText='')
 	$searchTextTitle = implode (" OR LOWER(title) LIKE ", $searchArray);
 
 	// doing only plain keyword search. not checking title, description or other fields...
-	$query = "SELECT DISTINCT (model_id) as 'ID' FROM openabm_model_keywords WHERE (keyword) LIKE " . $searchTextKeyword;
-//	$query = "SELECT DISTINCT (model_id) as 'ID' FROM openabm_model_keywords WHERE LOWER(keyword) LIKE " . $searchTextKeyword;
-	drupal_set_message ($query);
+	$query = "SELECT DISTINCT (SELECT DISTINCT (id) as 'ID' FROM openabm_model WHERE (name) LIKE " . $searchTextName . " OR (title) LIKE " . $searchTextTitle . " UNION SELECT DISTINCT (model_id) as 'ID' FROM openabm_model_keywords WHERE (keyword) LIKE " . $searchTextKeyword . ") AS 'ID'";
 
+//	drupal_set_message ($query);
 	// not using %s because the quotes should not be escaped
 	$result1 = db_query ($query);
 	$count = 0;
@@ -416,10 +415,7 @@ function openabmma_doSearch ($searchText='')
 		$count++;
 		$output .= l (openabmma_getModelTitle ($proj->ID) . " [" . openabmma_getModelName ($proj->ID) . "]", "mymodels/" . openabmma_getModelName ($proj->ID)) . "<br/>&nbsp;<br/>";
 	}
-
-	$query = "SELECT DISTINCT (id) as 'ID' FROM openabm_model WHERE (name) LIKE " . $searchTextName . " OR (title) LIKE " . $searchTextTitle;
-//	$query = "SELECT DISTINCT (id) as 'ID' FROM openabm_model WHERE LCASE(name) LIKE " . $searchTextName . " OR LCASE(title) LIKE " . $searchTextTitle;
-	drupal_set_message ($query);
+/*
 	$result2 = db_query ($query);
 
 	while ($proj = db_fetch_object ($result2))
@@ -428,7 +424,7 @@ function openabmma_doSearch ($searchText='')
 		$count++;
 		$output .= l (openabmma_getModelTitle ($proj->ID) . " [" . openabmma_getModelName ($proj->ID) . "]", "mymodels/" . openabmma_getModelName ($proj->ID)) . "<br/>&nbsp;<br/>";
 	}
-
+*/
 	$output = $count . " result(s) matched your query.<br/>&nbsp;<br/>" . $output;
 	return $output;
 }
