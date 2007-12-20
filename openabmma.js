@@ -1,12 +1,6 @@
-function validate_code_submission() {
-    alert("getting invoked");
-    return true;
-}
-
 function validate_version_step01 (newVersion)
 {
-//	alert ($('#edit-version-description').val ());
-
+	// Nothing to validate here
 	return true;
 }
 
@@ -47,41 +41,9 @@ function validate_version_step04 (newVersion)
 	return stat2 && stat3;
 }
 
-function validate_version_files_basic ()
-{
-	if ($('#edit-submitAction').val () == 0)	// back button pressed
-		return true;
-
-	valid_ext = 'gz bz2 zip nlogo c cpp java jar';
-	var stat1 = validate_ext ('#edit-version-code-file', valid_ext, false, "The code file you are trying to upload has an extension that is not allowed for code files. The allowed extensions are: " + valid_ext + ".");
-
-	valid_ext = 'gz bz2 zip xls ods txt';
-	var stat2 = validate_ext ('#edit-version-sensitivity', valid_ext, true, "The sensitivity file you are trying to upload has an extension that is not allowed for sensitivity files. The allowed extensions are: " + valid_ext + ".\nThe sensitivity file is optional.");
-
-	return stat1 && stat2;
-}
-
-function validate_version_files_opt ()
-{
-	if ($('#edit-submitAction').val () == 0)	// back button pressed
-		return true;
-
-	valid_ext = 'gz bz2 zip pdf doc txt';
-	stat1 = validate_ext ('#edit-version-odd-file', valid_ext, false, "The ODD file you are trying to upload has an extension that is not allowed for ODD files. The allowed extensions are: " + valid_ext + ".");
-
-	valid_ext = 'gz bz2 zip pdf doc txt xls ods';
-	stat2 = validate_ext ('#edit-version-dataset', valid_ext, true, "The Dataset file you are trying to upload has an extension that is not allowed for Dataset files. The allowed extensions are: " + valid_ext + ". The dataset file is optional.");
-
-	valid_ext = 'gz bz2 zip pdf doc txt jpg jpeg';
-	stat3 = validate_ext ('#edit-version-other', valid_ext, true, "The additional file you are trying to upload has an extension that is not allowed for additional files. The allowed extensions are: " + valid_ext + ". The additional file is optional.");
-
-	return stat1 && stat2 && stat3;
-}
-
 function validate_model (newVersion)
 {
-//	alert ($('#edit-version-description').val ());
-
+	// Nothing to validate here
 	return true;
 }
 
