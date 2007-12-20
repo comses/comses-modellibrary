@@ -22,7 +22,7 @@ function validate_version_step03 (newVersion)
 	stat1 = validate_ext ('#edit-version-sensitivity', valid_ext, true, "The sensitivity file you are trying to upload has an extension that is not allowed for sensitivity files. The allowed extensions are: " + valid_ext + ".\nThe sensitivity file is optional.");
 
 	valid_ext = 'gz bz2 zip pdf doc txt';
-	stat2 = validate_ext ('#edit-version-odd-file', valid_ext, false, "The ODD file you are trying to upload has an extension that is not allowed for ODD files. The allowed extensions are: " + valid_ext + ".");
+	stat2 = validate_ext ('#edit-version-doc-file', valid_ext, false, "The documentation file you are trying to upload has an extension that is not allowed for such files. The allowed extensions are: " + valid_ext + ".");
 
 	return stat1 && stat2;
 }
@@ -93,4 +93,28 @@ function validate_ext (formVar, allowed_ext, optionalField, errorMsg)
 	}
 
 	return true;
+}
+
+function validateAndGo (modelName, modelVersion, action, stepNumber, url)
+{
+	var valid = false;
+	var newVersion = action == "add" ? 1 : 0;
+
+	switch (stepNumber)
+	{
+		case 1:	valid = validate_version_step01 (newVersion);	break;
+		case 2:	valid = validate_version_step02 (newVersion);	break;
+		case 3:	valid = validate_version_step03 (newVersion);	break;
+		case 4:	valid = validate_version_step04 (newVersion);	break;
+		default: alert ('Invalid step number to validate function.'); return false;
+	}
+
+	// goto URL
+	if (valid)
+		window.location.replace (url);
+}
+
+function abc()
+{
+	alert ("!");
 }

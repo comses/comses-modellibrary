@@ -18,7 +18,8 @@ function openabmma_showMetaData ($pName='') {
         $visible = FALSE;
 
 	drupal_set_message ($visible);
-*/    if ($user->name != $owner && openabmma_inList ($user->name, openabmma_getModelMemberArray ($pName)) == -1)
+*/
+    if ($user->name != $owner && openabmma_inList ($user->name, openabmma_getModelMemberArray ($pName)) == -1)
     {
         openabmma_accessError ('Only model members can view metadata for a model.');
         return '';
@@ -412,19 +413,16 @@ function openabmma_doSearch ($searchText='')
 
 	while ($proj = db_fetch_object ($result1))
 	{
-		$count++;
-		$output .= l (openabmma_getModelTitle ($proj->ID) . " [" . openabmma_getModelName ($proj->ID) . "]", "mymodels/" . openabmma_getModelName ($proj->ID)) . "<br/>&nbsp;<br/>";
-	}
-/*
-	$result2 = db_query ($query);
+		if ($proj->ID == "")
+			continue;
 
-	while ($proj = db_fetch_object ($result2))
-	{
-//		$output .= "def";
 		$count++;
-		$output .= l (openabmma_getModelTitle ($proj->ID) . " [" . openabmma_getModelName ($proj->ID) . "]", "mymodels/" . openabmma_getModelName ($proj->ID)) . "<br/>&nbsp;<br/>";
+
+		$pName = openabmma_getModelName ($proj->ID);
+		$owner = openabmma_getModelOwner ($pName);
+		$output .= l (openabmma_getModelTitle ($proj->ID) . " [" . $pName . "]", "mymodels/" . $pName) . "<br/><small>Owner: " . $owner . "</small><br/>";
 	}
-*/
+
 	$output = $count . " result(s) matched your query.<br/>&nbsp;<br/>" . $output;
 	return $output;
 }
@@ -625,7 +623,7 @@ function openabmma_addMember_submit ($form_id, $edit)
 
 	if ($user->name != openabmma_getModelOwner ($projName))
 	{
-	        openabmma_accessError ('Only model members can view metadata for a model.');
+	        openabmma_accessError ('Only model members can add memebers for a model.');
 		return;
 	}
 
@@ -740,11 +738,49 @@ function openabmma_openProject ($pName='')
 	$owner = openabmma_getModelOwner ($pName);
 
 	$output = "<br/>You can now add or change information on the model project, or add versions of the model.<br/>&nbsp;<br/><u>Metadata information:</u><br/>";
-	$output .= l ("View current metadata configuration for this model", "mymodels/" . $pName . "/viewMetadata");
+
+/*
+    if ($user->name != $owner && openabmma_inList ($user->name, openabmma_getModelMemberArray ($pName)) == -1)
+    {
+        openabmma_accessError ('Only model members can view metadata for a model.');
+        return '';
+    }
+*/
+    drupal_add_css (openabmma_get_css_path ());
+
+    $query = "SELECT owner_uid, name, title, replicatedModel, replicators, reference from openabm_model WHERE name='%s'";
+    $result = (array) db_fetch_object (db_query ($query, $pName));
+    $owner_uid = $result ['owner_uid'];
+    $name = $result ['name'];
+    $title = $result ['title'];
+    $replicated = $result ['replicatedModel'] == "1" ? "Yes" : "No";
+    $replicators = $result ['replicators'];
+    $reference_url = $result ['reference'];
+
+    $keywordList = '';
+    $query = "SELECT keyword FROM openabm_model_keywords WHERE model_id=%d";
+    $result = db_query ($query, openabmma_getModelId ($pName));
+    while ($element = db_fetch_object ($result))
+        $keywordList .= $element->keyword . ", ";
+    $keywordList = substr ($keywordList, 0, strlen($keywordList)-2);
+
+    $output .= "<p><table border='0' cellpadding='0' cellspacing='0' width='100%'>";
+    $output .= "<tr class='openabmData'><td width='30%'><b>Model name:</b></td><td><i>" . $name . "</i></td></tr>";
+    $output .= "<tr class='openabmData'><td><b>Model owner:</b></td><td><i>" . openabmma_getModelOwner ($name) . "</i></td></tr>";
+    $output .= "<tr class='openabmData'><td><b>Model title:</b></td><td><i>" . $title . "</i></td></tr>";
+    $output .= "<tr class='openabmData'><td><b>Replicated model:</b></td><td><i>" . $replicated . "</i></td></tr>";
+    if ($replicated == "Yes")
+    {
+        $output .= "<tr class='openabmData'><td><b>Replicators:</b></td><td><i>" . $replicators . "</i></td></tr>";
+        $output .= "<tr class='openabmData'><td><b>Reference URL:</b></td><td><i>" . $reference_url . "</i></td></tr>";
+    }
+
+    $output .= "<tr class='openabmData'><td><b>Model keywords:</b></td><td><i>" . $keywordList . "</i></td></tr>";
+    $output .= "</table>";
 
 	if ($owner == $user->name)
 	{
-		$output .= "<br/>" . l ("Change model metadata", "models/edit/" . $pName);
+		$output .= "<br/>" . l ("To change model metadata, click here", "models/edit/" . $pName);
 		$output .= "<br/>" . l ("Manage members in this model", "mymodels/" . $pName . "/members");
 	}
 
@@ -833,7 +869,7 @@ function openabmma_getFormattedVersionList ($pName)
 
 	$output .= "</table>";
 
-	$finalOutput = "<br/>&nbsp;<br/><u>Add model versions (Currently there are " . $versionCount . " version(s) in this model):</u><br/>" . l ("Upload a new version", "mymodels/" . $pName . "/add/version") . "<br/>";
+	$finalOutput = "<br/>&nbsp;<br/><u>Versions (Currently " . $versionCount . " version(s)):</u><br/>" . l ("Upload a new version", "mymodels/" . $pName . "/add/version") . "<br/>";
 	if ($versionCount != 0)
 		$finalOutput .= $output;
 

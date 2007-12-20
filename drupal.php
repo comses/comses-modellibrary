@@ -2,24 +2,28 @@
 
 function openabmma_block ($op='list', $delta=0)
 {
+	global $user;
     // listing of blocks, such as on the admin/block page
     if ($op == "list") {
         $block[0]["info"] = t("OpenABM Resource Links");
         return $block;
     }
-    else if ($op == 'view') {
-        //if (user_access ('review models')) {
-            $block_content = "<br/>" . l ("Review Models", "review") . "<br/>";
-        //}
+     else if ($op == 'view') {
+        $block_content = l("Browse models", "models/browse") . "<br/>" . l("Search models", "models/search") . "<br/>";
 
-        $block_content .= l ("My models", "models/") . "<br/>"
-            . l ("Search models", "models/search") . "<br/>";
-        //if (user_access ('administer content')) {
+        if ($user->uid != 0) {
+            $block_content .= "<br/>" . l("My models", "models/") . "<br/>" . l("Add a new model", "models/add") . "<br/>";
+        }
+
+        if (user_access ('review models')) {
+            $block_content .= "<hr/>" . l ("Review Models", "review") . "<br/>";
+        }
+        if (user_access ('administer content')) {
             $block_content .= "<br/>" . l ("Model licenses", "config/licenses");
             $block_content .= "<br/>" . l ("Member roles", "config/roles");
             $block_content .= "<br/>" . l ("Programming languages", "config/planguages");
             $block_content .= "<br/>" . l ("Frameworks", "config/frameworks");
-        //}
+        }
 
         $block['subject'] = 'Model Archive';
         $block['content'] = $block_content;
@@ -57,7 +61,7 @@ function openabmma_menu($may_cache) {
             'path' => 'models/search',
             'title' => t('Search Models'),
             'description' => "",
-            'access' => user_access ('modify models'),
+            'access' => user_access ('view models'),
             'callback' => 'openabmma_searchProjects',
             'type' => MENU_CALLBACK
             );
@@ -113,6 +117,15 @@ function openabmma_menu($may_cache) {
             'description' => "",
             'access' => user_access ('administer content'),
             'callback' => 'openabmma_showFrameworks',
+            'type' => MENU_CALLBACK
+            );
+
+        $items[] = array(
+            'path' => 'models/browse',
+            'title' => t('Browse models'),
+            'description' => "",
+            'access' => user_access ('view models'),
+            'callback' => 'openabmma_browseModels',
             'type' => MENU_CALLBACK
             );
     }

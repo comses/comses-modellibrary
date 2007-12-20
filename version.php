@@ -31,7 +31,7 @@ function openabmma_versionMetadata ()
 
     $query = "SELECT description, model_language_id, os, framework, reference_text, examples, submittedReview, visible, date_modified, run_conditions, license_id from openabm_model_version WHERE model_id=%d AND version_num=%d";
     $result = (array) db_fetch_object (db_query ($query, openabmma_getModelId ($pName), $versionNumber));
-    $description = $result ['description'];
+    $description = $result ['description'] == '' ? '(none)' : $result ['description'];
     $model_language_id = $result ['model_language_id'];
     $os = $result ['os'];
     $framework = $result ['framework'];
@@ -56,7 +56,7 @@ function openabmma_versionMetadata ()
         $members = implode (' ,', $memberArray);
 
     $output = "<br/><p><table border='0' cellpadding='0' cellspacing='0' width='100%'>";
-    $output .= "<tr class='openabmData'><td width='30%'><b>Version description:</b></td><td><i>" . substr($description,0,100) . "...</i></td></tr>";
+    $output .= "<tr class='openabmData'><td width='30%'><b>Version description:</b></td><td><i>" . $description . "</i></td></tr>";
     $output .= "<tr class='openabmData'><td><b>Owner:</b></td><td><i>" . openabmma_getModelOwner ($pName) . "</i></td></tr>";
     $output .= "<tr class='openabmData'><td><b>Members:</b></td><td><i>" . $members . "</i></td></tr>";
     $output .= "<tr class='openabmData'><td><b>Visible to public:</b></td><td><i>" . $visible . "</i></td></tr>";
@@ -274,14 +274,21 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
     $newVersion = $action == "add" ? 1 : 0;		
     drupal_add_js( openabmma_get_js_path() );
 
-    $form['#attributes'] = array('enctype' => "multipart/form-data", 'onsubmit' => 'return validate_version_step02(' . $newVersion . ')');
+	$stepLinkText = "<table width='100%'><tr><td><a href=\"javascript:validateAndGo ('" . $pName . "', " . $versionNumber . ", '" . $action . "', 2, '" . url ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/step01") . "');\">Step 01</a></td><td><a href=\"javascript:validateAndGo ('" . $pName . "', " . $versionNumber . ", '" . $action . "', 2, '" . url ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/step02") . "');\">Step 02</a></td><td><a href=\"javascript:validateAndGo ('" . $pName . "', " . $versionNumber . ", '" . $action . "', 2, '" . url ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/step03") . "');\">Step 03</a></td><td><a href=\"javascript:validateAndGo ('" . $pName . "', " . $versionNumber . ", '" . $action . "', 2, '" . url ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/step04") . "');\">Step 04</a></td></tr></table><p>&nbsp;</p>";
 
+	$files_root = "files/models/" . $pName . "/v" . $versionNumber;
+	if (openabmma_getFileCount ($files_root . "/code") == 0)
+		$stepLinkText = "";	// Don't allow user to navigate unless he uploads a code file OR unless he clicks 'Back'
+					// There is a possibility that the user may escape from having to upload the code file, but we make all
+					// these checks at the end before the model is submitted and then redirect him to the appropriate step
+
+    $form['#attributes'] = array('enctype' => "multipart/form-data", 'onsubmit' => 'return validate_version_step02(' . $newVersion . ')');
     $form["details"] = array(
             "#type" => 'fieldset',
             "#collapsible" => FALSE,
             "#collapsed" => FALSE,
             "#title" => null,
-            "#description" => null,
+            "#description" => $stepLinkText
             );
 
 	$directory = "files/models/" . $pName . "/v" . $versionNumber . "/code";
@@ -426,14 +433,21 @@ function openabmma_addVersion03 ($edit=null, $item=0)
 	$newVersion = $action == "add" ? 1 : 0;		
 	drupal_add_js( openabmma_get_js_path() );
 
-	$form['#attributes'] = array('enctype' => "multipart/form-data", 'onsubmit' => 'return validate_version_step03 (' . $newVersion . ')');
+	$stepLinkText = "<table width='100%'><tr><td><a href=\"javascript:validateAndGo ('" . $pName . "', " . $versionNumber . ", '" . $action . "', 3, '" . url ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/step01") . "');\">Step 01</a></td><td><a href=\"javascript:validateAndGo ('" . $pName . "', " . $versionNumber . ", '" . $action . "', 3, '" . url ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/step02") . "');\">Step 02</a></td><td><a href=\"javascript:validateAndGo ('" . $pName . "', " . $versionNumber . ", '" . $action . "', 3, '" . url ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/step03") . "');\">Step 03</a></td><td><a href=\"javascript:validateAndGo ('" . $pName . "', " . $versionNumber . ", '" . $action . "', 3, '" . url ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/step04") . "');\">Step 04</a></td></tr></table><p>&nbsp;</p>";
 
+	$files_root = "files/models/" . $pName . "/v" . $versionNumber;
+	if (openabmma_getFileCount ($files_root . "/doc") == 0)
+		$stepLinkText = "";	// Don't allow user to navigate unless he uploads a code file OR unless he clicks 'Back'
+					// There is a possibility that the user may escape from having to upload the code file, but we make all
+					// these checks at the end before the model is submitted and then redirect him to the appropriate step
+
+	$form['#attributes'] = array('enctype' => "multipart/form-data", 'onsubmit' => 'return validate_version_step03 (' . $newVersion . ')');
 	$form["details"] = array(
 		"#type" => 'fieldset',
 		"#collapsible" => FALSE,
 		"#collapsed" => FALSE,
 		"#title" => null,
-		"#description" => null,
+		"#description" => $stepLinkText,
 	);
 
 	$licenseTypes = array ();
@@ -630,14 +644,16 @@ function openabmma_addVersion04 ($edit=null, $item=0)
 
 	$newVersion = $action == "add" ? 1 : 0;
 	drupal_add_js( openabmma_get_js_path() );
-	$form['#attributes'] = array('enctype' => "multipart/form-data", 'onsubmit' => 'return validate_version_step04 (' . $newVersion . ')');
 
+	$stepLinkText = "<table width='100%'><tr><td><a href=\"javascript:validateAndGo ('" . $pName . "', " . $versionNumber . ", '" . $action . "', 4, '" . url ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/step01") . "');\">Step 01</a></td><td><a href=\"javascript:validateAndGo ('" . $pName . "', " . $versionNumber . ", '" . $action . "', 4, '" . url ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/step02") . "');\">Step 02</a></td><td><a href=\"javascript:validateAndGo ('" . $pName . "', " . $versionNumber . ", '" . $action . "', 4, '" . url ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/step03") . "');\">Step 03</a></td><td><a href=\"javascript:validateAndGo ('" . $pName . "', " . $versionNumber . ", '" . $action . "', 4, '" . url ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/step04") . "');\">Step 04</a></td></tr></table><p>&nbsp;</p>";
+
+	$form['#attributes'] = array('enctype' => "multipart/form-data", 'onsubmit' => 'return validate_version_step04 (' . $newVersion . ')');
 	$form["details"] = array(
 		"#type" => 'fieldset',
 		"#collapsible" => FALSE,
 		"#collapsed" => FALSE,
 		"#title" => null,
-		"#description" => "Components required for review",
+		"#description" => $stepLinkText . "Components required for review",
 	);
 
 //	if ($action != "edit")
@@ -731,7 +747,16 @@ function openabmma_addVersionComplete ()
 	if ($user->name != openabmma_getModelOwner ($pName))
             return openabmma_formAccessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
 
+	$action = arg(2);
 	$versionNumber = openabmma_parseVersionNumber (arg(3));
+
+	$stepURL_root = "mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/step";
+	$files_root = "files/models/" . $pName . "/v" . $versionNumber;
+	if (openabmma_getFileCount ($files_root . "/code") == 0)
+		drupal_goto ($stepURL_root . "02");
+
+	if (openabmma_getFileCount ($files_root . "/doc") == 0)
+		drupal_goto ($stepURL_root . "03");
 
 	$query = "SELECT submittedReview FROM openabm_model_version WHERE model_id=%d and version_num=%d";
 	$result = (array) db_fetch_object (db_query ($query, $pName, $versionNumber));
@@ -868,10 +893,12 @@ function openabmma_addVersion01 ($edit=null, $item=0)
 		"#description" => null,
 	);
 
+	$stepLinkText = "<table width='100%'><tr><td><a href=\"javascript:validateAndGo ('" . $pName . "', " . $versionNumber . ", '" . $action . "', 1, '" . url ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/step01") . "');\">Step 01</a></td><td><a href=\"javascript:validateAndGo ('" . $pName . "', " . $versionNumber . ", '" . $action . "', 1, '" . url ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/step02") . "');\">Step 02</a></td><td><a href=\"javascript:validateAndGo ('" . $pName . "', " . $versionNumber . ", '" . $action . "', 1, '" . url ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/step03") . "');\">Step 03</a></td><td><a href=\"javascript:validateAndGo ('" . $pName . "', " . $versionNumber . ", '" . $action . "', 1, '" . url ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/step04") . "');\">Step 04</a></td></tr></table><p>&nbsp;</p>";
+
 	if ($newVersion == "0")
 		$form ["details"]["reviewNote"] = array (
 			"#type" => "item",
-			"#value" => "<u><b>Note:</b></u> If this model has previously been submitted for review, it will automatically be invalidated from the reviewer's list and you would have to submit it again."
+			"#value" => $stepLinkText . "<u><b>Note:</b></u> If this model has previously been submitted for review, it will automatically be invalidated from the reviewer's list and you would have to submit it again."
 		);
 
 	$form ["details"]["newVersion"] = array (

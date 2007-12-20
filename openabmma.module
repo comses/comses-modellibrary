@@ -64,3 +64,23 @@ function openabmma_showProjects ()
 	$output .= "<br/>" . l ("To add new model, click here", "models/add");
 	return $output;
 }
+
+function openabmma_browseModels ()
+{
+	$query = "SELECT owner_uid, name, title FROM openabm_model";
+	$result = db_query ($query);
+
+	while ($model = db_fetch_object ($result))
+	{
+		$pId = $model->id;
+		$pName = $model->name;
+		$pTitle = $model->title;
+		$owner_uid = $model->owner_uid;
+
+		$count++;
+		$output .= l ($pTitle . " [" . $pName . "]", "mymodels/" . $pName) . "<br/><small>Owner: " . openabmma_getUserName ($owner_uid) . "</small>&nbsp;<br/>";
+	}
+
+	$output = "<br/>" . $count . " model(s).<br/>&nbsp;<br/>" . $output;
+	return $output;
+}
