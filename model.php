@@ -50,7 +50,7 @@ function openabmma_showMetaData ($pName='') {
     $output .= "<tr class='openabmData'><td><b>Replicated model:</b></td><td><i>" . $replicated . "</i></td></tr>";
     if ($replicated == "Yes")
     {
-        $output .= "<tr class='openabmData'><td><b>Replicators:</b></td><td><i>" . $replicators . "</i></td></tr>";
+        $output .= "<tr class='openabmData'><td><b>List of authors of the original model (for replicated models only):</b></td><td><i>" . $replicators . "</i></td></tr>";
         $output .= "<tr class='openabmData'><td><b>Reference URL:</b></td><td><i>" . $reference_url . "</i></td></tr>";
     }
 
@@ -123,7 +123,7 @@ function openabmma_addModel_submit ($form_id, $edit)
         else {
             if ($replicated == '1') {
                 if ($edit ["model_repl"] == "" || $edit ["model_refurl"] == "") {
-                    drupal_set_message ("<b><font color='red'>Since this project is a replicated one, you need to enter information about the replicators and the reference URL.</font></b>");
+                    drupal_set_message ("<b><font color='red'>Since this project is a replicated one, you need to enter information about the original authors and the reference URL.</font></b>");
                     return;
                 }
             }
@@ -161,7 +161,7 @@ function openabmma_addModel_submit ($form_id, $edit)
             if ($edit ["model_repl"] == "" || $edit ["model_refurl"] == "")
             {
 		drupal_set_message ("|" . $edit ["model_repl"] . "|" . $edit ["model_refurl"] . "|");
-                drupal_set_message ("<b><font color='red'>Since this project is a replicated one, you need to enter information about the replicators and the reference URL.</font></b>");
+                drupal_set_message ("<b><font color='red'>Since this project is a replicated one, you need to enter information about the original authors and the reference URL.</font></b>");
                 return;
             }
         }
@@ -300,9 +300,9 @@ function openabmma_addModel ()
 		"#attributes" => array ('checked' => 'checked'),
 		'#title' => t("Model replication:"),
 		'#options' => array(
-		'replica' => t('Check this box is this a replicated model instead of an original model'),
+		'replica' => t('Check this box if this a replicated model instead of an original model'),
 			),
-		'#description' => t('If the model you are submitting is your own implementation a replica of an existing model of somebody else, put a check mark here. If this is an original model, leave this box blank.'),
+		'#description' => t('If the model you are submitting is a replication of an existing model, put a check mark here. If this is a new, original, model, leave this box blank.'),
 		);
 	}
 	else
@@ -311,25 +311,25 @@ function openabmma_addModel ()
 		'#type' => 'checkboxes',
 		'#title' => t("Model replication:"),
 		'#options' => array(
-		'replica' => t('Check this box is this a replicated model instead of an original model'),
+		'replica' => t('Check this box if this a replicated model instead of an original model'),
 			),
-		'#description' => t('If the model you are submitting is your own implementation a replica of an existing model of somebody else, put a check mark here. If this is an original model, leave this box blank.'),
+		'#description' => t('If the model you are submitting is a replication of an existing model, put a check mark here. If this is a new, original, model, leave this box blank.'),
 		);
 	}
 
 	$form ["details"]["model_repl"] = array (
 		"#type" => "textfield",
-		"#title" => t("Replicators (only for replicated models):"),
+		"#title" => t("List of authors of the original model (only for replicated models):"),
 		"#default_value" => $edit ["model_repl"] == "" ? $replicators : $edit ["model_repl"],
-		"#description" => t("If this model is a replicated model, enter the name of replicators here."),
+		"#description" => t("If this model is a replicated model, enter the names of original authors here."),
 		"#maxlength" => 210
 	);
 
 	$form ["details"]["model_refurl"] = array (
 		"#type" => "textfield",
-		"#title" => t("References (only for replicated models):"),
+		"#title" => t("Reference URL (only for replicated models):"),
 		"#default_value" => $edit ["model_refurl"] == "" ? $refurl : $edit ["model_refurl"],
-		"#description" => t("If this model is a replicated model, enter references, if any."),
+		"#description" => t("If this model is a replicated model, enter URL to the original model, if any."),
 		"#maxlength" => 255
 	);
 
@@ -771,7 +771,7 @@ function openabmma_openProject ($pName='')
     $output .= "<tr class='openabmData'><td><b>Replicated model:</b></td><td><i>" . $replicated . "</i></td></tr>";
     if ($replicated == "Yes")
     {
-        $output .= "<tr class='openabmData'><td><b>Replicators:</b></td><td><i>" . $replicators . "</i></td></tr>";
+        $output .= "<tr class='openabmData'><td><b>List of authors of the original model (for replicated models only):</b></td><td><i>" . $replicators . "</i></td></tr>";
         $output .= "<tr class='openabmData'><td><b>Reference URL:</b></td><td><i>" . $reference_url . "</i></td></tr>";
     }
 

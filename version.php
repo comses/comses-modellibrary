@@ -64,7 +64,7 @@ function openabmma_versionMetadata ()
     $output .= "<tr class='openabmData'><td><b>Operating System:</b></td><td><i>" . $os . "</i></td></tr>";
     $output .= "<tr class='openabmData'><td><b>Framework:</b></td><td><i>" . $framework . "</i></td></tr>";
     $output .= "<tr class='openabmData'><td><b>License:</b></td><td><i>" . $license_id . "</i></td></tr>";
-    $output .= "<tr class='openabmData'><td><b>References:</b></td><td><i>" . $reference_text . "</i></td></tr>";
+    $output .= "<tr class='openabmData'><td><b>References to publications where the original model is described:</b></td><td><i>" . $reference_text . "</i></td></tr>";
     $output .= "<tr class='openabmData'><td><b>Examples:</b></td><td><i>" . $examples . "</i></td></tr>";
     $output .= "<tr class='openabmData'><td><b>Submitted for review:</b></td><td><i>" . $submittedReview . "</i></td></tr>";
 
@@ -145,7 +145,7 @@ function openabmma_askIfReview () {
 	$output .= "<br/><p><table border='0' cellpadding='1' cellspacing='0' width='100%'>";
 $output .= "<tr class='openabmData'><td><b>Step 1</b></td><td><i>[Complete]</i></td><td>Version description and visibility to public</td></tr>";
 $output .= "<tr class='openabmData'><td><b>Step 2</b></td><td><i>[Complete]</i></td><td>Code files, language and platform details</td></tr>";
-$output .= "<tr class='openabmData'><td><b>Step 3</b></td><td><i>[Complete]</i></td><td>License information, References, Examples and Sensitivity data</td></tr>";
+$output .= "<tr class='openabmData'><td><b>Step 3</b></td><td><i>[Complete]</i></td><td>License information, References to publications, Examples and Sensitivity data</td></tr>";
 $output .= "<tr class='openabmData'><td><b>Step 4</b></td><td><font color='green'>Only for review</font></td><td>Collecting documents for model review</td></tr>";
 $output .= "</table>";
 
@@ -245,10 +245,69 @@ function openabmma_addVersion02_submit ($form_id, $edit)
 		return;
 	}
 
-	$query = "UPDATE openabm_model_version SET date_modified='%s', model_language_id=%d, os=%d, framework='%s' WHERE model_id=%d AND version_num=%d";
+	$os = $edit ["os"];
+	if ($os == "Other")	// selected other, so get the "other" fields contents first
+	{
+		$os = $edit ["other_os"];
+		if ($os == "")
+		{
+			drupal_set_message ("<b><font color='red'>Please chose an Operating System from the menu or enter the name in the text box below it.</font></b>");
+			return;
+		}
+	}
 
-	db_query ($query, date ("Y-m-d H:i:s"), $edit ["version_language"], $edit ["os"]+1, $edit ["framework"], openabmma_getModelId ($pName), $versionNumber);
+	$osVersion = $edit ["os_ver"];
+	if ($osVersion != "")
+		$os .= ", Version: " . $osVersion;
+
+	$framework = $edit ["framework"];
+	if ($framework == "Other")	// selected other, so get the "other" fields contents first
+	{
+		$framework = $edit ["other_framework"];
+		if ($framework == "")
+		{
+			drupal_set_message ("<b><font color='red'>Please chose a Framework from the menu or enter the name in the text box below it.</font></b>");
+			return;
+		}
+	}
+
+	$frameworkVersion = $edit ["framework_ver"];
+	if ($frameworkVersion != "")
+		$framework .= ", Version: " . $frameworkVersion;
+
+	$pLanguage = $edit ["version_language"];
+
+	// Check if this is the index of the "Other"
+	$query = "SELECT id FROM openabm_model_language WHERE name = 'Other'";
+	$result = (array) db_fetch_object (db_query ($query));
+
+	$other_language = '';
+	if ($pLanguage == $result ['id'])
+	{
+		$other_language = $edit ["other_language"];
+		if ($other_language == "")
+		{
+			drupal_set_message ("<b><font color='red'>Please chose a programming language from the menu or enter the name in the text box below it.</font></b>");
+			return;
+		}
+	}
+
+	$pLanguageVersion = $edit ["version_language_ver"];
+
+	$query = "UPDATE openabm_model_version SET date_modified='%s', model_language_id=%d, other_language='%s', language_version='%s', os='%s', framework='%s' WHERE model_id=%d AND version_num=%d";
+
+	db_query ($query, date ("Y-m-d H:i:s"), $pLanguage, $other_language, $pLanguageVersion, $os, $framework, openabmma_getModelId ($pName), $versionNumber);
 	drupal_goto ("mymodels/" . $pName . "/" . $action . "/version" . $versionNumber . "/step03");
+}
+
+function openabmma_getNameFromString ($os)
+{
+	return substr ($os, 0, strpos ($os, ", Version")-1);
+}
+
+function openabmma_getVersionFromString ($os)
+{
+	return (substr ($os, strpos ($os, ", Version: ")+strlen (",Version: ")+1));
 }
 
 function openabmma_addVersion02 ($edit=null, $item=0) {
@@ -264,12 +323,21 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
 	$versionNumber = openabmma_parseVersionNumber (arg(3));
 
     // FIXME:this doesn't work anymore.
-    $query = "SELECT model_language_id, os, framework FROM openabm_model_version WHERE model_id=%d AND version_num=%d";
+    $query = "SELECT model_language_id, os, other_language, language_version, framework FROM openabm_model_version WHERE model_id=%d AND version_num=%d";
     $result = (array) db_fetch_object (db_query ($query, openabmma_getModelId ($pName), $versionNumber));
     $progLang = $result ['model_language_id'];
 
+    $other_language = $result ['other_language'];
+    $progLangVer = $result ['language_version'];
     $os = $result ['os'];
+
+    $osName = openabmma_getNameFromString ($os);
+    $osVersion = openabmma_getVersionFromString ($os);
+
     $framework = $result ['framework'];
+
+    $frameworkName = openabmma_getNameFromString ($framework);
+    $frameworkVersion = openabmma_getVersionFromString ($framework);
 
     $newVersion = $action == "add" ? 1 : 0;		
     drupal_add_js( openabmma_get_js_path() );
@@ -314,26 +382,54 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
             "#type" => "select",
             "#title" => t("Programming Language:"),
             "#options" => $languages,
-            "#default_value" => $edit ["prog_language"] == "" ? $progLang : $edit ["prog_language"],
+            "#default_value" => $edit ["version_language"] == "" ? $progLang : $edit ["version_language"],
             "#description" => null
             );
-/*
+
     $form ["details"]["other_language"] = array (
             "#type" => "textfield",
-            "#title" => t("Other (if not mentioned in above list):"),
+            "#title" => t("Other language (if not mentioned in above list):"),
             "#maxlength" => 210,
-            "#default_value" => $edit ["other_language"],
+            "#default_value" => $edit ["other_language"] == "" ? $other_language : $edit ["other_language"],
             "#required" => false
             );
-*/
-// FIXME: add that crap that parses the output of "show columns from openabm_model_version like 'os'"
-    $arrayElements = array ('Linux', 'Mac', 'Windows', 'Platform Independent', 'Other');
+
+    $form ["details"]["version_language_ver"] = array (
+            "#type" => "textfield",
+            "#size" => 10,
+            "#title" => t("Programming Language Version:"),
+            "#default_value" => $edit ["version_language_ver"] == "" ? $progLangVer : $edit ["version_language_ver"],
+            "#description" => null
+            );
+
+    $arrayElements = array (
+	'Linux' => 'Linux',
+	'Mac' => 'Mac',
+	'Windows' => 'Windows',
+	'PlatformIndependent' => 'Platform Independent',
+	'Other' => 'Other');
 
     $form ["details"]["os"] = array (
             "#type" => "select",
             "#title" => t("Operating System:"),
-            "#default_value" => $edit ["os"] == "" ? openabmma_inList ($os, $arrayElements) : $edit ["os"],
+            "#default_value" => $edit ["os"] == "" ? (openabmma_inList ($osName, $arrayElements) == -1 ? "Other" : $osName) : $edit ["os"],
             "#options" => $arrayElements,
+            "#description" => null
+            );
+
+    $form ["details"]["other_os"] = array (
+            "#type" => "textfield",
+            "#title" => t("Other OS (if not mentioned in above list):"),
+            "#maxlength" => 210,
+            "#default_value" => $edit ["other_os"] == "" ? (openabmma_inList ($osName, $arrayElements) == -1 ? $osName : "") : $edit ["other_os"],
+            "#required" => false
+            );
+
+    $form ["details"]["os_ver"] = array (
+            "#type" => "textfield",
+            "#size" => 10,
+            "#title" => t("Operating System Version:"),
+            "#default_value" => $edit ["os_ver"] == "" ? $osVersion : $edit ["os_ver"],
             "#description" => null
             );
 
@@ -346,8 +442,24 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
     $form ["details"]["framework"] = array (
             "#type" => "select",
             "#title" => t("Framework used:"),
-            "#default_value" => $edit ["framework"] == "" ? $framework : $edit ["framework"],
+            "#default_value" => $edit ["framework"] == "" ? (openabmma_inList ($frameworkName, $arrayElements) == -1 ? "Other" : $frameworkName) : $edit ["framework"],
             "#options" => $arrayElements,
+            "#description" => null
+            );
+
+    $form ["details"]["other_framework"] = array (
+            "#type" => "textfield",
+            "#title" => t("Other framework (if not mentioned in above list):"),
+            "#maxlength" => 210,
+            "#default_value" => $edit ["other_framework"] == "" ? (openabmma_inList ($frameworkName, $arrayElements) == -1 ? $frameworkName : "") : $edit ["other_framework"],
+            "#required" => false
+            );
+
+    $form ["details"]["framework_ver"] = array (
+            "#type" => "textfield",
+            "#size" => 10,
+            "#title" => t("Framework Version:"),
+            "#default_value" => $edit ["framework_ver"] == "" ? $frameworkVersion : $edit ["framework_ver"],
             "#description" => null
             );
 
@@ -465,7 +577,7 @@ function openabmma_addVersion03 ($edit=null, $item=0)
 
 	$form ["details"]["version_ref"] = array (
 		"#type" => "textarea",
-		"#title" => "References:",
+		"#title" => "References to publications where the original model is described:",
 		"#default_value" => $edit ["version_ref"] == "" ? $refText : $edit ["version_ref"],
 		"#maxlength" => 210,
 		"#description" => t("Links to other hosted material of reference"),
@@ -496,6 +608,7 @@ function openabmma_addVersion03 ($edit=null, $item=0)
 		{
 			$form ["details"]["version_doc_file"] = array (
 				"#type" => "file",
+				"#description" => t("Preferably following the ODD protocol [" . l ("http://www.openabm.org/site/odd", "http://www.openabm.org/site/odd") . "]"),
 				"#title" => t("Documentation (required):")
 			);
 		}
@@ -511,8 +624,8 @@ function openabmma_addVersion03 ($edit=null, $item=0)
 	else		
 		$form ["details"]["version_sensitivity"] = array (
 			"#type" => "file",
-			"#description" => t("File containing sensitivity analysis"),
-			"#title" => t("File containing sensitivity data:")
+			"#description" => null,
+			"#title" => t("File containing information of sensitivity analysis:")
 		);
 
     $form ["details"]["submitAction"] = array (
@@ -809,9 +922,12 @@ function openabmma_addVersion01_submit ($form_id, $edit) {
     }
 
 	$versionNumber = $edit ["versionNumber"];
-    $visible = $edit ["version_visibility"]["visibility"];
-    if ($visible != '0')
-        $visible = '1';
+    $notVisible = $edit ["version_visibility"]["visibility"];
+    if ($notVisible != '0')
+        $notVisible = '1';
+
+	if ($notVisible == '0')	$visible = '1';
+	else			$visible = '0';
 
 	if ($newVersion)
 	{
@@ -929,7 +1045,7 @@ function openabmma_addVersion01 ($edit=null, $item=0)
 		"#required" => false
 	);
 
-	if ($visible)
+	if (!$visible)
 	{
 		$form["details"]["version_visibility"] = array(
 		'#type' => 'checkboxes',
@@ -937,9 +1053,9 @@ function openabmma_addVersion01 ($edit=null, $item=0)
 		"#attributes" => array ('checked' => 'checked'),
 	//	'#default_value' => array (TRUE),
 		'#options' => array(
-		'visibility' => t('I want to make this version visible to all'),
+		'visibility' => t('I want to make this version private'),
 			),
-		'#description' => t('Enabling this option will make this version visible to public'),
+		'#description' => t('Enabling this option will make this version NOT visible to public'),
 		);
 	}
 	else
@@ -949,9 +1065,9 @@ function openabmma_addVersion01 ($edit=null, $item=0)
 		'#title' => t('Version visibility:'),
 	//	'#default_value' => array (TRUE),
 		'#options' => array(
-		'visibility' => t('I want to make this version visible to all'),
+		'visibility' => t('I want to make this version private'),
 			),
-		'#description' => t('Enabling this option will make this version visible to public'),
+		'#description' => t('Enabling this option will make this version NOT visible to public'),
 		);
 	}
 
@@ -990,7 +1106,7 @@ function openabmma_addVersion ()
     $output .= "<table border='0' cellpadding='0' cellspacing='0' width='100%'>";
     $output .= "<tr class='openabmData'><td><b>Step 1</b></td><td><font color='red'>Mandatory</font></td><td>Version description and visibility to public</td></tr>";
     $output .= "<tr class='openabmData'><td><b>Step 2</b></td><td><font color='red'>Mandatory</font></td><td>Code files, language and platform details</td></tr>";
-    $output .= "<tr class='openabmData'><td><b>Step 3</b></td><td><font color='red'>Mandatory</font></td><td>License information, References, Examples and Sensitivity data</td></tr>";
+    $output .= "<tr class='openabmData'><td><b>Step 3</b></td><td><font color='red'>Mandatory</font></td><td>License information, References to publications, Examples and Sensitivity data</td></tr>";
     $output .= "<tr class='openabmData'><td><b>Step 4</b></td><td><font color='green'>Only for review</font></td><td>Collecting documents for version review</td></tr>";
     $output .= "</table>";
     $output .= "<p>&nbsp;</p>" . l ("Click here to proceed to first step", "mymodels/" . $pName . "/add/version/step01");	
