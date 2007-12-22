@@ -29,7 +29,7 @@ function openabmma_versionMetadata ()
 
     drupal_add_css (openabmma_get_css_path ());
 
-    $query = "SELECT description, model_language_id, os, framework, reference_text, examples, submittedReview, visible, date_modified, run_conditions, license_id from openabm_model_version WHERE model_id=%d AND version_num=%d";
+    $query = "SELECT description, model_language_id, other_language, language_version, os, framework, reference_text, examples, submittedReview, visible, date_modified, run_conditions, license_id from openabm_model_version WHERE model_id=%d AND version_num=%d";
     $result = (array) db_fetch_object (db_query ($query, openabmma_getModelId ($pName), $versionNumber));
     $description = $result ['description'] == '' ? '(none)' : $result ['description'];
     $model_language_id = $result ['model_language_id'];
@@ -40,10 +40,17 @@ function openabmma_versionMetadata ()
     $submittedReview = $result ['submittedReview'] == "1" ? "Yes" : "No";
     $visible = $result ['visible'] == "1" ? "Yes" : "No";
     $license_id = $result ['license_id'];
+    $other_language = $result ['other_language'];
+    $pLanguageVersion = $result ['language_version'];
 
     $query = "SELECT name from openabm_model_language WHERE id=%d";
     $result = (array) db_fetch_object (db_query ($query, $model_language_id));
     $model_language_id = $result ['name'];
+    if ($model_language_id == "Other")
+	$model_language_id = $other_language;
+
+    if ($pLanguageVersion != "")
+        $model_language_id .= ", Version: " . $pLanguageVersion;
 
     $query = "SELECT name from openabm_license WHERE id=%d";
     $result = (array) db_fetch_object (db_query ($query, $license_id));
