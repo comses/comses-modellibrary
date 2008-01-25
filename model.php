@@ -326,10 +326,10 @@ function openabmma_addModel ()
 	);
 
 	$form ["details"]["model_refurl"] = array (
-		"#type" => "textfield",
-		"#title" => t("Reference URL (only for replicated models):"),
+		"#type" => "textarea",
+		"#title" => t("Reference URL or citation (only for replicated models):"),
 		"#default_value" => $edit ["model_refurl"] == "" ? $refurl : $edit ["model_refurl"],
-		"#description" => t("If this model is a replicated model, enter URL to the original model, if any."),
+		"#description" => t("If this model is a replicated model, enter a URL or citation for the original model."),
 		"#maxlength" => 255
 	);
 

@@ -20,7 +20,7 @@ function openabmma_install() {
 		title		VARCHAR(255) NOT NULL,
 		replicators     VARCHAR(255) NULL,
 		replicatedModel bool default 0,
-                reference       VARCHAR(255) NULL,
+                reference       TEXT NULL,
                 PRIMARY KEY(id)
                 );");
             // create license table
