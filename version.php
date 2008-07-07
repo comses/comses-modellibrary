@@ -584,7 +584,6 @@ function openabmma_addVersion03 ($edit=null, $item=0)
 		"#type" => "textarea",
 		"#title" => "References to publications where the original model is described:",
 		"#default_value" => $edit ["version_ref"] == "" ? $refText : $edit ["version_ref"],
-		"#maxlength" => 210,
 		"#description" => t("Links to other hosted material of reference"),
 		"#required" => false
 	);

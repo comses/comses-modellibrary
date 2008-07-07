@@ -25,7 +25,7 @@ function openabmma_showProjects ()
   global $user;
 
   $count = 0;
-  $output .= '<br/><u>Your submitted models:</u><p>&nbsp;</p><hr/><br/>';
+  $output .= '<br/><b>Your submitted models:</b><hr/><br/>';
   $query = "SELECT m.name, m.title FROM openabm_model m WHERE m.owner_uid=%d";
   $result = db_query ($query, $user->uid);
   while ($node = db_fetch_object ($result))
@@ -40,7 +40,7 @@ function openabmma_showProjects ()
   $output .= "You have submitted <b>" . $count . "</b> model(s).<br/>&nbsp;<br/>";
   $count = 0;
 
-  $output .= '<br/><u>Your other models:</u><p>&nbsp;</p><hr/><br/>';
+  $output .= '<br/><b>You are a member of these models:</b><hr/><br/>';
   $query = "SELECT m.owner_uid, m.name, m.title, B.role 
     FROM openabm_model m INNER JOIN openabm_model_member B ON m.id=B.project_id
     WHERE B.user_id=%d";
@@ -59,7 +59,7 @@ function openabmma_showProjects ()
   }
 
   $output .= "You are a member of <b>" . $count . "</b> model(s).<br/>&nbsp;<br/>";
-  $output .= "<br/>" . l ("To add a new model, click here", "models/add");
+  $output .= "<br/>" . l ("To submit a new model, please click here", "models/add");
   return $output;
 }
 
@@ -79,7 +79,12 @@ function openabmma_browseModels ()
     $output .= l ($pTitle . " [" . $pName . "]", "mymodels/" . $pName) . "<br/><small>Owner: " . openabmma_getUserName ($owner_uid) . "</small>&nbsp;<br/>";
   }
 
-  $output = "<br/>" . $count . " model(s).<br/>&nbsp;<br/>" . $output;
+  if ($count) {
+    $output = "<hr/>" . $count . " model(s) available.<br/>&nbsp;<br/>" . $output;
+  }
+  else {
+    $output = "<hr/>No models available.";
+  }
   return $output;
 }
 
