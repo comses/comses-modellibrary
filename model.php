@@ -106,7 +106,7 @@ function openabmma_addModel_submit ($form_id, $edit)
     {
         if ($pName [$i] == ' ')
         {
-            $errorString = "Model name cannot contain spaces. Please re-enter the correct model name.";
+            $errorString = "Model name cannot contain spaces. Please re-enter the model name without spaces.";
             drupal_set_message ("<b><font color='red'>" . $errorString . "</font></b>");
             return;
         }
@@ -251,7 +251,7 @@ function openabmma_addModel ()
 
 	$form ["details"]["model_ownerId"] = array (
 		"#type" => "item",
-		"#title" => t("Owner ID:"),
+		"#title" => t("Owner ID"),
 		"#value" => "#" . $user->uid . " - " . $user->name,
 		"#description" => null,
 	);
@@ -265,7 +265,7 @@ function openabmma_addModel ()
 	{
 		$form ["details"]["model_name"] = array (
 			"#type" => "textfield",
-			"#title" => t("Model name (should not contain spaces):"),
+			"#title" => t("Model name (should not contain spaces)"),
 			"#default_value" => $edit ["model_name"],
 			"#description" => null,
 	//		"#required" => true,		// Commented because clicking Cancel validates this field too!
@@ -276,7 +276,7 @@ function openabmma_addModel ()
 	{
 		$form ["details"]["model_name"] = array (
 			"#type" => "item",
-			"#title" => t("Model name:"),
+			"#title" => t("Model name"),
 			"#description" => null,
 			"#value" => arg(2),
 	//		"#required" => true,		// Commented because clicking Cancel validates this field too!
@@ -286,19 +286,21 @@ function openabmma_addModel ()
 
 	$form ["details"]["model_title"] = array (
 		"#type" => "textfield",
-		"#title" => t("Model title (human-friendly name):"),
+		"#title" => t("Model title (human-friendly name)"),
 		"#default_value" => $edit ["model_title"] == "" ? $projTitle : $edit ["model_title"],
 		"#description" => null,
 //		"#required" => true,		// Commented because clicking Cancel validates this field too!
 		"#maxlength" => 210
 	);
 
+
+// FIXME: what is the point of this conditional?
 	if ($replicated)
 	{
 		$form["details"]["model_replicated"] = array(
 		'#type' => 'checkboxes',
 		"#attributes" => array ('checked' => 'checked'),
-		'#title' => t("Model replication:"),
+		'#title' => t("Model replication"),
 		'#options' => array(
 		'replica' => t('Check this box if this a replicated model instead of an original model'),
 			),
@@ -309,7 +311,7 @@ function openabmma_addModel ()
 	{
 		$form["details"]["model_replicated"] = array(
 		'#type' => 'checkboxes',
-		'#title' => t("Model replication:"),
+		'#title' => t("Model replication"),
 		'#options' => array(
 		'replica' => t('Check this box if this a replicated model instead of an original model'),
 			),
@@ -318,27 +320,25 @@ function openabmma_addModel ()
 	}
 
 	$form ["details"]["model_repl"] = array (
-		"#type" => "textfield",
-		"#title" => t("List of authors of the original model (only for replicated models):"),
+		"#type" => "textarea",
+		"#title" => t("List of authors of the original model (only for replicated models)"),
 		"#default_value" => $edit ["model_repl"] == "" ? $replicators : $edit ["model_repl"],
 		"#description" => t("If this model is a replicated model, enter the names of original authors here."),
-		"#maxlength" => 210
 	);
 
 	$form ["details"]["model_refurl"] = array (
 		"#type" => "textarea",
-		"#title" => t("Reference URL or citation (only for replicated models):"),
+		"#title" => t("Reference URL or citation"),
 		"#default_value" => $edit ["model_refurl"] == "" ? $refurl : $edit ["model_refurl"],
 		"#description" => t("If this model is a replicated model, enter a URL or citation for the original model."),
-		"#maxlength" => 255
 	);
 
 	$form ["details"]["keywords"] = array (
 		"#type" => "textfield",
-		"#title" => "Keywords:",
+		"#title" => "Keywords",
 		"#description" => t("Special words related to your project (separated by commas)"),
 		"#default_value" => $edit ["keywords"] == "" ? $keywordList : $edit ["keywords"],
-		"#maxlength" => 210,
+		"#maxlength" => 255,
 		"#required" => false
 	);
 
@@ -687,12 +687,12 @@ function openabmma_getModelMemberArray ($name='')
 	$i = 0;
 	while ($users = db_fetch_object ($result))
 	{
-		$userArr [$i] = openabmma_getUserName ($users->user_id);
-		$i++;
+            $userArr [$i] = openabmma_getUserName ($users->user_id);
+            $i++;
 	}
 
 	if($i == 0)
-		return null;
+            return null;
 
 	return $userArr;
 }
@@ -701,7 +701,7 @@ function openabmma_showModelMembers ($name='')
 {
 	global $user;
 	if ($name == '')
-		return "";
+            return "";
 
 	// get identifier (number) of the project
 	$result = (array) db_fetch_object (db_query ("SELECT id FROM openabm_model WHERE name='%s'", $name));
@@ -709,11 +709,10 @@ function openabmma_showModelMembers ($name='')
 
 	$query = "SELECT user_id, role FROM openabm_model_member WHERE project_id=%d";
 	$result = db_query ($query, $model_id);
-	while ($users = db_fetch_object ($result))
-	{
-		$output .= "<br/>" . openabmma_getUserName ($users->user_id) . "&nbsp;<small>[" . openabmma_getRoleName ($users->role) . "]";
-		if ($user->name == openabmma_getModelOwner ($name))
-			 $output .= " - " . "<a href=\"javascript:if(confirm('Are you sure you want to remove this user from your model?')) window.location.replace('" . url("mymodels/" . $name . "/members/delete/" . $users->user_id) . "');\">Remove this user from my model</a></small>";
+	while ($users = db_fetch_object ($result)) {
+            $output .= "<br/>" . openabmma_getUserName ($users->user_id) . "&nbsp;<small>[" . openabmma_getRoleName ($users->role) . "]";
+            if ($user->name == openabmma_getModelOwner ($name))
+                $output .= " - " . "<a href=\"javascript:if(confirm('Are you sure you want to remove this user from your model?')) window.location.replace('" . url("mymodels/" . $name . "/members/delete/" . $users->user_id) . "');\">Remove this user from my model</a></small>";
 	}
 
 	return $output;

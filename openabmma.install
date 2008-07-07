@@ -116,10 +116,14 @@ function openabmma_install() {
 
             db_query ("INSERT INTO openabm_model_language (name) VALUES ('C');");
             db_query ("INSERT INTO openabm_model_language (name) VALUES ('C++');");
+            db_query ("INSERT INTO openabm_model_language (name) VALUES ('Haskell');");
             db_query ("INSERT INTO openabm_model_language (name) VALUES ('Java');");
+            db_query ("INSERT INTO openabm_model_language (name) VALUES ('Lisp');");
+            db_query ("INSERT INTO openabm_model_language (name) VALUES ('ML');");
             db_query ("INSERT INTO openabm_model_language (name) VALUES ('NetLogo');");
             db_query ("INSERT INTO openabm_model_language (name) VALUES ('Perl');");
             db_query ("INSERT INTO openabm_model_language (name) VALUES ('Python');");
+            db_query ("INSERT INTO openabm_model_language (name) VALUES ('Scheme');");
             db_query ("INSERT INTO openabm_model_language (name) VALUES ('Other');");
 
             db_query ("INSERT INTO openabm_role (name) VALUES ('Owner');");

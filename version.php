@@ -60,7 +60,7 @@ function openabmma_versionMetadata ()
     if ($memberArray == null)
         $members = "None";
     else
-        $members = implode (' ,', $memberArray);
+        $members = implode (', ', $memberArray);
 
     $output = "<br/><p><table border='0' cellpadding='0' cellspacing='0' width='100%'>";
     $output .= "<tr class='openabmData'><td width='30%'><b>Version description:</b></td><td><i>" . $description . "</i></td></tr>";
@@ -327,9 +327,7 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
     if ($user->name != openabmma_getModelOwner ($pName))
         return openabmma_formAccessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
 
-	$versionNumber = openabmma_parseVersionNumber (arg(3));
-
-    // FIXME:this doesn't work anymore.
+    $versionNumber = openabmma_parseVersionNumber (arg(3));
     $query = "SELECT model_language_id, os, other_language, language_version, framework FROM openabm_model_version WHERE model_id=%d AND version_num=%d";
     $result = (array) db_fetch_object (db_query ($query, openabmma_getModelId ($pName), $versionNumber));
     $progLang = $result ['model_language_id'];
