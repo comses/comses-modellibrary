@@ -374,7 +374,7 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
 	else
 		$form ["details"]["version_code_file"] = array (
 			"#type" => "file",
-			"#title" => t("Code file (required):")
+			"#title" => t("Source code (required)")
 		);
 
 
@@ -385,7 +385,7 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
 
     $form ["details"]["version_language"] = array (
             "#type" => "select",
-            "#title" => t("Programming Language:"),
+            "#title" => t("Programming Language"),
             "#options" => $languages,
             "#default_value" => $edit ["version_language"] == "" ? $progLang : $edit ["version_language"],
             "#description" => null
@@ -393,7 +393,7 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
 
     $form ["details"]["other_language"] = array (
             "#type" => "textfield",
-            "#title" => t("Other language (if not mentioned in above list):"),
+            "#title" => t("Other language (if not mentioned in above list)"),
             "#maxlength" => 210,
             "#default_value" => $edit ["other_language"] == "" ? $other_language : $edit ["other_language"],
             "#required" => false
@@ -402,7 +402,7 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
     $form ["details"]["version_language_ver"] = array (
             "#type" => "textfield",
             "#size" => 10,
-            "#title" => t("Programming Language Version:"),
+            "#title" => t("Programming Language Version"),
             "#default_value" => $edit ["version_language_ver"] == "" ? $progLangVer : $edit ["version_language_ver"],
             "#description" => null
             );
@@ -416,7 +416,7 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
 
     $form ["details"]["os"] = array (
             "#type" => "select",
-            "#title" => t("Operating System:"),
+            "#title" => t("Operating System"),
             "#default_value" => $edit ["os"] == "" ? (openabmma_inList ($osName, $arrayElements) == -1 ? "Other" : $osName) : $edit ["os"],
             "#options" => $arrayElements,
             "#description" => null
@@ -424,7 +424,7 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
 
     $form ["details"]["other_os"] = array (
             "#type" => "textfield",
-            "#title" => t("Other OS (if not mentioned in above list):"),
+            "#title" => t("Other OS (if not mentioned in above list)"),
             "#maxlength" => 210,
             "#default_value" => $edit ["other_os"] == "" ? (openabmma_inList ($osName, $arrayElements) == -1 ? $osName : "") : $edit ["other_os"],
             "#required" => false
@@ -433,7 +433,7 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
     $form ["details"]["os_ver"] = array (
             "#type" => "textfield",
             "#size" => 10,
-            "#title" => t("Operating System Version:"),
+            "#title" => t("Operating System Version"),
             "#default_value" => $edit ["os_ver"] == "" ? $osVersion : $edit ["os_ver"],
             "#description" => null
             );
@@ -446,7 +446,7 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
 
     $form ["details"]["framework"] = array (
             "#type" => "select",
-            "#title" => t("Framework used:"),
+            "#title" => t("Framework used"),
             "#default_value" => $edit ["framework"] == "" ? (openabmma_inList ($frameworkName, $arrayElements) == -1 ? "Other" : $frameworkName) : $edit ["framework"],
             "#options" => $arrayElements,
             "#description" => null
@@ -454,7 +454,7 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
 
     $form ["details"]["other_framework"] = array (
             "#type" => "textfield",
-            "#title" => t("Other framework (if not mentioned in above list):"),
+            "#title" => t("Other framework (if not mentioned in above list)"),
             "#maxlength" => 210,
             "#default_value" => $edit ["other_framework"] == "" ? (openabmma_inList ($frameworkName, $arrayElements) == -1 ? $frameworkName : "") : $edit ["other_framework"],
             "#required" => false
@@ -463,7 +463,7 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
     $form ["details"]["framework_ver"] = array (
             "#type" => "textfield",
             "#size" => 10,
-            "#title" => t("Framework Version:"),
+            "#title" => t("Framework Version"),
             "#default_value" => $edit ["framework_ver"] == "" ? $frameworkVersion : $edit ["framework_ver"],
             "#description" => null
             );
@@ -574,7 +574,7 @@ function openabmma_addVersion03 ($edit=null, $item=0)
 
 	$form ["details"]["version_licenseId"] = array (
 		"#type" => "select",
-		"#title" => t("License:"),
+		"#title" => t("License"),
 		"#default_value" => $edit ["version_licenseId"] == "" ? $licenseId : $edit ['version_licenseId'],
 		"#options" => $licenseTypes,
 		"#description" => null
@@ -582,7 +582,7 @@ function openabmma_addVersion03 ($edit=null, $item=0)
 
 	$form ["details"]["version_ref"] = array (
 		"#type" => "textarea",
-		"#title" => "References to publications where the original model is described:",
+		"#title" => "References to publications where the original model is described",
 		"#default_value" => $edit ["version_ref"] == "" ? $refText : $edit ["version_ref"],
 		"#description" => t("Links to other hosted material of reference"),
 		"#required" => false
@@ -590,7 +590,7 @@ function openabmma_addVersion03 ($edit=null, $item=0)
 
 	$form ["details"]["version_examples"] = array (
 		"#type" => "textarea",
-		"#title" => "Examples:",
+		"#title" => "Examples",
 		"#default_value" => $edit ["version_examples"] == "" ? $examples : $edit ["version_examples"],
 		"#maxlength" => 210,
 		"#description" => t("Notes on how to use the version"),
@@ -613,7 +613,7 @@ function openabmma_addVersion03 ($edit=null, $item=0)
 			$form ["details"]["version_doc_file"] = array (
 				"#type" => "file",
 				"#description" => t("Preferably following the ODD protocol [" . l ("http://www.openabm.org/site/odd", "http://www.openabm.org/site/odd") . "]"),
-				"#title" => t("Documentation (required):")
+				"#title" => t("Documentation (required)")
 			);
 		}
 	}
@@ -629,7 +629,7 @@ function openabmma_addVersion03 ($edit=null, $item=0)
 		$form ["details"]["version_sensitivity"] = array (
 			"#type" => "file",
 			"#description" => null,
-			"#title" => t("File containing information of sensitivity analysis:")
+			"#title" => t("File containing information of sensitivity analysis")
 		);
 
     $form ["details"]["submitAction"] = array (
@@ -788,17 +788,17 @@ function openabmma_addVersion04 ($edit=null, $item=0)
 		{
 			$form ["details"]["version_dataset"] = array (
 				"#type" => "file",
-				"#title" => t("Test data set (for running the version) - optional:")
+				"#title" => t("Test data set (for running the version) - optional")
 			);
 		}
 	}
 
 	$form ["details"]["version_conditions"] = array (
 		"#type" => "textarea",
-		"#title" => "Conditions or comments for running the code:",
+		"#title" => "Special conditions or other comments for running the code",
 		"#default_value" => $edit ["model_conditions"] == "" ? $run_conditions : $edit ["model_conditions"],
 		"#maxlength" => 210,
-		"#description" => t("Optional notes on running of version"),
+		"#description" => t("Optional notes on how to run this version of code"),
 		"#required" => false
 	);
 
@@ -817,7 +817,7 @@ function openabmma_addVersion04 ($edit=null, $item=0)
 		{
 			$form ["details"]["version_other"] = array (
 				"#type" => "file",
-				"#title" => t("Additional document to be included with version submission (optional):")
+				"#title" => t("Additional document to be included with version submission (optional)")
 			);
 		}
 	}
@@ -825,7 +825,7 @@ function openabmma_addVersion04 ($edit=null, $item=0)
 //	if ($action != "edit")
 		$form["details"]["version_inst"] = array(
 		'#type' => 'checkboxes',
-		'#title' => t('Submission requirements:'),
+		'#title' => t('Submission requirements'),
 		'#default_value' => "false",
 		'#options' => array(
 		'commented' => t('The code has been well commented'),
@@ -1043,7 +1043,7 @@ function openabmma_addVersion01 ($edit=null, $item=0)
 */
 	$form ["details"]["version_description"] = array (
 		"#type" => "textarea",
-		"#title" => t("Description of this version:"),
+		"#title" => t("Description of this version"),
 		"#default_value" => $edit ["version_description"] == "" ? $desc : $edit ["version_description"],
 		"#description" => null,
 		"#required" => false
@@ -1053,7 +1053,7 @@ function openabmma_addVersion01 ($edit=null, $item=0)
 	{
 		$form["details"]["version_visibility"] = array(
 		'#type' => 'checkboxes',
-		'#title' => t('Version visibility:'),
+		'#title' => t('Version visibility'),
 		"#attributes" => array ('checked' => 'checked'),
 	//	'#default_value' => array (TRUE),
 		'#options' => array(
@@ -1066,7 +1066,7 @@ function openabmma_addVersion01 ($edit=null, $item=0)
 	{
 		$form["details"]["version_visibility"] = array(
 		'#type' => 'checkboxes',
-		'#title' => t('Version visibility:'),
+		'#title' => t('Version visibility'),
 	//	'#default_value' => array (TRUE),
 		'#options' => array(
 		'visibility' => t('I want to make this version private'),

@@ -480,10 +480,10 @@ function openabmma_getSearchText ()
 
     $form ["details"]["text"] = array (
             "#type" => "textfield",
-            "#title" => t("Search for:"),
+            "#title" => t("Search"),
             "#default_value" => null,
             "#description" => "",
-            "#maxlength" => 210,
+            "#maxlength" => 255,
             "#required" => true
             );
 
@@ -585,7 +585,7 @@ function openabmma_addMember ()
 
     $form ["details"]["name"] = array (
             "#type" => "textfield",
-            "#title" => t("User name:"),
+            "#title" => t("User name"),
             '#autocomplete_path' => 'user/autocomplete',
             "#default_value" => null,
             "#description" => "",

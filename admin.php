@@ -46,7 +46,7 @@ function openabmma_add_pLanguage ()
 
 	$form ["details"]["name"] = array (
 		"#type" => "textfield",
-		"#title" => t("Language name:"),
+		"#title" => t("Language name"),
 		"#default_value" => null,
 		"#description" => "",
 		"#maxlength" => 210,
@@ -108,7 +108,7 @@ function openabmma_add_framework ()
 
 	$form ["details"]["name"] = array (
 		"#type" => "textfield",
-		"#title" => t("Framework name:"),
+		"#title" => t("Framework name"),
 		"#default_value" => null,
 		"#description" => "",
 		"#maxlength" => 210,
@@ -231,7 +231,7 @@ function openabmma_addLicense_form ()
 
 	$form ["details"]["name"] = array (
 		"#type" => "textfield",
-		"#title" => t("License Name:"),
+		"#title" => t("License Name"),
 		"#default_value" => null,
 		"#description" => t("Name of the license"),
 		"#maxlength" => 210,
@@ -239,7 +239,7 @@ function openabmma_addLicense_form ()
 	);
 	$form ["details"]["license_text"] = array (
 		"#type" => "textarea",
-		"#title" => t("License Text:"),
+		"#title" => t("License Text"),
 		"#default_value" => null,
 		"#description" => t("Full license text"),
 		"#required" => true
@@ -247,7 +247,7 @@ function openabmma_addLicense_form ()
 
 	$form ["details"]["url"] = array (
 		"#type" => "textfield",
-		"#title" => t("URL:"),
+		"#title" => t("URL"),
 		"#default_value" => null,
 		"#description" => t("Web address of license document"),
 		"#maxlength" => 210,
