@@ -1,5 +1,6 @@
 <?php
 
+
 function openabmma_showMetaData ($pName='') {
     global $user;
     if ($pName == '')
@@ -65,17 +66,16 @@ function openabmma_showMetaData ($pName='') {
     return $output;
 }
 
-function openabmma_addModel_submit ($form_id, $edit)
-{
+function openabmma_addModel_submit ($form_id, $edit) {
     $action = arg(1);
 
     global $user;
-    if ($edit ["newModel"] == "1") {
-        $newModel = TRUE;
+    if ($edit ['newModel'] == "1") {
+        $newModel = true;
         $pName = $edit ["model_name"];
     }
     else {
-        $newModel = FALSE;
+        $newModel = false;
         $pName = arg(2);
     }
 
@@ -95,73 +95,57 @@ function openabmma_addModel_submit ($form_id, $edit)
             return openabmma_formAccessError ("Only model owners can change metadata details of any model. You are not registered as the owner of this model.");
     }
 
-    if ($pName == "" || $pName == null)
-    {
-        drupal_set_message ("<b><font color='red'>Model name is a required field</font></b>");
+    // validate name
+    if ($pName == '') {
+        form_set_error ($form_id, t("<b><font color='#DD0000'>Model name is a required field</font></b>"));
         return;
     }
 
-    $pCount = strlen ($pName);
-    for ($i=0; $i<$pCount; $i++)
-    {
-        if ($pName [$i] == ' ')
-        {
-            $errorString = "Model name cannot contain spaces. Please re-enter the model name without spaces.";
-            drupal_set_message ("<b><font color='red'>" . $errorString . "</font></b>");
-            return;
-        }
+    // valid name is only alphanumeric with underscore character.
+    if (preg_match('/^[\w]+$/', $pName)) {
+        // model name is OK
+
+    }
+    else {
+        $errorString = "The model name you entered, <b><i><font color='#DD0000'>" . $pName . "</font></i></b> contains invalid characters. Please re-enter the model name only using alphanumeric characters and the underscore character.";
+        form_set_error ($form_id, t($errorString));
+        // drupal_set_message ($errorString);
+        return;
     }
 
     $replicated = $edit ["model_replicated"]["replica"];
     if ($replicated != '0')
         $replicated = '1';
 
-    if ($newModel == TRUE) {
-        if (openabmma_getModelId ($pName) != -1 && openabmma_getModelId ($pName) != '') {
-            drupal_set_message ("<b><font color='red'>Another project with the same name exists. Please choose a different name</font></b>");
+    $modelId = openabmma_getModelId ($pName);
+    $REPLICATED_MODELS_ERROR_MESSAGE = "Replicated models must enter proper references to the original authors and citations.  Please enter a list of authors and a reference URL or citation.";
+    if ($newModel) {
+        if ($modelId != -1) {
+            form_set_error($form_id, t("Another project with the same name (<b><font color='#DD0000'>" . $pName . "</font></b>) exists. Please choose a different name."));
+            return;
         }
         else {
             if ($replicated == '1') {
                 if ($edit ["model_repl"] == "" || $edit ["model_refurl"] == "") {
-                    drupal_set_message ("<b><font color='red'>Since this project is a replicated one, you need to enter information about the original authors and the reference URL.</font></b>");
+                    form_set_error($form_id, t($REPLICATED_MODELS_ERROR_MESSAGE));
                     return;
                 }
             }
-
             $query = "INSERT INTO openabm_model (owner_uid, name, title, replicators, replicatedModel, reference) VALUES (%d, '%s', '%s', '%s', %d, '%s')";
             db_query($query, $user->uid, $pName, $edit ["model_title"], $edit ["model_repl"], $replicated, $edit ["model_refurl"]);
-
-	$keywordList = $edit ["keywords"];
-	$replaceList = "!@#$%^&*()+-|\\[]{}:;'\"<>,/?~` ";
-	$replaceLen = strlen ($replaceList);
-	for ($i=0; $i<$replaceLen; $i = $i+1)
-            $keywordList = str_replace ($replaceList [$i], ",", $keywordList);
-
-	$keywords = explode (",", $keywordList);
-
-	$pId = openabmma_getModelId ($pName);
-	$query = "DELETE FROM openabm_model_keywords WHERE model_id=%d";
-	db_query ($query, $pId);
-
-	$query = "INSERT INTO openabm_model_keywords (model_id, keyword) VALUES (%d, '%s')";
-	for ($i=0; $i<count($keywords); $i++)
-	{
-		if ($keywords [$i] == '')
-			continue;
-		db_query ($query, $pId, trim ($keywords [$i]));
-	}
-
-	    drupal_goto("mymodels/" . $pName);
+            $modelId = openabmma_getModelId($pName);
+            openabm_addKeywords($modelId, $edit['keywords']);
+            drupal_goto("mymodels/" . $pName);
         }
     }
     else
     {
-        if ($replicated == '1')
+        if ($replicated)
         {
             if ($edit ["model_repl"] == "" || $edit ["model_refurl"] == "")
             {
 		drupal_set_message ("|" . $edit ["model_repl"] . "|" . $edit ["model_refurl"] . "|");
-                drupal_set_message ("<b><font color='red'>Since this project is a replicated one, you need to enter information about the original authors and the reference URL.</font></b>");
+                form_set_error ($form_id, t($REPLICATED_MODELS_ERROR_MESSAGE));
                 return;
             }
         }
@@ -169,6 +153,8 @@ function openabmma_addModel_submit ($form_id, $edit)
         $query = "UPDATE openabm_model SET title='%s', replicatedModel=%d, replicators='%s', reference='%s' WHERE name='%s'";
         db_query ($query, $edit ["model_title"], $replicated, $edit ["model_repl"], $edit ["model_refurl"], $pName);
 
+        openabm_addKeywords( $modelId, $edit['keywords'] );
+        /*
 	$keywordList = $edit ["keywords"];
 	$replaceList = "!@#$%^&*()+-|\\[]{}:;'\"<>,/?~` ";
 	$replaceLen = strlen ($replaceList);
@@ -177,9 +163,9 @@ function openabmma_addModel_submit ($form_id, $edit)
 
 	$keywords = explode (",", $keywordList);
 
-	$pId = openabmma_getModelId ($pName);
+	$modelId = openabmma_getModelId ($pName);
 	$query = "DELETE FROM openabm_model_keywords WHERE model_id=%d";
-	db_query ($query, $pId);
+	db_query ($query, $modelId);
 
 	$query = "INSERT INTO openabm_model_keywords (model_id, keyword) VALUES (%d, '%s')";
 	for ($i=0; $i<count($keywords); $i++)
@@ -188,11 +174,39 @@ function openabmma_addModel_submit ($form_id, $edit)
 			continue;
 		db_query ($query, $pId, trim ($keywords [$i]));
 	}
-
-
+        */
         drupal_goto("mymodels/" . $pName);
     }
 }
+
+function openabm_addKeywords($modelId, $inputKeywordList) {
+    // FIXME: notify them that we are replacing any non-alphanumeric/space
+    // characters with nothing?
+    $keywordList = preg_replace('/[^\w\s,]+/', '', $inputKeywordList);
+    /*
+       $replaceList = "!@#$%^&*()+-|\\[]{}:;'\"<>,/?~`";
+       $replaceLen = strlen ($replaceList);
+       for ($i=0; $i<$replaceLen; $i = $i+1)
+       $keywordList = str_replace ($replaceList [$i], ",", $keywordList);
+
+       $keywords = explode (",", $keywordList);
+     */
+
+    $keywords = explode(',', $keywordList);
+
+    $query = "DELETE FROM openabm_model_keywords WHERE model_id=%d";
+    db_query ($query, $modelId);
+
+    $query = "INSERT INTO openabm_model_keywords (model_id, keyword) VALUES (%d, '%s')";
+    foreach ($keywords as $keyword) {
+        $keyword = trim($keyword);
+        if ($keyword) {
+            db_query($query, $modelId, $keyword);
+        }
+    }
+}
+
+
 
 function openabmma_addModel ()
 {
@@ -238,6 +252,7 @@ function openabmma_addModel ()
 	    $keywordList = substr ($keywordList, 0, strlen($keywordList)-2);
 	}
 
+        // FIXME: dangerous, may not work for all concurrent requests!
 	$result = (array) db_fetch_object (db_query ("SELECT max(id) FROM openabm_model"));
 	$id = $result['max(id)'] + 1;
 
@@ -251,8 +266,8 @@ function openabmma_addModel ()
 
 	$form ["details"]["model_ownerId"] = array (
 		"#type" => "item",
-		"#title" => t("Owner ID"),
-		"#value" => "#" . $user->uid . " - " . $user->name,
+		"#title" => t("Owner"),
+		"#value" => $user->name,
 		"#description" => null,
 	);
 
@@ -261,15 +276,18 @@ function openabmma_addModel ()
 		"#value" => $newModel
 	);
 
-	if ($newModel == "1")
-	{
+	if ($newModel)
+        {
 		$form ["details"]["model_name"] = array (
 			"#type" => "textfield",
-			"#title" => t("Model name (should not contain spaces)"),
+			"#title" => t("Model name "),
 			"#default_value" => $edit ["model_name"],
-			"#description" => null,
+			"#description" => t("This name will be used as part of
+                            the URL to access your model, so a shorter name is
+                            often better.  Only alphanumeric characters and the 
+                            underscore character are allowed."),
 	//		"#required" => true,		// Commented because clicking Cancel validates this field too!
-			"#maxlength" => 210
+			"#maxlength" => 255
 		);
 	}
 	else
@@ -277,10 +295,13 @@ function openabmma_addModel ()
 		$form ["details"]["model_name"] = array (
 			"#type" => "item",
 			"#title" => t("Model name"),
-			"#description" => null,
+			"#description" => t("This name will be used as part of
+                            the URL to access your model, so a shorter name is
+                            often better.  Only alphanumeric characters and the 
+                            underscore character are allowed."),
 			"#value" => arg(2),
 	//		"#required" => true,		// Commented because clicking Cancel validates this field too!
-			"#maxlength" => 210
+			"#maxlength" => 255
 		);
 	}
 
@@ -295,35 +316,29 @@ function openabmma_addModel ()
 
 
 // FIXME: what is the point of this conditional?
-	if ($replicated)
-	{
+	if ($replicated) {
 		$form["details"]["model_replicated"] = array(
 		'#type' => 'checkboxes',
 		"#attributes" => array ('checked' => 'checked'),
 		'#title' => t("Model replication"),
-		'#options' => array(
-		'replica' => t('Check this box if this a replicated model instead of an original model'),
-			),
-		'#description' => t('If the model you are submitting is a replication of an existing model, put a check mark here. If this is a new, original, model, leave this box blank.'),
+		'#options' => array('replica' => t('Check this box if this a replicated model instead of an original model')),
+                '#description' => t('If the model you are submitting is a replication of an existing model, put a check mark here. If this is a new, original, model, leave this box blank.'),
 		);
 	}
-	else
-	{
+        else {
 		$form["details"]["model_replicated"] = array(
 		'#type' => 'checkboxes',
 		'#title' => t("Model replication"),
-		'#options' => array(
-		'replica' => t('Check this box if this a replicated model instead of an original model'),
-			),
-		'#description' => t('If the model you are submitting is a replication of an existing model, put a check mark here. If this is a new, original, model, leave this box blank.'),
-		);
+		'#options' => array('replica' => t('Check this box if this a replicated model instead of an original model')),
+                '#description' => t('If the model you are submitting is a replication of an existing model, put a check mark here. If this is a new, original, model, leave this box blank.'),
+                );
 	}
 
 	$form ["details"]["model_repl"] = array (
-		"#type" => "textarea",
-		"#title" => t("List of authors of the original model (only for replicated models)"),
-		"#default_value" => $edit ["model_repl"] == "" ? $replicators : $edit ["model_repl"],
-		"#description" => t("If this model is a replicated model, enter the names of original authors here."),
+                "#type" => "textarea",
+                "#title" => t("List of authors of the original model (only for replicated models)"),
+                "#default_value" => $edit ["model_repl"] == "" ? $replicators : $edit ["model_repl"],
+                "#description" => t("If this model is a replicated model, enter the names of original authors here."),
 	);
 
 	$form ["details"]["model_refurl"] = array (
@@ -336,7 +351,7 @@ function openabmma_addModel ()
 	$form ["details"]["keywords"] = array (
 		"#type" => "textfield",
 		"#title" => "Keywords",
-		"#description" => t("Special words related to your project (separated by commas)"),
+		"#description" => t("Keywords related to your project (separate by commas)"),
 		"#default_value" => $edit ["keywords"] == "" ? $keywordList : $edit ["keywords"],
 		"#maxlength" => 255,
 		"#required" => false
@@ -669,12 +684,12 @@ function openabmma_addMember_submit ($form_id, $edit)
 
 function openabmma_getModelId ($name)
 {
-	if ($name == '')
-		return -1;
+    if ($name == '')
+        return -1;
 
-	$result = (array) db_fetch_object (db_query ("SELECT id FROM openabm_model WHERE name='%s'", $name));
-	$pId = $result ['id'];
-	return $pId;
+    $result = (array) db_fetch_object (db_query ("SELECT id FROM openabm_model WHERE name='%s'", $name));
+    $modelId = $result ['id'];
+    return ($modelId) ? $modelId : -1;
 }
 
 function openabmma_getModelMemberArray ($name='')
@@ -756,6 +771,7 @@ function openabmma_openProject ($pName='')
     $replicators = $result ['replicators'];
     $reference_url = $result ['reference'];
 
+    // FIXME: hacky, use split/join instead and an array.
     $keywordList = '';
     $query = "SELECT keyword FROM openabm_model_keywords WHERE model_id=%d";
     $result = db_query ($query, openabmma_getModelId ($pName));

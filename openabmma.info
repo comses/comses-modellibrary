@@ -2,4 +2,4 @@
 name = OpenABM Model Archive
 description = openabm.org model archive for maintaining digital artifacts associated with an agent based model i.e. code, data, documentation, etc.
 package = OpenABM
-version = "0.1"
+version = "0.2"

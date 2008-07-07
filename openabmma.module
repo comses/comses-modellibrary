@@ -1,5 +1,5 @@
 <?php
-
+// vim:sts=2:sw=2:filetype=php
 // $Id$
 
 /**
@@ -10,8 +10,6 @@
  * versions of an ABM project and edit associated metadata.  Members of a
  * review committee should also be able to "star" an ABM project to signify
  * its level of maturity and completeness.
- * 
- *
  */
 
 include 'admin.php';
@@ -24,63 +22,65 @@ include 'version.php';
 
 function openabmma_showProjects ()
 {
-	global $user;
+  global $user;
 
-	$count = 0;
-	$output .= '<br/><u>Owned models:</u><p>&nbsp;</p><hr/><br/>';
-	$query = "SELECT m.name, m.title FROM openabm_model m WHERE m.owner_uid=%d";
-	$result = db_query ($query, $user->uid);
-	while ($node = db_fetch_object ($result))
-	{
-            $count++;
-            $output .= "<b>" . l ($node->title . " (" . $node->name . ")", "mymodels/" . $node->name) . "</b>&nbsp;";
+  $count = 0;
+  $output .= '<br/><u>Your submitted models:</u><p>&nbsp;</p><hr/><br/>';
+  $query = "SELECT m.name, m.title FROM openabm_model m WHERE m.owner_uid=%d";
+  $result = db_query ($query, $user->uid);
+  while ($node = db_fetch_object ($result))
+  {
+    $count++;
+    $output .= "<b>" . l ($node->title . " (" . $node->name . ")", "mymodels/" . $node->name) . "</b>&nbsp;";
 
-            $output .= "&nbsp;<br/><small>" . $node->description . "<hr/>";
-            $output .= "</small><br/>";
-        }
+    $output .= "&nbsp;<br/><small>" . $node->description . "<hr/>";
+    $output .= "</small><br/>";
+  }
 
-	$output .= "Total <b>" . $count . "</b> owned model(s).<br/>&nbsp;<br/>";
-	$count = 0;
+  $output .= "You have submitted <b>" . $count . "</b> model(s).<br/>&nbsp;<br/>";
+  $count = 0;
 
-	$output .= '<br/><u>Membered models:</u><p>&nbsp;</p><hr/><br/>';
-	$query = "SELECT m.owner_uid, m.name, m.title, B.role 
-                  FROM openabm_model m INNER JOIN openabm_model_member B ON m.id=B.project_id
-                  WHERE B.user_id=%d";
-	$result = db_query ($query, $user->uid);
-	while ($node = db_fetch_object ($result))
-	{
-		$count++;
-		$owner = openabmma_getUserName ($node->owner_uid);
-		$output .= "<b>" . l ($node->title . " (" . $node->name . ")", "mymodels/" . $node->name) . "</b>&nbsp;";
+  $output .= '<br/><u>Your other models:</u><p>&nbsp;</p><hr/><br/>';
+  $query = "SELECT m.owner_uid, m.name, m.title, B.role 
+    FROM openabm_model m INNER JOIN openabm_model_member B ON m.id=B.project_id
+    WHERE B.user_id=%d";
+  $result = db_query ($query, $user->uid);
+  while ($node = db_fetch_object ($result))
+  {
+    $count++;
+    $owner = openabmma_getUserName ($node->owner_uid);
+    $output .= "<b>" . l ($node->title . " (" . $node->name . ")", "mymodels/" . $node->name) . "</b>&nbsp;";
 
-		if ($node->visible == 1)	$output .= "[Public]";
-		else				$output .= "[Private]";
+    if ($node->visible == 1)	$output .= "[Public]";
+    else				$output .= "[Private]";
 
-		$output .= "&nbsp;<br/><small>" . $node->description . "<br/>";
-		$output .= "Owned by: <b>" . $owner . "</b></small><hr/><br/>";
-	}
+    $output .= "&nbsp;<br/><small>" . $node->description . "<br/>";
+    $output .= "Owned by: <b>" . $owner . "</b></small><hr/><br/>";
+  }
 
-	$output .= "Total <b>" . $count . "</b> membered model(s).<br/>&nbsp;<br/>";
-	$output .= "<br/>" . l ("To add new model, click here", "models/add");
-	return $output;
+  $output .= "You are a member of <b>" . $count . "</b> model(s).<br/>&nbsp;<br/>";
+  $output .= "<br/>" . l ("To add a new model, click here", "models/add");
+  return $output;
 }
 
 function openabmma_browseModels ()
 {
-	$query = "SELECT owner_uid, name, title FROM openabm_model";
-	$result = db_query ($query);
+  $query = "SELECT owner_uid, name, title FROM openabm_model";
+  $result = db_query ($query);
 
-	while ($model = db_fetch_object ($result))
-	{
-		$pId = $model->id;
-		$pName = $model->name;
-		$pTitle = $model->title;
-		$owner_uid = $model->owner_uid;
+  while ($model = db_fetch_object ($result))
+  {
+    $pId = $model->id;
+    $pName = $model->name;
+    $pTitle = $model->title;
+    $owner_uid = $model->owner_uid;
 
-		$count++;
-		$output .= l ($pTitle . " [" . $pName . "]", "mymodels/" . $pName) . "<br/><small>Owner: " . openabmma_getUserName ($owner_uid) . "</small>&nbsp;<br/>";
-	}
+    $count++;
+    $output .= l ($pTitle . " [" . $pName . "]", "mymodels/" . $pName) . "<br/><small>Owner: " . openabmma_getUserName ($owner_uid) . "</small>&nbsp;<br/>";
+  }
 
-	$output = "<br/>" . $count . " model(s).<br/>&nbsp;<br/>" . $output;
-	return $output;
+  $output = "<br/>" . $count . " model(s).<br/>&nbsp;<br/>" . $output;
+  return $output;
 }
+
+?>
