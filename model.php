@@ -89,12 +89,13 @@ function openabmma_addModel_validate ($form_id, $form_values) {
     else if (! preg_match('/^[\w]+$/', $modelName)) {
         form_set_error ($form_id, t("The model name you entered, <b><i><font color='#DD0000'>${modelName}</font></i></b> contains invalid characters. Please re-enter the model name only using alphanumeric characters and the underscore character."));
     }
-    $REPLICATED_MODELS_ERROR_MESSAGE = "Replicated models must enter proper references to the original authors and citations.  Please enter a list of authors and a reference URL or citation.";
-
+    if ($form_values['model_title'] == '') {
+        form_set_error($form_id, t("Please enter a model title."));
+    }
     $replicated = $form_values ["model_replicated"]["replica"];
     if ($replicated) {
         if ($form_values ["model_repl"] == "" || $form_values ["model_refurl"] == "") {
-            form_set_error($form_id, t($REPLICATED_MODELS_ERROR_MESSAGE));
+            form_set_error($form_id, t("Replicated models must enter proper references to the original authors and citations.  Please enter a list of authors and a reference URL or citation."));
         }
     }
     if ($newModel) {

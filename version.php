@@ -989,7 +989,7 @@ function openabmma_addVersion01 ($edit=null, $item=0)
 	}
 
 	$desc = '';
-	$visible = FALSE;
+	$visible = true;
 	if ($newVersion == "0")
 	{
 		$query = "SELECT description, visible FROM openabm_model_version WHERE model_id=%d AND version_num=%d";
@@ -1049,17 +1049,16 @@ function openabmma_addVersion01 ($edit=null, $item=0)
 		"#required" => false
 	);
 
+        // FIXME: get rid of duplicate code
 	if (!$visible)
 	{
 		$form["details"]["version_visibility"] = array(
 		'#type' => 'checkboxes',
 		'#title' => t('Version visibility'),
 		"#attributes" => array ('checked' => 'checked'),
-	//	'#default_value' => array (TRUE),
-		'#options' => array(
-		'visibility' => t('I want to make this version private'),
-			),
-		'#description' => t('Enabling this option will make this version NOT visible to public'),
+                '#default_value' => 0,
+		'#options' => array('visibility' => t('I want to make this version private')),
+		'#description' => t('Enabling this option will make this version NOT visible to the public'),
 		);
 	}
 	else
@@ -1067,11 +1066,9 @@ function openabmma_addVersion01 ($edit=null, $item=0)
 		$form["details"]["version_visibility"] = array(
 		'#type' => 'checkboxes',
 		'#title' => t('Version visibility'),
-	//	'#default_value' => array (TRUE),
-		'#options' => array(
-		'visibility' => t('I want to make this version private'),
-			),
-		'#description' => t('Enabling this option will make this version NOT visible to public'),
+		'#default_value' => 0,
+		'#options' => array('visibility' => t('I want to make this version private')),
+		'#description' => t('Enabling this option will make this version NOT visible to the public'),
 		);
 	}
 
