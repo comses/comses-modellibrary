@@ -71,12 +71,12 @@ function openabmma_browseModels ()
   while ($model = db_fetch_object ($result))
   {
     $pId = $model->id;
-    $pName = $model->name;
+    $modelName = $model->name;
     $pTitle = $model->title;
     $owner_uid = $model->owner_uid;
 
     $count++;
-    $output .= l ($pTitle . " [" . $pName . "]", "mymodels/" . $pName) . "<br/><small>Owner: " . openabmma_getUserName ($owner_uid) . "</small>&nbsp;<br/>";
+    $output .= l ($pTitle . " [" . $modelName . "]", "mymodels/" . $modelName) . "<br/><small>Owner: " . openabmma_getUserName ($owner_uid) . "</small>&nbsp;<br/>";
   }
 
   if ($count) {

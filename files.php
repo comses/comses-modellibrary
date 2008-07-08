@@ -2,11 +2,11 @@
 
 function openabmma_downloadFile ()
 {
-	$pName = arg(1);
+	$modelName = arg(1);
 	$versionNumber = openabmma_parseVersionNumber (arg(2));
 	$target = arg(3);
 
-	$files_root = "files/models/" . $pName . "/v" . $versionNumber . "/" . $target;
+	$files_root = "files/models/" . $modelName . "/v" . $versionNumber . "/" . $target;
 	$filename = openabmma_getFirstFile ($files_root);
 	$filepath = realpath ($files_root . "/" . $filename);
 
