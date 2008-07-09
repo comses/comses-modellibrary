@@ -702,7 +702,7 @@ function openabmma_getModelOwner ($name='')
     return $owner;
 }
 
-function openabmma_openProject ($modelName='')
+function openabmma_openProject($modelName='')
 {
     global $user;
     if ($modelName == '')
@@ -710,7 +710,7 @@ function openabmma_openProject ($modelName='')
 
     $owner = openabmma_getModelOwner ($modelName);
 
-    $output = "<br/>You can now add or change information on the model project, or add versions of the model.<br/>&nbsp;<br/><u>Metadata information:</u><br/>";
+    $output = "<h3>Model Metadata</h3>";
 
     /*
        if ($user->name != $owner && openabmma_inList ($user->name, openabmma_getModelMemberArray ($modelName)) == -1)
@@ -738,6 +738,19 @@ function openabmma_openProject ($modelName='')
         $keywordList .= $element->keyword . ", ";
     $keywordList = substr ($keywordList, 0, strlen($keywordList)-2);
 
+    $header = array( 'Name/URL', 'Owner', 'Title', 'Replicated?');
+    $data = array(
+                array($name, openabmma_getModelOwner($name), $title,
+                $replicated));
+    if ($replicated == "Yes") {
+        array_push($header, 'Other Authors', 'Reference / URL', 'Keywords');
+        array_push($data[0], $replicators, $reference_url, $keywordList);
+    }
+
+    $output .= theme_table($header, $data);
+
+/*
+
     $output .= "<p><table border='0' cellpadding='0' cellspacing='0' width='100%'>";
     $output .= "<tr class='openabmData'><td width='30%'><b>Model name:</b></td><td><i>" . $name . "</i></td></tr>";
     $output .= "<tr class='openabmData'><td><b>Model owner:</b></td><td><i>" . openabmma_getModelOwner ($name) . "</i></td></tr>";
@@ -745,17 +758,18 @@ function openabmma_openProject ($modelName='')
     $output .= "<tr class='openabmData'><td><b>Replicated model:</b></td><td><i>" . $replicated . "</i></td></tr>";
     if ($replicated == "Yes")
     {
-        $output .= "<tr class='openabmData'><td><b>List of authors of the original model (for replicated models only):</b></td><td><i>" . $replicators . "</i></td></tr>";
+        $output .= "<tr class='openabmData'><td><b>List of authors of the original model:</b></td><td><i>" . $replicators . "</i></td></tr>";
         $output .= "<tr class='openabmData'><td><b>Reference URL:</b></td><td><i>" . $reference_url . "</i></td></tr>";
     }
 
     $output .= "<tr class='openabmData'><td><b>Model keywords:</b></td><td><i>" . $keywordList . "</i></td></tr>";
     $output .= "</table>";
+    */
 
     if ($owner == $user->name)
     {
-        $output .= "<br/>" . l ("To change model metadata, click here", "models/edit/" . $modelName);
-        $output .= "<br/>" . l ("Manage members in this model", "mymodels/" . $modelName . "/members");
+        $output .= '(' . l('Change model metadata', 'models/edit/' . $modelName);
+        $output .= ' | ' . l('Manage members of this model', 'mymodels/' . $modelName . '/members') . ')';
     }
 
     $output .= openabmma_getFormattedVersionList ($modelName);

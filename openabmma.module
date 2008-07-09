@@ -13,6 +13,7 @@
  */
 
 include 'admin.php';
+include 'classes.php';
 include 'drupal.php';
 include 'files.php';
 include 'misc.php';
@@ -26,7 +27,47 @@ function openabmma_showProjects ()
 
   $count = 0;
   $output .= '<br/><b>Your submitted models:</b><hr/><br/>';
-  $query = "SELECT m.name, m.title FROM openabm_model m WHERE m.owner_uid=%d";
+  $query = "SELECT m.name, m.title, m.owner_uid, m.replicatedModel, m.replicators FROM openabm_model m WHERE m.owner_uid=%d";
+  $model = new Model(10);
+#  $output .= "what is: " . ${model}->getId();
+  /*
+    $query = "SELECT owner_uid, name, title, replicatedModel, replicators, reference from openabm_model WHERE name='%s'";
+    $result = (array) db_fetch_object (db_query ($query, $modelName));
+    $owner_uid = $result ['owner_uid'];
+    $name = $result ['name'];
+    $title = $result ['title'];
+    $replicated = $result ['replicatedModel'] == "1" ? "Yes" : "No";
+    $replicators = $result ['replicators'];
+    $reference_url = $result ['reference'];
+
+    // FIXME: hacky, use split/join instead and an array.
+    $keywordList = '';
+    $query = "SELECT keyword FROM openabm_model_keywords WHERE model_id=%d";
+    $result = db_query ($query, openabmma_getModelId ($modelName));
+    while ($element = db_fetch_object ($result))
+        $keywordList .= $element->keyword . ", ";
+    $keywordList = substr ($keywordList, 0, strlen($keywordList)-2);
+
+    $header = array( 'Name/URL', 'Owner', 'Title', 'Replicated?');
+    $data = array(
+                array($name, openabmma_getModelOwner($name), $title,
+                $replicated));
+    if ($replicated == "Yes") {
+        array_push($header, 'Other Authors', 'Reference / URL', 'Keywords');
+        array_push($data[0], $replicators, $reference_url, $keywordList);
+    }
+
+    $output .= theme_table($header, $data);
+
+
+    if ($owner == $user->name)
+    {
+        $output .= '(' . l('Change model metadata', 'models/edit/' . $modelName);
+        $output .= ' | ' . l('Manage members of this model', 'mymodels/' . $modelName . '/members') . ')';
+    }
+    */
+
+
   $result = db_query ($query, $user->uid);
   while ($node = db_fetch_object ($result))
   {
