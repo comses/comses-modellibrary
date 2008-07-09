@@ -1,3 +1,5 @@
+// ashay's original JS validation code, replace with Drupal validation or
+// improve later
 function validate_version_step01 (newVersion)
 {
     // Nothing to validate here
@@ -6,14 +8,20 @@ function validate_version_step01 (newVersion)
 
 function validate_version_step02 (newVersion)
 {
+    return true;
+    /*
     if ($('#edit-submitAction').val () == 0)	// back button pressed
         return true;
     valid_ext = 'gz bz2 zip nlogo c cpp java jar tar rar py pl rb';
     return validate_ext ('#edit-version-code-file', valid_ext, false, "The code file you are trying to upload has an extension that is not allowed for code files. The allowed extensions are: " + valid_ext + ".");
+    */
 }
 
 function validate_version_step03 (newVersion)
 {
+    // for now, allow anything
+    return true;
+    /*
     if ($('#edit-submitAction').val () == 0)	// back button pressed
         return true;
 
@@ -24,10 +32,13 @@ function validate_version_step03 (newVersion)
     stat2 = validate_ext ('#edit-version-doc-file', valid_ext, false, "The documentation file you are trying to upload has an extension that is not allowed for such files. The allowed extensions are: " + valid_ext + ".");
 
     return stat1 && stat2;
+    */
 }
 
 function validate_version_step04 (newVersion)
 {
+    return true;
+    /*
     if ($('#edit-submitAction').val () == 0)	// back button pressed
         return true;
 
@@ -38,6 +49,7 @@ function validate_version_step04 (newVersion)
     stat3 = validate_ext ('#edit-version-other', valid_ext, true, "The additional file you are trying to upload has an extension that is not allowed for additional files. The allowed extensions are: " + valid_ext + ". The additional file is optional.");
 
     return stat2 && stat3;
+    */
 }
 
 function validate_model (newVersion)
