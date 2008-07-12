@@ -53,6 +53,7 @@ function openabmma_install() {
                 os              VARCHAR(255) NOT NULL,
                 os_version      VARCHAR(10) NULL,
                 framework	VARCHAR(255) NOT NULL,
+                framework_version VARCHAR(10) NULL,
                 reference_text  TEXT,
                 examples        TEXT,
                 submittedReview bool default 0,

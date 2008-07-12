@@ -326,7 +326,7 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
         return openabmma_formAccessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
 
     $versionNumber = openabmma_parseVersionNumber (arg(3));
-    $query = "SELECT model_language_id, os, os_version, other_language, language_version, framework FROM openabm_model_version WHERE model_id=%d AND version_num=%d";
+    $query = "SELECT model_language_id, os, os_version, other_language, language_version, framework, framework_version FROM openabm_model_version WHERE model_id=%d AND version_num=%d";
     $result = (array) db_fetch_object (db_query ($query, openabmma_getModelId ($modelName), $versionNumber));
     $progLang = $result ['model_language_id'];
 
@@ -336,10 +336,9 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
 
     $osVersion = $result['os_version'];
 
-    $framework = $result ['framework'];
+    $frameworkName = $result ['framework'];
+    $frameworkVersion = $result['framework_version'];
 
-    $frameworkName = openabmma_getNameFromString ($framework);
-    $frameworkVersion = openabmma_getVersionFromString ($framework);
 
     $newVersion = $action == "add" ? 1 : 0;		
     drupal_add_js( openabmma_get_js_path() );
