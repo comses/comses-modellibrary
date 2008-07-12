@@ -747,9 +747,8 @@ function openabmma_openProject($modelName='')
         array_push($data[0], $replicators, $reference_url, $keywordList);
     }
 
-    $output .= theme_table($header, $data);
+    // $output .= theme_table($header, $data);
 
-/*
 
     $output .= "<p><table border='0' cellpadding='0' cellspacing='0' width='100%'>";
     $output .= "<tr class='openabmData'><td width='30%'><b>Model name:</b></td><td><i>" . $name . "</i></td></tr>";
@@ -758,13 +757,12 @@ function openabmma_openProject($modelName='')
     $output .= "<tr class='openabmData'><td><b>Replicated model:</b></td><td><i>" . $replicated . "</i></td></tr>";
     if ($replicated == "Yes")
     {
-        $output .= "<tr class='openabmData'><td><b>List of authors of the original model:</b></td><td><i>" . $replicators . "</i></td></tr>";
+        $output .= "<tr class='openabmData'><td><b>Authors of the original model:</b></td><td><i>" . $replicators . "</i></td></tr>";
         $output .= "<tr class='openabmData'><td><b>Reference URL:</b></td><td><i>" . $reference_url . "</i></td></tr>";
     }
 
     $output .= "<tr class='openabmData'><td><b>Model keywords:</b></td><td><i>" . $keywordList . "</i></td></tr>";
     $output .= "</table>";
-    */
 
     if ($owner == $user->name)
     {

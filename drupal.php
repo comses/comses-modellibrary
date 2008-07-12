@@ -169,7 +169,7 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'mymodels/' . arg(1) . "/add/version",
-            'title' => t('Step 01 :: Adding a version to your model'),
+            'title' => t('Step 1 : Adding a version to your model'),
             'description' => "",
             'access' => user_access ('modify models'),
             'callback' => 'openabmma_addVersion',
@@ -187,7 +187,7 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'mymodels/' . arg(1) . "/add/" . arg(3) . "/step01",
-            'title' => t('Step 01 :: Adding a version'),
+            'title' => t('Step 1 : Adding a version'),
             'description' => "",
             'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
@@ -197,7 +197,7 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'mymodels/' . arg(1) . "/add/" . arg(3) . "/step02",
-            'title' => t('Step 02 :: Adding a version'),
+            'title' => t('Step 2 : Adding a version'),
             'description' => "",
             'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
@@ -207,7 +207,7 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'mymodels/' . arg(1) . "/add/" . arg(3) . "/step03",
-            'title' => t('Step 03 :: Adding a version'),
+            'title' => t('Step 3 : Adding a version'),
             'description' => "",
             'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
@@ -217,7 +217,7 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'mymodels/' . arg(1) . "/add/" . arg(3) . "/step04",
-            'title' => t('Step 04 :: Adding a version'),
+            'title' => t('Step 4 : Adding a version'),
             'description' => "",
             'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
@@ -228,7 +228,7 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'mymodels/' . arg(1) . "/edit/" . arg(3) . "/step01",
-            'title' => t('Step 01 :: Editing a version'),
+            'title' => t('Step 1 : Editing a version'),
             'description' => "",
             'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
@@ -238,7 +238,7 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'mymodels/' . arg(1) . "/edit/" . arg(3) . "/step02",
-            'title' => t('Step 02 :: Editing a version'),
+            'title' => t('Step 2 : Editing a version'),
             'description' => "",
             'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
@@ -248,7 +248,7 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'mymodels/' . arg(1) . "/edit/" . arg(3) . "/step03",
-            'title' => t('Step 03 :: Editing a version'),
+            'title' => t('Step 3 : Editing a version'),
             'description' => "",
             'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
@@ -258,7 +258,7 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'mymodels/' . arg(1) . "/edit/" . arg(3) . "/step04",
-            'title' => t('Step 04 :: Editing a version'),
+            'title' => t('Step 4 : Editing a version'),
             'description' => "",
             'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
@@ -268,7 +268,7 @@ function openabmma_menu($may_cache) {
 /*
         $items[] = array(
             'path' => 'mymodels/' . arg(1) . "/edit/" . arg(3) . "/files_basic",
-            'title' => t('Step 04 :: Editing a version'),
+            'title' => t('Step 4 : Editing a version'),
             'description' => null,
             'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
@@ -278,7 +278,7 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'mymodels/' . arg(1) . "/edit/" . arg(3) . "/files_opt",
-            'title' => t('Step 05 :: Editing a version'),
+            'title' => t('Step 5 : Editing a version'),
             'description' => null,
             'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',
@@ -328,7 +328,7 @@ function openabmma_menu($may_cache) {
 
         $items[] = array(
             'path' => 'mymodels/' . arg(1) . "/" . arg(2) . "/" . arg(3) . "/reviewnote",
-            'title' => t('Step 04 :: Review step'),
+            'title' => t('Step 4 : Review step'),
             'description' => "",
             'access' => user_access ('modify models'),
             'callback' => 'drupal_get_form',

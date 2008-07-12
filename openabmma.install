@@ -51,6 +51,7 @@ function openabmma_install() {
 		other_language	VARCHAR(255) NULL,
 		language_version VARCHAR(10) NULL,
                 os              VARCHAR(255) NOT NULL,
+                os_version      VARCHAR(10) NULL,
                 framework	VARCHAR(255) NOT NULL,
                 reference_text  TEXT,
                 examples        TEXT,

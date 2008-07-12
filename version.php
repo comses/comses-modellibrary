@@ -258,14 +258,12 @@ function openabmma_addVersion02_submit ($form_id, $edit)
 		$os = $edit ["other_os"];
 		if ($os == "")
 		{
-			drupal_set_message ("<b><font color='red'>Please chose an Operating System from the menu or enter the name in the text box below it.</font></b>");
+			drupal_set_message ("<b><font color='red'>Please chose an operating system from the menu or enter the name in the text box below it.</font></b>");
 			return;
 		}
 	}
 
 	$osVersion = $edit ["os_ver"];
-	if ($osVersion != "")
-		$os .= ", Version: " . $osVersion;
 
 	$framework = $edit ["framework"];
 	if ($framework == "Other")	// selected other, so get the "other" fields contents first
@@ -301,9 +299,9 @@ function openabmma_addVersion02_submit ($form_id, $edit)
 
 	$pLanguageVersion = $edit ["version_language_ver"];
 
-	$query = "UPDATE openabm_model_version SET date_modified='%s', model_language_id=%d, other_language='%s', language_version='%s', os='%s', framework='%s' WHERE model_id=%d AND version_num=%d";
+	$query = "UPDATE openabm_model_version SET date_modified='%s', model_language_id=%d, other_language='%s', language_version='%s', os='%s', os_version='%s', framework='%s' WHERE model_id=%d AND version_num=%d";
 
-	db_query ($query, date ("Y-m-d H:i:s"), $pLanguage, $other_language, $pLanguageVersion, $os, $framework, openabmma_getModelId ($modelName), $versionNumber);
+	db_query ($query, date ("Y-m-d H:i:s"), $pLanguage, $other_language, $pLanguageVersion, $os, $osVersion, $framework, openabmma_getModelId ($modelName), $versionNumber);
 	drupal_goto ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step03");
 }
 
@@ -328,16 +326,15 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
         return openabmma_formAccessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
 
     $versionNumber = openabmma_parseVersionNumber (arg(3));
-    $query = "SELECT model_language_id, os, other_language, language_version, framework FROM openabm_model_version WHERE model_id=%d AND version_num=%d";
+    $query = "SELECT model_language_id, os, os_version, other_language, language_version, framework FROM openabm_model_version WHERE model_id=%d AND version_num=%d";
     $result = (array) db_fetch_object (db_query ($query, openabmma_getModelId ($modelName), $versionNumber));
     $progLang = $result ['model_language_id'];
 
     $other_language = $result ['other_language'];
     $progLangVer = $result ['language_version'];
-    $os = $result ['os'];
+    $osName = $result ['os'];
 
-    $osName = openabmma_getNameFromString ($os);
-    $osVersion = openabmma_getVersionFromString ($os);
+    $osVersion = $result['os_version'];
 
     $framework = $result ['framework'];
 
@@ -347,7 +344,7 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
     $newVersion = $action == "add" ? 1 : 0;		
     drupal_add_js( openabmma_get_js_path() );
 
-	$stepLinkText = "<table width='100%'><tr><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 2, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step01") . "');\">Step 01</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 2, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step02") . "');\">Step 02</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 2, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step03") . "');\">Step 03</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 2, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step04") . "');\">Step 04</a></td></tr></table><p>&nbsp;</p>";
+	$stepLinkText = "<table width='100%'><tr><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 2, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step01") . "');\">Step 1</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 2, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step02") . "');\">Step 2</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 2, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step03") . "');\">Step 3</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 2, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step04") . "');\">Step 4</a></td></tr></table><p>&nbsp;</p>";
 
 	$files_root = "files/models/" . $modelName . "/v" . $versionNumber;
 	if (openabmma_getFileCount ($files_root . "/code") == 0)
@@ -394,7 +391,7 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
     $form ["details"]["other_language"] = array (
             "#type" => "textfield",
             "#title" => t("Other language (if not mentioned in above list)"),
-            "#maxlength" => 210,
+            "#maxlength" => 255,
             "#default_value" => $edit ["other_language"] == "" ? $other_language : $edit ["other_language"],
             "#required" => false
             );
@@ -411,7 +408,7 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
 	'Linux' => 'Linux',
 	'Mac' => 'Mac',
 	'Windows' => 'Windows',
-	'PlatformIndependent' => 'Platform Independent',
+	'Platform Independent' => 'Platform Independent',
 	'Other' => 'Other');
 
     $form ["details"]["os"] = array (
@@ -425,7 +422,7 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
     $form ["details"]["other_os"] = array (
             "#type" => "textfield",
             "#title" => t("Other OS (if not mentioned in above list)"),
-            "#maxlength" => 210,
+            "#maxlength" => 255,
             "#default_value" => $edit ["other_os"] == "" ? (openabmma_inList ($osName, $arrayElements) == -1 ? $osName : "") : $edit ["other_os"],
             "#required" => false
             );
@@ -455,7 +452,7 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
     $form ["details"]["other_framework"] = array (
             "#type" => "textfield",
             "#title" => t("Other framework (if not mentioned in above list)"),
-            "#maxlength" => 210,
+            "#maxlength" => 255,
             "#default_value" => $edit ["other_framework"] == "" ? (openabmma_inList ($frameworkName, $arrayElements) == -1 ? $frameworkName : "") : $edit ["other_framework"],
             "#required" => false
             );
@@ -550,7 +547,7 @@ function openabmma_addVersion03 ($edit=null, $item=0)
 	$newVersion = $action == "add" ? 1 : 0;		
 	drupal_add_js( openabmma_get_js_path() );
 
-	$stepLinkText = "<table width='100%'><tr><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 3, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step01") . "');\">Step 01</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 3, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step02") . "');\">Step 02</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 3, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step03") . "');\">Step 03</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 3, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step04") . "');\">Step 04</a></td></tr></table><p>&nbsp;</p>";
+	$stepLinkText = "<table width='100%'><tr><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 3, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step01") . "');\">Step 1</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 3, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step02") . "');\">Step 2</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 3, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step03") . "');\">Step 3</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 3, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step04") . "');\">Step 4</a></td></tr></table><p>&nbsp;</p>";
 
 	$files_root = "files/models/" . $modelName . "/v" . $versionNumber;
 	if (openabmma_getFileCount ($files_root . "/doc") == 0)
@@ -592,7 +589,7 @@ function openabmma_addVersion03 ($edit=null, $item=0)
 		"#type" => "textarea",
 		"#title" => "Examples",
 		"#default_value" => $edit ["version_examples"] == "" ? $examples : $edit ["version_examples"],
-		"#maxlength" => 210,
+		"#maxlength" => 255,
 		"#description" => t("Notes on how to use the version"),
 		"#required" => false
 	);
@@ -762,7 +759,7 @@ function openabmma_addVersion04 ($edit=null, $item=0)
 	$newVersion = $action == "add" ? 1 : 0;
 	drupal_add_js( openabmma_get_js_path() );
 
-	$stepLinkText = "<table width='100%'><tr><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 4, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step01") . "');\">Step 01</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 4, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step02") . "');\">Step 02</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 4, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step03") . "');\">Step 03</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 4, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step04") . "');\">Step 04</a></td></tr></table><p>&nbsp;</p>";
+	$stepLinkText = "<table width='100%'><tr><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 4, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step01") . "');\">Step 1</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 4, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step02") . "');\">Step 2</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 4, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step03") . "');\">Step 3</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 4, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step04") . "');\">Step 4</a></td></tr></table><p>&nbsp;</p>";
 
 	$form['#attributes'] = array('enctype' => "multipart/form-data", 'onsubmit' => 'return validate_version_step04 (' . $newVersion . ')');
 	$form["details"] = array(
@@ -797,7 +794,7 @@ function openabmma_addVersion04 ($edit=null, $item=0)
 		"#type" => "textarea",
 		"#title" => "Special conditions or other comments for running the code",
 		"#default_value" => $edit ["model_conditions"] == "" ? $run_conditions : $edit ["model_conditions"],
-		"#maxlength" => 210,
+		"#maxlength" => 255,
 		"#description" => t("Optional notes on how to run this version of code"),
 		"#required" => false
 	);
@@ -1013,7 +1010,7 @@ function openabmma_addVersion01 ($edit=null, $item=0)
 		"#description" => null,
 	);
 
-	$stepLinkText = "<table width='100%'><tr><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 1, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step01") . "');\">Step 01</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 1, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step02") . "');\">Step 02</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 1, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step03") . "');\">Step 03</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 1, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step04") . "');\">Step 04</a></td></tr></table><p>&nbsp;</p>";
+	$stepLinkText = "<table width='100%'><tr><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 1, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step01") . "');\">Step 1</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 1, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step02") . "');\">Step 2</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 1, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step03") . "');\">Step 3</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 1, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step04") . "');\">Step 4</a></td></tr></table><p>&nbsp;</p>";
 
 	if ($newVersion == "0")
 		$form ["details"]["reviewNote"] = array (
@@ -1037,7 +1034,7 @@ function openabmma_addVersion01 ($edit=null, $item=0)
 		"#description" => null,
 		"#value" => $modelName,
 //		"#required" => true,		// Commented because clicking Cancel validates this field too!
-		"#maxlength" => 210
+		"#maxlength" => 255
 //		'#autocomplete_path' => 'user/autocomplete',
 	);
 */
