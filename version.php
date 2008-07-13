@@ -276,9 +276,11 @@ function openabmma_addVersion02_submit ($form_id, $edit)
 		}
 	}
 
-	$frameworkVersion = $edit ["framework_ver"];
-	if ($frameworkVersion != "")
-		$framework .= ", Version: " . $frameworkVersion;
+	$framework_version = $edit ["framework_ver"];
+        if ($framework = '') {
+            // allow framework version without framework?  or spit out an
+            // error?  Actually, should have JS enable textfields
+        }
 
 	$pLanguage = $edit ["version_language"];
 
@@ -289,19 +291,19 @@ function openabmma_addVersion02_submit ($form_id, $edit)
 	$other_language = '';
 	if ($pLanguage == $result ['id'])
 	{
-		$other_language = $edit ["other_language"];
-		if ($other_language == "")
-		{
-			drupal_set_message ("<b><font color='red'>Please chose a programming language from the menu or enter the name in the text box below it.</font></b>");
-			return;
-		}
+            $other_language = $edit ["other_language"];
+            if ($other_language == "")
+            {
+                drupal_set_message ("<b><font color='red'>Please chose a programming language from the menu or enter the name in the text box below it.</font></b>");
+                return;
+            }
 	}
 
 	$pLanguageVersion = $edit ["version_language_ver"];
 
-	$query = "UPDATE openabm_model_version SET date_modified='%s', model_language_id=%d, other_language='%s', language_version='%s', os='%s', os_version='%s', framework='%s' WHERE model_id=%d AND version_num=%d";
+	$query = "UPDATE openabm_model_version SET date_modified='%s', model_language_id=%d, other_language='%s', language_version='%s', os='%s', os_version='%s', framework='%s', framework_version='%s' WHERE model_id=%d AND version_num=%d";
 
-	db_query ($query, date ("Y-m-d H:i:s"), $pLanguage, $other_language, $pLanguageVersion, $os, $osVersion, $framework, openabmma_getModelId ($modelName), $versionNumber);
+	db_query ($query, date ("Y-m-d H:i:s"), $pLanguage, $other_language, $pLanguageVersion, $os, $osVersion, $framework, $framework_version, openabmma_getModelId ($modelName), $versionNumber);
 	drupal_goto ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step03");
 }
 
@@ -337,7 +339,7 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
     $osVersion = $result['os_version'];
 
     $frameworkName = $result ['framework'];
-    $frameworkVersion = $result['framework_version'];
+    $framework_version = $result['framework_version'];
 
 
     $newVersion = $action == "add" ? 1 : 0;		
@@ -460,7 +462,7 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
             "#type" => "textfield",
             "#size" => 10,
             "#title" => t("Framework Version"),
-            "#default_value" => $edit ["framework_ver"] == "" ? $frameworkVersion : $edit ["framework_ver"],
+            "#default_value" => $edit ["framework_ver"] == "" ? $framework_version : $edit ["framework_ver"],
             "#description" => null
             );
 
@@ -766,7 +768,7 @@ function openabmma_addVersion04 ($edit=null, $item=0)
 		"#collapsible" => FALSE,
 		"#collapsed" => FALSE,
 		"#title" => null,
-		"#description" => $stepLinkText . "Components required for review",
+		"#description" => $stepLinkText . "<h3>Additional information required for review</h3>",
 	);
 
 //	if ($action != "edit")
@@ -1011,11 +1013,12 @@ function openabmma_addVersion01 ($edit=null, $item=0)
 
 	$stepLinkText = "<table width='100%'><tr><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 1, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step01") . "');\">Step 1</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 1, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step02") . "');\">Step 2</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 1, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step03") . "');\">Step 3</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 1, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step04") . "');\">Step 4</a></td></tr></table><p>&nbsp;</p>";
 
-	if ($newVersion == "0")
-		$form ["details"]["reviewNote"] = array (
-			"#type" => "item",
-			"#value" => $stepLinkText . "<u><b>Note:</b></u> If this model has previously been submitted for review, it will automatically be invalidated from the reviewer's list and you would have to submit it again."
-		);
+	if ($newVersion == "0") {
+        $form ["details"]["reviewNote"] = array (
+            "#type" => "item",
+            "#value" => $stepLinkText . "<u><b>Note:</b></u> If this model has previously been submitted for review, it will automatically be removed from the reviewer's list and you would have to submit it again."
+            );
+        }
 
 	$form ["details"]["newVersion"] = array (
 		"#type" => "hidden",
