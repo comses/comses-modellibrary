@@ -1,5 +1,6 @@
 <?php
 
+define("MODEL_DIRECTORY", 'model-archive/');
 function openabmma_versionMetadata ()
 {
     global $user;
@@ -7,7 +8,7 @@ function openabmma_versionMetadata ()
     if ($modelName == '')
         return '';
 
-	$versionNumber = openabmma_parseVersionNumber (arg(2));
+    $versionNumber = openabmma_parseVersionNumber (arg(2));
     $owner = openabmma_getModelOwner ($modelName);
 
     $query = "SELECT visible FROM openabm_model_version WHERE model_id=%d AND version_num=%d";
@@ -135,9 +136,9 @@ function openabmma_versionMetadata ()
     $output .= "</table>";
 
 	if ($user->name == $owner)
-	    $output .= "<p></p>" . l ("To change your metadata settings, click here", "mymodels/" . $modelName . "/edit/version" . $versionNumber . "/step01");
+	    $output .= "<p></p>" . l ("To change your metadata settings, click here", MODEL_DIRECTORY . $modelName . "/edit/version" . $versionNumber . "/step01");
 
-	$output .= "<p></p>" . l ("To go to model workspace, click here", "mymodels/" . $modelName);
+	$output .= "<p></p>" . l ("To go to model workspace, click here", MODEL_DIRECTORY . $modelName);
     return $output;
 }
 
@@ -210,11 +211,11 @@ function openabmma_askIfReview_submit ($form_id, $edit)
 	$versionNumber = openabmma_parseVersionNumber (arg(3));
 
 	if ($_POST ["op"] == "Proceed to Submit Version for Review")
-		drupal_goto ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step04");
+		drupal_goto (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step04");
 	else if ($_POST ["op"] == "Finish the Add Version process")
-		drupal_goto ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/complete");
+		drupal_goto (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/complete");
 	else if ($_POST ["op"] == "Back")
-		drupal_goto ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step03");
+		drupal_goto (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step03");
 	else
 		drupal_goto ("/");
 }
@@ -232,7 +233,7 @@ function openabmma_addVersion02_submit ($form_id, $edit)
 
 	$action = arg(2);
 	if ($_POST ["op"] == "Back")
-		drupal_goto ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step01");
+		drupal_goto (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step01");
 
 	$directory = "files/models/" . $modelName . "/v" . $versionNumber . "/code";
 	$fileCount = openabmma_getFileCount ($directory);
@@ -304,7 +305,7 @@ function openabmma_addVersion02_submit ($form_id, $edit)
 	$query = "UPDATE openabm_model_version SET date_modified='%s', model_language_id=%d, other_language='%s', language_version='%s', os='%s', os_version='%s', framework='%s', framework_version='%s' WHERE model_id=%d AND version_num=%d";
 
 	db_query ($query, date ("Y-m-d H:i:s"), $pLanguage, $other_language, $pLanguageVersion, $os, $osVersion, $framework, $framework_version, openabmma_getModelId ($modelName), $versionNumber);
-	drupal_goto ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step03");
+	drupal_goto (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step03");
 }
 
 function openabmma_getNameFromString ($os)
@@ -345,7 +346,7 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
     $newVersion = $action == "add" ? 1 : 0;		
     drupal_add_js( openabmma_get_js_path() );
 
-	$stepLinkText = "<table width='100%'><tr><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 2, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step01") . "');\">Step 1</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 2, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step02") . "');\">Step 2</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 2, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step03") . "');\">Step 3</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 2, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step04") . "');\">Step 4</a></td></tr></table><p>&nbsp;</p>";
+	$stepLinkText = "<table width='100%'><tr><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 2, '" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step01") . "');\">Step 1</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 2, '" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step02") . "');\">Step 2</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 2, '" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step03") . "');\">Step 3</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 2, '" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step04") . "');\">Step 4</a></td></tr></table><p>&nbsp;</p>";
 
 	$files_root = "files/models/" . $modelName . "/v" . $versionNumber;
 	if (openabmma_getFileCount ($files_root . "/code") == 0)
@@ -367,7 +368,7 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
 	if ($fileCount > 0)
 		$form ["details"]["version_code_file"] = array (
 			"#type" => "item",
-			"#value" => "The file '<b>" . openabmma_getFirstFile ($directory) . "</b>' has been uploaded as the code file. To delete this file and upload a different one, click <a href='" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/files_basic/delete/code") . "'>delete</a>."
+			"#value" => "The file '<b>" . openabmma_getFirstFile ($directory) . "</b>' has been uploaded as the code file. To delete this file and upload a different one, click <a href='" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/files_basic/delete/code") . "'>delete</a>."
 		);
 	else
 		$form ["details"]["version_code_file"] = array (
@@ -499,7 +500,7 @@ function openabmma_addVersion03_submit ($form_id, $edit)
 
 	$action = arg(2);
 	if ($_POST ["op"] == "Back")
-		drupal_goto ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step02");
+		drupal_goto (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step02");
 
 	$directory = "files/models/" . $modelName . "/v" . $versionNumber . "/doc";
 	$fileCount = openabmma_getFileCount ($directory);
@@ -524,7 +525,7 @@ function openabmma_addVersion03_submit ($form_id, $edit)
 	$query = "UPDATE openabm_model_version SET date_modified='%s', license_id=%d, reference_text='%s', examples='%s' WHERE model_id=%d AND version_num=%d";
 	db_query ($query, date ("Y-m-d H:i:s"), $edit ["version_licenseId"], $edit ["version_ref"], $edit ["version_examples"], openabmma_getModelId ($modelName), $versionNumber);
 
-	drupal_goto ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/reviewnote");
+	drupal_goto (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/reviewnote");
 }
 
 function openabmma_addVersion03 ($edit=null, $item=0)
@@ -548,7 +549,7 @@ function openabmma_addVersion03 ($edit=null, $item=0)
 	$newVersion = $action == "add" ? 1 : 0;		
 	drupal_add_js( openabmma_get_js_path() );
 
-	$stepLinkText = "<table width='100%'><tr><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 3, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step01") . "');\">Step 1</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 3, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step02") . "');\">Step 2</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 3, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step03") . "');\">Step 3</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 3, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step04") . "');\">Step 4</a></td></tr></table><p>&nbsp;</p>";
+	$stepLinkText = "<table width='100%'><tr><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 3, '" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step01") . "');\">Step 1</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 3, '" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step02") . "');\">Step 2</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 3, '" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step03") . "');\">Step 3</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 3, '" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step04") . "');\">Step 4</a></td></tr></table><p>&nbsp;</p>";
 
 	$files_root = "files/models/" . $modelName . "/v" . $versionNumber;
 	if (openabmma_getFileCount ($files_root . "/doc") == 0)
@@ -603,7 +604,7 @@ function openabmma_addVersion03 ($edit=null, $item=0)
 		{
 			$form ["details"]["version_doc_file"] = array (
 				"#type" => "item",
-				"#value" => "The file '<b>" . openabmma_getFirstFile ($directory) . "</b>' has been uploaded as the Documentation. To delete this file and upload a different one, click <a href='" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/files_opt/delete/doc") . "'>delete</a>."
+				"#value" => "The file '<b>" . openabmma_getFirstFile ($directory) . "</b>' has been uploaded as the Documentation. To delete this file and upload a different one, click <a href='" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/files_opt/delete/doc") . "'>delete</a>."
 			);
 		}
 		else
@@ -621,7 +622,7 @@ function openabmma_addVersion03 ($edit=null, $item=0)
 	if ($fileCount > 0)
 		$form ["details"]["version_sensitivity"] = array (
 			"#type" => "item",
-			"#value" => "The file '<b>" . openabmma_getFirstFile ($directory) . "</b>' has been uploaded as the sensitivity file. To delete this file and upload a different one, click <a href='" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/files_basic/delete/sensitivity") . "'>delete</a>."
+			"#value" => "The file '<b>" . openabmma_getFirstFile ($directory) . "</b>' has been uploaded as the sensitivity file. To delete this file and upload a different one, click <a href='" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/files_basic/delete/sensitivity") . "'>delete</a>."
 		);
 	else		
 		$form ["details"]["version_sensitivity"] = array (
@@ -668,7 +669,7 @@ function openabmma_optFiles_delete ()
 
 	openabmma_cleantmp ($modelName . "/v" . $versionNumber . "/" . $target);
 
-	$gotoURL = "mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/";
+	$gotoURL = MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/";
 	switch ($target)
 	{
 		case "doc":	$gotoURL .= "step03";	break;
@@ -696,9 +697,9 @@ function openabmma_basicFiles_delete ()
 	openabmma_cleantmp ($modelName . "/v" . $versionNumber . "/" . $target);
 
 	if ($target == "code")
-		drupal_goto ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step02");
+		drupal_goto (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step02");
 	else if ($target == "sensitivity")
-		drupal_goto ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step03");
+		drupal_goto (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step03");
 }
 
 function openabmma_addVersion04_submit ($form_id, $edit)
@@ -713,7 +714,7 @@ function openabmma_addVersion04_submit ($form_id, $edit)
 		return openabmma_accessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
 
 	if ($_POST ["op"] == "Back")
-		drupal_goto ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/reviewnote");
+		drupal_goto (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/reviewnote");
 
 	if ($edit ["version_inst"]['commented'] == '0' || $edit ["version_inst"]['cleanup'] == '0' || $edit ["version_inst"]['running'] == '0')
 		drupal_set_message ("<b><font color='red'>Well-commented, cleanedup and running code is required before you submit your model version for review!</font></b><br/>");
@@ -737,7 +738,7 @@ function openabmma_addVersion04_submit ($form_id, $edit)
 
 		$query = "UPDATE openabm_model_version SET date_modified='%s', submittedReview=1, run_conditions='%s' WHERE model_id=%d AND version_num=%d";
 		db_query ($query, date ("Y-m-d H:i:s"), $edit ["version_conditions"], openabmma_getModelId ($modelName), $versionNumber);
-		drupal_goto ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/complete");
+		drupal_goto (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/complete");
 	}
 }
 
@@ -760,7 +761,7 @@ function openabmma_addVersion04 ($edit=null, $item=0)
 	$newVersion = $action == "add" ? 1 : 0;
 	drupal_add_js( openabmma_get_js_path() );
 
-	$stepLinkText = "<table width='100%'><tr><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 4, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step01") . "');\">Step 1</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 4, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step02") . "');\">Step 2</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 4, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step03") . "');\">Step 3</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 4, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step04") . "');\">Step 4</a></td></tr></table><p>&nbsp;</p>";
+	$stepLinkText = "<table width='100%'><tr><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 4, '" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step01") . "');\">Step 1</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 4, '" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step02") . "');\">Step 2</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 4, '" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step03") . "');\">Step 3</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 4, '" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step04") . "');\">Step 4</a></td></tr></table><p>&nbsp;</p>";
 
 	$form['#attributes'] = array('enctype' => "multipart/form-data", 'onsubmit' => 'return validate_version_step04 (' . $newVersion . ')');
 	$form["details"] = array(
@@ -779,7 +780,7 @@ function openabmma_addVersion04 ($edit=null, $item=0)
 		{
 			$form ["details"]["version_dataset"] = array (
 				"#type" => "item",
-				"#value" => "The file '<b>" . openabmma_getFirstFile ($directory) . "</b>' has been uploaded as the Dataset file. To delete this file and upload a different one, click <a href='" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/files_opt/delete/dataset") . "'>delete</a>."
+				"#value" => "The file '<b>" . openabmma_getFirstFile ($directory) . "</b>' has been uploaded as the Dataset file. To delete this file and upload a different one, click <a href='" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/files_opt/delete/dataset") . "'>delete</a>."
 			);
 		}
 		else
@@ -808,7 +809,7 @@ function openabmma_addVersion04 ($edit=null, $item=0)
 		{
 			$form ["details"]["version_other"] = array (
 				"#type" => "item",
-				"#value" => "The file '<b>" . openabmma_getFirstFile ($directory) . "</b>' has been uploaded as the additional file. To delete this file and upload a different one, click <a href='" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/files_opt/delete/other") . "'>delete</a>."
+				"#value" => "The file '<b>" . openabmma_getFirstFile ($directory) . "</b>' has been uploaded as the additional file. To delete this file and upload a different one, click <a href='" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/files_opt/delete/other") . "'>delete</a>."
 			);
 		}
 		else
@@ -865,7 +866,7 @@ function openabmma_addVersionComplete ()
 	$action = arg(2);
 	$versionNumber = openabmma_parseVersionNumber (arg(3));
 
-	$stepURL_root = "mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step";
+	$stepURL_root = MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step";
 	$files_root = "files/models/" . $modelName . "/v" . $versionNumber;
 	if (openabmma_getFileCount ($files_root . "/code") == 0)
 		drupal_goto ($stepURL_root . "02");
@@ -880,7 +881,7 @@ function openabmma_addVersionComplete ()
 	else
 		$output = "<p><br/>Congratulations! Your version has been uploaded!</p>";
 
-	$webAddr = url ("mymodels/" . $modelName, NULL, NULL, TRUE);
+	$webAddr = url (MODEL_DIRECTORY . $modelName, NULL, NULL, TRUE);
 	$output .= "<p>Your model can be accessed via the URL:<br/>" . l($webAddr, $webAddr) . "</p>";
 //	$output = 
 	return $output;
@@ -910,7 +911,7 @@ function openabmma_addVersion01_submit ($form_id, $edit) {
     }
 
     if ($_POST ["op"] == "Cancel")
-        drupal_goto ("mymodels/" . $modelName);
+        drupal_goto (MODEL_DIRECTORY . $modelName);
 
     $pCount = strlen ($modelName);
     for ($i=0; $i<$pCount; $i++)
@@ -945,7 +946,7 @@ function openabmma_addVersion01_submit ($form_id, $edit) {
 
 	//FIXME: Add code to invalidate the copy if it has already been sent for review
 
-            drupal_goto("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step02");
+            drupal_goto(MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step02");
         }
     else
     {
@@ -954,7 +955,7 @@ function openabmma_addVersion01_submit ($form_id, $edit) {
 
 	//FIXME: Add code to invalidate the copy if it has already been sent for review
 
-        drupal_goto("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step02");
+        drupal_goto(MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step02");
     }
 }
 
@@ -1011,7 +1012,7 @@ function openabmma_addVersion01 ($edit=null, $item=0)
 		"#description" => null,
 	);
 
-	$stepLinkText = "<table width='100%'><tr><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 1, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step01") . "');\">Step 1</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 1, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step02") . "');\">Step 2</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 1, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step03") . "');\">Step 3</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 1, '" . url ("mymodels/" . $modelName . "/" . $action . "/version" . $versionNumber . "/step04") . "');\">Step 4</a></td></tr></table><p>&nbsp;</p>";
+	$stepLinkText = "<table width='100%'><tr><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 1, '" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step01") . "');\">Step 1</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 1, '" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step02") . "');\">Step 2</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 1, '" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step03") . "');\">Step 3</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 1, '" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step04") . "');\">Step 4</a></td></tr></table><p>&nbsp;</p>";
 
 	if ($newVersion == "0") {
         $form ["details"]["reviewNote"] = array (
@@ -1109,7 +1110,7 @@ function openabmma_addVersion ()
     $output .= "<tr class='openabmData'><td><b>Step 3</b></td><td><font color='red'>Mandatory</font></td><td>License information, References to publications, Examples and Sensitivity data</td></tr>";
     $output .= "<tr class='openabmData'><td><b>Step 4</b></td><td><font color='green'>Only for review</font></td><td>Collecting documents for version review</td></tr>";
     $output .= "</table>";
-    $output .= "<p>&nbsp;</p>" . l ("Click here to proceed to first step", "mymodels/" . $modelName . "/add/version/step01");	
+    $output .= "<p>&nbsp;</p>" . l ("Click here to proceed to first step", MODEL_DIRECTORY . $modelName . "/add/version/step01");	
     return $output;
 }
 
@@ -1130,6 +1131,6 @@ function openabmma_deleteVersion ()
 
 	openabmma_cleantmp ($modelName . '/v' . $versionNumber, true);
 
-	drupal_goto ("mymodels/" . $modelName);
+	drupal_goto (MODEL_DIRECTORY . $modelName);
 	return "";
 }

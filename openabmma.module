@@ -11,6 +11,7 @@
  * review committee should also be able to "star" an ABM project to signify
  * its level of maturity and completeness.
  */
+ define('MODEL_DIRECTORY', 'model-archive/');
 
 include 'admin.php';
 include 'classes.php';
@@ -63,7 +64,7 @@ function openabmma_showProjects ()
     if ($owner == $user->name)
     {
         $output .= '(' . l('Change model metadata', 'models/edit/' . $modelName);
-        $output .= ' | ' . l('Manage members of this model', 'mymodels/' . $modelName . '/members') . ')';
+        $output .= ' | ' . l('Manage members of this model', MODEL_DIRECTORY . $modelName . '/members') . ')';
     }
     */
 
@@ -72,7 +73,7 @@ function openabmma_showProjects ()
   while ($node = db_fetch_object ($result))
   {
     $count++;
-    $output .= "<b>" . l ($node->title . " (" . $node->name . ")", "mymodels/" . $node->name) . "</b>&nbsp;";
+    $output .= "<b>" . l ($node->title . " (" . $node->name . ")", MODEL_DIRECTORY . $node->name) . "</b>&nbsp;";
 
     $output .= "&nbsp;<br/><small>" . $node->description . "<hr/>";
     $output .= "</small><br/>";
@@ -81,7 +82,7 @@ function openabmma_showProjects ()
   $output .= "You have submitted <b>" . $count . "</b> model(s).<br/>&nbsp;<br/>";
   $count = 0;
 
-  $output .= '<br/><b>You are a member of these models:</b><hr/><br/>';
+  $output .= '<br/><b>Other models:</b><hr/><br/>';
   $query = "SELECT m.owner_uid, m.name, m.title, B.role 
     FROM openabm_model m INNER JOIN openabm_model_member B ON m.id=B.project_id
     WHERE B.user_id=%d";
@@ -90,7 +91,7 @@ function openabmma_showProjects ()
   {
     $count++;
     $owner = openabmma_getUserName ($node->owner_uid);
-    $output .= "<b>" . l ($node->title . " (" . $node->name . ")", "mymodels/" . $node->name) . "</b>&nbsp;";
+    $output .= "<b>" . l ($node->title . " (" . $node->name . ")", MODEL_DIRECTORY . $node->name) . "</b>&nbsp;";
 
     if ($node->visible == 1)	$output .= "[Public]";
     else				$output .= "[Private]";
@@ -117,7 +118,7 @@ function openabmma_browseModels ()
     $owner_uid = $model->owner_uid;
 
     $count++;
-    $output .= l ($pTitle . " [" . $modelName . "]", "mymodels/" . $modelName) . "<br/><small>Owner: " . openabmma_getUserName ($owner_uid) . "</small>&nbsp;<br/>";
+    $output .= l ($pTitle . " [" . $modelName . "]", MODEL_DIRECTORY . $modelName) . "<br/><small>Owner: " . openabmma_getUserName ($owner_uid) . "</small>&nbsp;<br/>";
   }
 
   if ($count) {

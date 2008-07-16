@@ -1,5 +1,7 @@
 <?php
 
+define('MODEL_DIRECTORY', 'model-archive/');
+
 function openabmma_showMetaData ($modelName='') {
     global $user;
     if ($modelName == '')
@@ -61,7 +63,7 @@ function openabmma_showMetaData ($modelName='') {
     if ($user->name == $owner)
         $output .= "<p></p>" . l ("To change your metadata settings, click here", "models/edit/" . $modelName);
 
-    $output .= "<p></p>" . l ("To go to model workspace, click here", "mymodels/" . $modelName);
+    $output .= "<p></p>" . l ("To go to model workspace, click here", MODEL_DIRECTORY . $modelName);
     return $output;
 }
 
@@ -86,7 +88,7 @@ function openabmma_addModel_validate ($form_id, $form_values) {
     if ($modelName == '') {
         form_set_error($form_id, t("<b><font color='#DD0000'>HEY HEY HE YModel name is a required field</font></b>"));
     }
-    else if (! preg_match('/^[\w]+$/', $modelName)) {
+    else if (! preg_match('/^[\w.-]+$/', $modelName)) {
         form_set_error ($form_id, t("The model name you entered, <b><i><font color='#DD0000'>${modelName}</font></i></b> contains invalid characters. Please re-enter the model name only using alphanumeric characters and the underscore character."));
     }
     if ($form_values['model_title'] == '') {
@@ -126,7 +128,7 @@ function openabmma_addModel_submit ($form_id, $edit) {
         else if ($action == "edit")
         {
             $modelName = arg(2);
-            drupal_goto ("mymodels/" . $modelName);
+            drupal_goto (MODEL_DIRECTORY . $modelName);
         }
 
     $replicated = $edit ["model_replicated"]["replica"] ? 1 : 0;
@@ -143,7 +145,7 @@ function openabmma_addModel_submit ($form_id, $edit) {
         db_query ($query, $edit ["model_title"], $replicated, $edit ["model_repl"], $edit ["model_refurl"], $modelName);
         openabm_addKeywords( $modelId, $edit['keywords'] );
     }
-    drupal_goto("mymodels/${modelName}");
+    drupal_goto(MODEL_DIRECTORY . $modelName);
 }
 
 function openabm_addKeywords($modelId, $inputKeywordList) {
@@ -394,7 +396,7 @@ function openabmma_doSearch ($searchText='')
 
         $modelName = openabmma_getModelName ($proj->ID);
         $owner = openabmma_getModelOwner ($modelName);
-        $output .= l (openabmma_getModelTitle ($proj->ID) . " [${modelName}]", "mymodels/${modelName}") . "<br/><small>Owner: ${owner}</small><br/>";
+        $output .= l (openabmma_getModelTitle ($proj->ID) . " [${modelName}]", MODEL_DIRECTORY) . "<br/><small>Owner: ${owner}</small><br/>";
     }
 
     $output = $count . " result(s) matched your query.<br/>&nbsp;<br/>" . $output;
@@ -470,7 +472,7 @@ function openabmma_deleteMember ($name, $uid)
         return "Invalid project name";
 
     db_query ($query, $projectId, $uid);
-    drupal_goto ("mymodels/" . $name . "/members");
+    drupal_goto (MODEL_DIRECTORY . $name . "/members");
     return "";
 }
 
@@ -497,7 +499,7 @@ function openabmma_manageMembers ($name='')
     if ($user->name == $owner)
         $output .= "<br/>&nbsp;<br/>" . drupal_get_form (openabmma_addMember);
 
-    $output .= "<p></p>To go to the model workspace, click " . l ("here", "mymodels/" . $name);
+    $output .= "<p></p>To go to the model workspace, click " . l ("here", MODEL_DIRECTORY . $name);
 
     return $output;
 }
@@ -590,7 +592,7 @@ function openabmma_addMember_submit ($form_id, $edit)
     $modelName = arg(1);
 
     if ($_POST ["op"] == "Back")
-        drupal_goto ("mymodels/" . $modelName);
+        drupal_goto (MODEL_DIRECTORY . $modelName);
 
     $username = $edit ["name"];
     $projName = arg(1);
@@ -686,7 +688,7 @@ function openabmma_showModelMembers ($name='')
     while ($users = db_fetch_object ($result)) {
         $output .= "<br/>" . openabmma_getUserName ($users->user_id) . "&nbsp;<small>[" . openabmma_getRoleName ($users->role) . "]";
         if ($user->name == openabmma_getModelOwner ($name))
-            $output .= " - " . "<a href=\"javascript:if(confirm('Are you sure you want to remove this user from your model?')) window.location.replace('" . url("mymodels/" . $name . "/members/delete/" . $users->user_id) . "');\">Remove this user from my model</a></small>";
+            $output .= " - " . "<a href=\"javascript:if(confirm('Are you sure you want to remove this user from your model?')) window.location.replace('" . url(MODEL_DIRECTORY . $name . "/members/delete/" . $users->user_id) . "');\">Remove this user from my model</a></small>";
     }
 
     return $output;
@@ -767,7 +769,7 @@ function openabmma_openProject($modelName='')
     if ($owner == $user->name)
     {
         $output .= '(' . l('Change model metadata', 'models/edit/' . $modelName);
-        $output .= ' | ' . l('Manage members of this model', 'mymodels/' . $modelName . '/members') . ')';
+        $output .= ' | ' . l('Manage members of this model', MODEL_DIRECTORY . $modelName . '/members') . ')';
     }
 
     $output .= openabmma_getFormattedVersionList ($modelName);
@@ -838,17 +840,17 @@ function openabmma_getFormattedVersionList ($modelName)
             //
             $desc .= "...";
         }
-        $output .= "<tr class='openabmData'><td class='openabmCol'>" . $item->version_num . "</td><td class='openabmCol'>" . l ($desc, "mymodels/". $modelName . "/version" . $item->version_num . "/metadata") . "</td><td class='openabmCol'>" . $dlStr . "</td><td class='openabmCol'>" . $visible . "</td><td class='openabmCol'>" . $submitted . "</td><td class='openabmCol'>". $item->date_modified . "</td><td>";
+        $output .= "<tr class='openabmData'><td class='openabmCol'>" . $item->version_num . "</td><td class='openabmCol'>" . l ($desc, MODEL_DIRECTORY. $modelName . "/version" . $item->version_num . "/metadata") . "</td><td class='openabmCol'>" . $dlStr . "</td><td class='openabmCol'>" . $visible . "</td><td class='openabmCol'>" . $submitted . "</td><td class='openabmCol'>". $item->date_modified . "</td><td>";
 
         if ($user->name == $owner)
-            $output .= l ("edit", "mymodels/" . $modelName . "/edit/version" . $item->version_num . "/step01");
+            $output .= l ("edit", MODEL_DIRECTORY . $modelName . "/edit/version" . $item->version_num . "/step01");
         else
             $output .= "&nbsp;";
 
         $output .= "</td><td>";
 
         if ($user->name == $owner)
-            $output .= "<a href=\"javascript:if(confirm('Are you sure you want to delete this version?\\nOnce deleted, no recovery is possible.')) window.location.replace('" . url("mymodels/" . $modelName . "/delete/version" . $item->version_num) . "');\">delete</a>";
+            $output .= "<a href=\"javascript:if(confirm('Are you sure you want to delete this version?\\nOnce deleted, no recovery is possible.')) window.location.replace('" . url(MODEL_DIRECTORY . $modelName . "/delete/version" . $item->version_num) . "');\">delete</a>";
         else
             $output .= "&nbsp;";
         $output .= "</td></tr>";
@@ -856,7 +858,7 @@ function openabmma_getFormattedVersionList ($modelName)
 
     $output .= "</table>";
 
-    $finalOutput = "<br/>&nbsp;<br/><u>Versions (Currently " . $versionCount . " version(s)):</u><br/>" . l ("Upload a new version", "mymodels/" . $modelName . "/add/version") . "<br/>";
+    $finalOutput = "<br/>&nbsp;<br/><u>${versionCount} version(s) available:</u><br/>" . l ("Upload a new version", MODEL_DIRECTORY . $modelName . "/add/version") . "<br/>";
     if ($versionCount != 0)
         $finalOutput .= $output;
 

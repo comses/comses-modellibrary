@@ -1,4 +1,5 @@
 <?php
+define('MODEL_DIRECTORY', 'model-archive/');
 
 function openabmma_block ($op='list', $delta=0)
 {
@@ -159,7 +160,7 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'mymodels/' . arg(1) . "/" . arg(2) . "/metadata",
+            'path' => MODEL_DIRECTORY . arg(1) . "/" . arg(2) . "/metadata",
             'title' => t('Model version metadata'),
             'description' => "",
             'access' => user_access ('modify models'),
@@ -168,7 +169,7 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'mymodels/' . arg(1) . "/add/version",
+            'path' => MODEL_DIRECTORY . arg(1) . "/add/version",
             'title' => t('Step 1 : Adding a version to your model'),
             'description' => "",
             'access' => user_access ('modify models'),
@@ -177,7 +178,7 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'mymodels/' . arg(1) . "/delete/" . arg(3),
+            'path' => MODEL_DIRECTORY . arg(1) . "/delete/" . arg(3),
             'title' => t('Delete a version'),
             'description' => "",
             'access' => user_access ('modify models'),
@@ -186,7 +187,7 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'mymodels/' . arg(1) . "/add/" . arg(3) . "/step01",
+            'path' => MODEL_DIRECTORY . arg(1) . "/add/" . arg(3) . "/step01",
             'title' => t('Step 1 : Adding a version'),
             'description' => "",
             'access' => user_access ('modify models'),
@@ -196,7 +197,7 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'mymodels/' . arg(1) . "/add/" . arg(3) . "/step02",
+            'path' => MODEL_DIRECTORY . arg(1) . "/add/" . arg(3) . "/step02",
             'title' => t('Step 2 : Adding a version'),
             'description' => "",
             'access' => user_access ('modify models'),
@@ -206,7 +207,7 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'mymodels/' . arg(1) . "/add/" . arg(3) . "/step03",
+            'path' => MODEL_DIRECTORY . arg(1) . "/add/" . arg(3) . "/step03",
             'title' => t('Step 3 : Adding a version'),
             'description' => "",
             'access' => user_access ('modify models'),
@@ -216,7 +217,7 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'mymodels/' . arg(1) . "/add/" . arg(3) . "/step04",
+            'path' => MODEL_DIRECTORY . arg(1) . "/add/" . arg(3) . "/step04",
             'title' => t('Step 4 : Adding a version'),
             'description' => "",
             'access' => user_access ('modify models'),
@@ -227,7 +228,7 @@ function openabmma_menu($may_cache) {
 
 
         $items[] = array(
-            'path' => 'mymodels/' . arg(1) . "/edit/" . arg(3) . "/step01",
+            'path' => MODEL_DIRECTORY . arg(1) . "/edit/" . arg(3) . "/step01",
             'title' => t('Step 1 : Editing a version'),
             'description' => "",
             'access' => user_access ('modify models'),
@@ -237,7 +238,7 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'mymodels/' . arg(1) . "/edit/" . arg(3) . "/step02",
+            'path' => MODEL_DIRECTORY . arg(1) . "/edit/" . arg(3) . "/step02",
             'title' => t('Step 2 : Editing a version'),
             'description' => "",
             'access' => user_access ('modify models'),
@@ -247,7 +248,7 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'mymodels/' . arg(1) . "/edit/" . arg(3) . "/step03",
+            'path' => MODEL_DIRECTORY . arg(1) . "/edit/" . arg(3) . "/step03",
             'title' => t('Step 3 : Editing a version'),
             'description' => "",
             'access' => user_access ('modify models'),
@@ -257,7 +258,7 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'mymodels/' . arg(1) . "/edit/" . arg(3) . "/step04",
+            'path' => MODEL_DIRECTORY . arg(1) . "/edit/" . arg(3) . "/step04",
             'title' => t('Step 4 : Editing a version'),
             'description' => "",
             'access' => user_access ('modify models'),
@@ -267,7 +268,7 @@ function openabmma_menu($may_cache) {
             );
 /*
         $items[] = array(
-            'path' => 'mymodels/' . arg(1) . "/edit/" . arg(3) . "/files_basic",
+            'path' => MODEL_DIRECTORY . arg(1) . "/edit/" . arg(3) . "/files_basic",
             'title' => t('Step 4 : Editing a version'),
             'description' => null,
             'access' => user_access ('modify models'),
@@ -277,7 +278,7 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'mymodels/' . arg(1) . "/edit/" . arg(3) . "/files_opt",
+            'path' => MODEL_DIRECTORY . arg(1) . "/edit/" . arg(3) . "/files_opt",
             'title' => t('Step 5 : Editing a version'),
             'description' => null,
             'access' => user_access ('modify models'),
@@ -287,7 +288,7 @@ function openabmma_menu($may_cache) {
             );
 */
         $items[] = array(
-            'path' => 'mymodels/' . arg(1) . "/edit/" . arg(3) . "/files_basic/delete/" . arg(6),
+            'path' => MODEL_DIRECTORY . arg(1) . "/edit/" . arg(3) . "/files_basic/delete/" . arg(6),
             'title' => null,
             'description' => null,
             'access' => user_access ('modify models'),
@@ -297,7 +298,7 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'mymodels/' . arg(1) . "/add/" . arg(3) . "/files_basic/delete/" . arg(6),
+            'path' => MODEL_DIRECTORY . arg(1) . "/add/" . arg(3) . "/files_basic/delete/" . arg(6),
             'title' => null,
             'description' => null,
             'access' => user_access ('modify models'),
@@ -307,7 +308,7 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'mymodels/' . arg(1) . "/add/" . arg(3) . "/files_opt/delete/" . arg(6),
+            'path' => MODEL_DIRECTORY . arg(1) . "/add/" . arg(3) . "/files_opt/delete/" . arg(6),
             'title' => null,
             'description' => null,
             'access' => user_access ('modify models'),
@@ -317,7 +318,7 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'mymodels/' . arg(1) . "/edit/" . arg(3) . "/files_opt/delete/" . arg(6),
+            'path' => MODEL_DIRECTORY . arg(1) . "/edit/" . arg(3) . "/files_opt/delete/" . arg(6),
             'title' => null,
             'description' => null,
             'access' => user_access ('modify models'),
@@ -327,7 +328,7 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'mymodels/' . arg(1) . "/" . arg(2) . "/" . arg(3) . "/reviewnote",
+            'path' => MODEL_DIRECTORY . arg(1) . "/" . arg(2) . "/" . arg(3) . "/reviewnote",
             'title' => t('Step 4 : Review step'),
             'description' => "",
             'access' => user_access ('modify models'),
@@ -337,7 +338,7 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'mymodels/' . arg(1) . '/add/' . arg(3) . "/complete",
+            'path' => MODEL_DIRECTORY . arg(1) . '/add/' . arg(3) . "/complete",
             'title' => t('Add new version complete'),
             'description' => "",
             'access' => user_access ('modify models'),
@@ -346,7 +347,7 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'mymodels/' . arg(1) . '/edit/' . arg(3) . "/complete",
+            'path' => MODEL_DIRECTORY . arg(1) . '/edit/' . arg(3) . "/complete",
             'title' => t('Add new version complete'),
             'description' => "",
             'access' => user_access ('modify models'),
@@ -404,7 +405,7 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'mymodels/' . arg(1) . '/members/delete',
+            'path' => MODEL_DIRECTORY . arg(1) . '/members/delete',
             'title' => t('Delete members'),
             'description' => "",
             'access' => user_access ('modify models'),
@@ -414,7 +415,7 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'mymodels/' . arg(1) . '/members',
+            'path' => MODEL_DIRECTORY . arg(1) . '/members',
             'title' => t('Model members'),
             'description' => "",
             'access' => user_access ('modify models'),
@@ -424,7 +425,7 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'mymodels/' . arg(1) . '/viewMetadata',
+            'path' => MODEL_DIRECTORY . arg(1) . '/viewMetadata',
             'title' => arg(1),
             'description' => "",
             'access' => user_access ('view models'),
@@ -434,7 +435,7 @@ function openabmma_menu($may_cache) {
             );
 
         $items[] = array(
-            'path' => 'mymodels/' . arg(1),
+            'path' => MODEL_DIRECTORY . arg(1),
             'title' => arg(1),
             'description' => "",
             'access' => user_access ('view models'),
