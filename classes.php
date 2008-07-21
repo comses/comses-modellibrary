@@ -1,5 +1,4 @@
 <?php
-
 // :vim:sts=2:sw=2:filetype=php
 
 interface Persistable {
