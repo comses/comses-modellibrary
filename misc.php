@@ -5,6 +5,8 @@ function openabmma_parseVersionNumber ($versionString)
 	return substr ($versionString, 7);
 }
 
+// what is the difference between this and in_array?  Other than the fact that
+// this may be slower.
 function openabmma_inList ($value, $arr)
 {
 	$c = 0;

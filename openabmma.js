@@ -1,3 +1,19 @@
+/* FIXME: too much work, making it too brittle too */
+function updateFrameworks() {
+    var languageFrameworksMap = { 
+        'Java': ['Ascape 5', 'DEVSJAVA', 'Mason', 'Repast'],
+        'Netlogo': ['Netlogo']
+    };
+    var selectedOption = document.getElementById('programming_language');
+    var language = selectedOption[selectedOption.selectedIndex].innerHTML;
+    if (languageFrameworksMap[language]) {
+        var frameworks = document.getElementById('framework');
+        frameworks.options.length = 0;
+        var index = 0;
+        for (var framework in languageFrameworksMap[language]) {
+            frameworks.options[index++] = new Option();
+        }
+}
 // ashay's original JS validation code, replace with Drupal validation or
 // improve later
 function validate_version_step01 (newVersion)

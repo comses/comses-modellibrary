@@ -270,7 +270,7 @@ function openabmma_addModel ()
             "#type" => "textfield",
             "#title" => t("Model title"),
             "#default_value" => $edit ["model_title"] == "" ? $projTitle : $edit ["model_title"],
-            "#description" => t("A more descriptive title for your model - spaces and non alphanumeric characters are allowed."),
+            "#description" => t("A more descriptive title for your model - spaces and non alphanumeric characters are allowed, within reason."),
             //		"#required" => true,		// Commented because clicking Cancel validates this field too!
             "#maxlength" => 255
             );
@@ -360,7 +360,7 @@ function openabmma_doSearch ($searchText='')
 
     $searchText = str_replace ('\'', '\\\'', $searchText);	// escape string because not using %s later, in db_query
     $searchText = str_replace ('"', '\\"', $searchText);	// escape string because not using %s later, in db_query
-        $searchText = str_replace (',', ' ', $searchText);	// replace commas by spaces to assist searching
+    $searchText = str_replace (',', ' ', $searchText);	// replace commas by spaces to assist searching
 
     $searchArray = explode (' ', $searchText);
     $keyCount = count ($searchArray);
@@ -371,8 +371,9 @@ function openabmma_doSearch ($searchText='')
         return;
     }
 
-    for ($i=0; $i<$keyCount; $i++)
+    for ($i=0; $i<$keyCount; $i++) {
         $searchArray [$i] = "'%" . $searchArray [$i] . "%'";
+    }
 
     // slightly cryptic way of reducing lines of code to form a query using 'LIKE' for each keyword
     $searchTextKeyword = implode (" OR LOWER(keyword) LIKE ", $searchArray);

@@ -153,7 +153,7 @@ function openabmma_askIfReview () {
 	$output .= "<br/><p><table border='0' cellpadding='1' cellspacing='0' width='100%'>";
 $output .= "<tr class='openabmData'><td><b>Step 1</b></td><td><i>[Complete]</i></td><td>Version description and visibility to public</td></tr>";
 $output .= "<tr class='openabmData'><td><b>Step 2</b></td><td><i>[Complete]</i></td><td>Code files, language and platform details</td></tr>";
-$output .= "<tr class='openabmData'><td><b>Step 3</b></td><td><i>[Complete]</i></td><td>License information, References to publications, Examples and Sensitivity data</td></tr>";
+$output .= "<tr class='openabmData'><td><b>Step 3</b></td><td><i>[Complete]</i></td><td>License information, references to publications, examples and sensitivity data</td></tr>";
 $output .= "<tr class='openabmData'><td><b>Step 4</b></td><td><font color='green'>Only for review</font></td><td>Collecting documents for model review</td></tr>";
 $output .= "</table>";
 
@@ -379,15 +379,18 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
 
     $languages = array ();
     $result = db_query ("SELECT id, name FROM openabm_model_language ORDER BY name");
-    while ($node = db_fetch_object ($result))
+    while ($node = db_fetch_object ($result)) {
         $languages [$node->id] = $node->name;
+    }
 
     $form ["details"]["version_language"] = array (
+            '#id' => 'programming_language',
             "#type" => "select",
             "#title" => t("Programming Language"),
             "#options" => $languages,
             "#default_value" => $edit ["version_language"] == "" ? $progLang : $edit ["version_language"],
-            "#description" => null
+            "#description" => 'The programming language used to implement the model'
+//            '#attributes' => array('onChange' => 'updateFrameworks()')
             );
 
     $form ["details"]["other_language"] = array (
@@ -403,7 +406,7 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
             "#size" => 10,
             "#title" => t("Programming Language Version"),
             "#default_value" => $edit ["version_language_ver"] == "" ? $progLangVer : $edit ["version_language_ver"],
-            "#description" => null
+            "#description" => 'The version of the programming language used to implement this model, if necessary.'
             );
 
     $arrayElements = array (
@@ -439,16 +442,18 @@ function openabmma_addVersion02 ($edit=null, $item=0) {
 
     $arrayElements = array ();
     $result = db_query ("SELECT name FROM openabm_framework ORDER BY name");
-    while ($node = db_fetch_object ($result))
+    while ($node = db_fetch_object ($result)) {
         $arrayElements [$node->name] = $node->name;
+    }
     $arrayElements ["Other"] = "Other";
 
     $form ["details"]["framework"] = array (
+            '#id' => 'framework',
             "#type" => "select",
             "#title" => t("Framework used"),
             "#default_value" => $edit ["framework"] == "" ? (openabmma_inList ($frameworkName, $arrayElements) == -1 ? "Other" : $frameworkName) : $edit ["framework"],
             "#options" => $arrayElements,
-            "#description" => null
+            "#description" => 'The ABM framework used to implement this model'
             );
 
     $form ["details"]["other_framework"] = array (
@@ -1107,7 +1112,7 @@ function openabmma_addVersion ()
     $output .= "<table border='0' cellpadding='0' cellspacing='0' width='100%'>";
     $output .= "<tr class='openabmData'><td><b>Step 1</b></td><td><font color='red'>Mandatory</font></td><td>Version description and visibility to public</td></tr>";
     $output .= "<tr class='openabmData'><td><b>Step 2</b></td><td><font color='red'>Mandatory</font></td><td>Code files, language and platform details</td></tr>";
-    $output .= "<tr class='openabmData'><td><b>Step 3</b></td><td><font color='red'>Mandatory</font></td><td>License information, References to publications, Examples and Sensitivity data</td></tr>";
+    $output .= "<tr class='openabmData'><td><b>Step 3</b></td><td><font color='red'>Mandatory</font></td><td>License information, references to publications, examples and sensitivity data</td></tr>";
     $output .= "<tr class='openabmData'><td><b>Step 4</b></td><td><font color='green'>Only for review</font></td><td>Collecting documents for version review</td></tr>";
     $output .= "</table>";
     $output .= "<p>&nbsp;</p>" . l ("Click here to proceed to first step", MODEL_DIRECTORY . $modelName . "/add/version/step01");	

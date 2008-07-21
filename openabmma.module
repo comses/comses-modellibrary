@@ -107,7 +107,7 @@ function openabmma_showProjects ()
 
 function openabmma_browseModels ()
 {
-  $query = "SELECT owner_uid, name, title FROM openabm_model";
+  $query = "SELECT owner_uid, name, title FROM openabm_model ORDER BY name";
   $result = db_query ($query);
 
   while ($model = db_fetch_object ($result))
