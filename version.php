@@ -13,7 +13,8 @@ function openabmma_versionMetadata ()
 
     $query = "SELECT visible FROM openabm_model_version WHERE model_id=%d AND version_num=%d";
     $result = (array) db_fetch_object (db_query ($query, openabmma_getModelId ($modelName), $versionNumber));
-    $visible = $result ['visible'];
+    $visible = ($result ['visible'] == 1);
+    /*
     if ($visible == "1")
         $visible = TRUE;
     else
@@ -27,6 +28,7 @@ function openabmma_versionMetadata ()
 		return '';
 	    }
     }
+     */
 
     drupal_add_css (openabmma_get_css_path ());
 
@@ -47,21 +49,25 @@ function openabmma_versionMetadata ()
     $query = "SELECT name from openabm_model_language WHERE id=%d";
     $result = (array) db_fetch_object (db_query ($query, $model_language_id));
     $model_language_id = $result ['name'];
-    if ($model_language_id == "Other")
+    if ($model_language_id == "Other") {
 	$model_language_id = $other_language;
+    }
 
-    if ($pLanguageVersion != "")
+    if ($pLanguageVersion != "") {
         $model_language_id .= ", Version: " . $pLanguageVersion;
+    }
 
     $query = "SELECT name from openabm_license WHERE id=%d";
     $result = (array) db_fetch_object (db_query ($query, $license_id));
     $license_id = $result ['name'];
 
     $memberArray = openabmma_getModelMemberArray ($modelName);
-    if ($memberArray == null)
+    if ($memberArray == null) {
         $members = "None";
-    else
+    }
+    else {
         $members = implode (', ', $memberArray);
+    }
 
     $output = "<br/><p><table border='0' cellpadding='0' cellspacing='0' width='100%'>";
     $output .= "<tr class='openabmData'><td width='30%'><b>Version description:</b></td><td><i>" . $description . "</i></td></tr>";
@@ -117,8 +123,9 @@ function openabmma_versionMetadata ()
     }
 
     $files_root = "files/models/" . $modelName . "/v" . $versionNumber;
-    if (openabmma_getFileCount ($files_root . "/other") == 0)
+    if (openabmma_getFileCount ($files_root . "/other") == 0) {
         $additionalStr = "None";
+    }
     else
     {
         $filename = openabmma_getFirstFile ($files_root . "/other");
@@ -135,10 +142,11 @@ function openabmma_versionMetadata ()
     $output .= "<tr class='openabmData'><td><b>Additional file:</b></td><td><i>" . $additionalStr . "</i></td></tr>";
     $output .= "</table>";
 
-	if ($user->name == $owner)
-	    $output .= "<p></p>" . l ("To change your metadata settings, click here", MODEL_DIRECTORY . $modelName . "/edit/version" . $versionNumber . "/step01");
+    if (strcasecmp($user->name, $owner) == 0) {
+        $output .= "<p></p>" . l ("To change your metadata settings, click here", MODEL_DIRECTORY . $modelName . "/edit/version" . $versionNumber . "/step01");
+    }
 
-	$output .= "<p></p>" . l ("To go to model workspace, click here", MODEL_DIRECTORY . $modelName);
+    $output .= "<p></p>" . l ("To go to model workspace, click here", MODEL_DIRECTORY . $modelName);
     return $output;
 }
 

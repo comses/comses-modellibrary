@@ -20,12 +20,12 @@ function openabmma_showMetaData ($modelName='') {
        $visible = FALSE;
 
        drupal_set_message ($visible);
-     */
     if ($user->name != $owner && openabmma_inList ($user->name, openabmma_getModelMemberArray ($modelName)) == -1)
     {
         openabmma_accessError ('Only model members can view metadata for a model.');
         return '';
     }
+     */
 
     drupal_add_css (openabmma_get_css_path ());
 
@@ -60,8 +60,9 @@ function openabmma_showMetaData ($modelName='') {
 
     $output .= "</table>";
 
-    if ($user->name == $owner)
+    if ($user->uid && (strcasecmp($user->name, $owner) == 0)) {
         $output .= "<p></p>" . l ("To change your metadata settings, click here", "models/edit/" . $modelName);
+    }
 
     $output .= "<p></p>" . l ("To go to model workspace, click here", MODEL_DIRECTORY . $modelName);
     return $output;
@@ -86,7 +87,7 @@ function openabmma_addModel_validate ($form_id, $form_values) {
 
 // validate model name
     if ($modelName == '') {
-        form_set_error($form_id, t("<b><font color='#DD0000'>HEY HEY HE YModel name is a required field</font></b>"));
+        form_set_error($form_id, t("<b><font color='#DD0000'>Model name is a required field</font></b>"));
     }
     else if (! preg_match('/^[\w.-]+$/', $modelName)) {
         form_set_error ($form_id, t("The model name you entered, <b><i><font color='#DD0000'>${modelName}</font></i></b> contains invalid characters. Please re-enter the model name only using alphanumeric characters and the underscore character."));

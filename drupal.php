@@ -163,7 +163,7 @@ function openabmma_menu($may_cache) {
             'path' => MODEL_DIRECTORY . arg(1) . "/" . arg(2) . "/metadata",
             'title' => t('Model version metadata'),
             'description' => "",
-            'access' => user_access ('modify models'),
+            'access' => user_access ('view models'),
             'callback' => 'openabmma_versionMetadata',
             'type' => MENU_CALLBACK
             );
