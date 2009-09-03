@@ -89,7 +89,7 @@ function openabmma_menu($may_cache) {
             'path' => 'config/roles',
             'title' => t('User roles'),
             'description' => "",
-            'access' => user_access ('administer content'),
+            'access' => user_access ('administer models'),
             'callback' => 'openabmma_showRoles',
             'type' => MENU_CALLBACK
             );
@@ -98,7 +98,7 @@ function openabmma_menu($may_cache) {
             'path' => 'config/licenses',
             'title' => t('Manage licenses'),
             'description' => "",
-            'access' => user_access ('administer content'),
+            'access' => user_access ('administer models'),
             'callback' => 'openabmma_showLicenses',
             'type' => MENU_CALLBACK
             );
@@ -107,7 +107,7 @@ function openabmma_menu($may_cache) {
             'path' => 'config/planguages',
             'title' => t('Programming languages listed'),
             'description' => "",
-            'access' => user_access ('administer content'),
+            'access' => user_access ('administer models'),
             'callback' => 'openabmma_showPLanguages',
             'type' => MENU_CALLBACK
             );
@@ -116,7 +116,7 @@ function openabmma_menu($may_cache) {
             'path' => 'config/frameworks',
             'title' => t('Manage frameworks'),
             'description' => "",
-            'access' => user_access ('administer content'),
+            'access' => user_access ('administer models'),
             'callback' => 'openabmma_showFrameworks',
             'type' => MENU_CALLBACK
             );
@@ -359,7 +359,7 @@ function openabmma_menu($may_cache) {
             'path' => 'config/roles/delete/' . arg(3),
             'title' => t('Delete role'),
             'description' => "",
-            'access' => user_access ('administer content'),
+            'access' => user_access ('administer models'),
             'callback' => 'openabmma_deleteRole',
             'callback arguments' => array(arg(3)),
             'type' => MENU_CALLBACK
@@ -378,7 +378,7 @@ function openabmma_menu($may_cache) {
             'path' => 'config/licenses/delete/' . arg(3),
             'title' => t('Delete license'),
             'description' => "",
-            'access' => user_access ('administer content'),
+            'access' => user_access ('administer models'),
             'callback' => 'openabmma_deleteLicense',
             'callback arguments' => array(arg(3)),
             'type' => MENU_CALLBACK
@@ -388,7 +388,7 @@ function openabmma_menu($may_cache) {
             'path' => 'config/planguages/delete/' . arg(3),
             'title' => t('Delete language'),
             'description' => "",
-            'access' => user_access ('administer content'),
+            'access' => user_access ('administer models'),
             'callback' => 'openabmma_deletePLanguages',
             'callback arguments' => array(arg(3)),
             'type' => MENU_CALLBACK
@@ -398,7 +398,7 @@ function openabmma_menu($may_cache) {
             'path' => 'config/frameworks/delete/' . arg(3),
             'title' => t('Delete framework'),
             'description' => "",
-            'access' => user_access ('administer content'),
+            'access' => user_access ('administer models'),
             'callback' => 'openabmma_deleteFramework',
             'callback arguments' => array(arg(3)),
             'type' => MENU_CALLBACK
