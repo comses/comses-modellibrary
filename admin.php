@@ -159,7 +159,7 @@ function openabmma_add_role ()
 
 	$form ["details"]["name"] = array (
 		"#type" => "textfield",
-		"#title" => t("Role name:"),
+		"#title" => t("Role name"),
 		"#default_value" => null,
 		"#description" => "",
 		"#maxlength" => 210,
