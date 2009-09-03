@@ -19,7 +19,7 @@ function openabmma_block ($op='list', $delta=0)
         if (user_access ('review models')) {
             $block_content .= "<hr/>" . l ("Review Models", "review") . "<br/>";
         }
-        if (user_access ('administer content')) {
+        if (user_access ('administer models')) {
             $block_content .= "<br/>" . l ("Model licenses", "config/licenses");
             $block_content .= "<br/>" . l ("Member roles", "config/roles");
             $block_content .= "<br/>" . l ("Programming languages", "config/planguages");
@@ -449,7 +449,7 @@ function openabmma_menu($may_cache) {
 }
 
 function openabmma_perm () {
-	return array ('view models', 'modify models', 'review models');
+	return array ('view models', 'modify models', 'review models', 'administer models');
 }
 
 function openabmma_getUserId ($name)

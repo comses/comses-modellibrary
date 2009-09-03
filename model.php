@@ -20,6 +20,7 @@ function openabmma_showMetaData ($modelName='') {
        $visible = FALSE;
 
        drupal_set_message ($visible);
+    /*
     if ($user->name != $owner && openabmma_inList ($user->name, openabmma_getModelMemberArray ($modelName)) == -1)
     {
         openabmma_accessError ('Only model members can view metadata for a model.');

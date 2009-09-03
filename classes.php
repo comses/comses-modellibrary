@@ -17,6 +17,25 @@ abstract class AbstractPersistable implements Persistable {
         return $this->id;
     }
 
+    // follows JavaBean conventions of properties getters/setters
+    function __call($method, $arguments) {
+        $prefix = strtolower(substr($method, 0, 3));
+        $property = strtolower(substr($method, 3));
+
+        if (empty($prefix) || empty($property)) {
+            return;
+        }
+
+        if ($prefix == "get" && isset($this->$property)) {
+            return $this->$property;
+        }
+
+        if ($prefix == "set") {
+            $this->$property = $arguments[0];
+        }
+    }
+
+
     public static function executeLoad($query) {
         $args = func_get_args();
         array_shift($args);
@@ -43,9 +62,16 @@ class Model extends AbstractPersistable {
     private $references;
 
     public static function load($id) {
-        $result = executeLoad('SELECT m.name, m.title, m.owner_uid, m.replicators, m.replicatedModel, m.reference 
+        $db_result = executeLoad('SELECT m.name, m.title, m.owner_uid, m.replicators, m.replicatedModel, m.reference 
                                FROM openabm_model where id=%d', $id);
-        print_r($result);
+        $fetch_object = $db_fetch_object($db_result);
+        $this->id=$id;
+        $this->name=$fetch_object->name;
+        $this->title=$fetch_object->title;
+        $this->ownerUid=$fetch_object->owner_uid;
+        $this->isReplicated=$fetch_object->replicatedModel;
+        $this->replicators=$fetch_object->replicators;
+        $this->references = $fetch_object->reference;
     }
 
     public function save() {
@@ -53,11 +79,4 @@ class Model extends AbstractPersistable {
         parent::executeSave($query, $this->owner_uid, $this->name, $this->title, $this->replicators, $this->is_replicated, $this->references);
     }
 
-    public function setId($id) {
-        $this->id = $id;
-    }
-
-    public function setName($name) {
-        $this->name = $name;
-    }
 }
