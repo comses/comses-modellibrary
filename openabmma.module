@@ -1,132 +1,545 @@
 <?php
-// vim:sts=2:sw=2:filetype=php
 // $Id$
 
+/* TODO FormAPI image buttons are now supported.
+   FormAPI now offers the 'image_button' element type, allowing developers to
+   use icons or other custom images in place of traditional HTML submit buttons.
+
+$form['my_image_button'] = array(
+  '#type'         => 'image_button',
+  '#title'        => t('My button'),
+  '#return_value' => 'my_data',
+  '#src'          => 'my/image/path.jpg',
+); */
+
+/* TODO New user_mail_tokens() method may be useful.
+   user.module now provides a user_mail_tokens() function to return an array
+   of the tokens available for the email notification messages it sends when
+   accounts are created, activated, blocked, etc. Contributed modules that
+   wish to make use of the same tokens for their own needs are encouraged
+   to use this function. */
+
+/* TODO
+   There is a new hook_watchdog in core. This means that contributed modules
+   can implement hook_watchdog to log Drupal events to custom destinations.
+   Two core modules are included, dblog.module (formerly known as watchdog.module),
+   and syslog.module. Other modules in contrib include an emaillog.module,
+   included in the logging_alerts module. See syslog or emaillog for an
+   example on how to implement hook_watchdog.
+function example_watchdog($log = array()) {
+  if ($log['severity'] == WATCHDOG_ALERT) {
+    mysms_send($log['user']->uid,
+      $log['type'],
+      $log['message'],
+      $log['variables'],
+      $log['severity'],
+      $log['referer'],
+      $log['ip'],
+      format_date($log['timestamp']));
+  }
+} */
+
+/* TODO Implement the hook_theme registry. Combine all theme registry entries
+   into one hook_theme function in each corresponding module file.
+function openabmma_theme() {
+  return array(
+  );
+} */
+
 /**
- * @file
- * 
- * Provides an agent based model archive within the Drupal framework.  This
- * involves the user creation of new model projects, ability to upload new
- * versions of an ABM project and edit associated metadata.  Members of a
- * review committee should also be able to "star" an ABM project to signify
- * its level of maturity and completeness.
- */
- define('MODEL_DIRECTORY', 'model-archive/');
+* @file
+* 
+* Provides an agent based model archive within the Drupal framework.  This
+* involves the user creation of new model projects, ability to upload new
+* versions of an ABM project and edit associated metadata.  Members of a
+* review committee should also be able to "star" an ABM project to signify
+* its level of maturity and completeness.
+*/
+define('MODEL_DIRECTORY', 'model-archive/');
 
-include 'admin.php';
-include 'classes.php';
-include 'drupal.php';
-include 'files.php';
-include 'misc.php';
-include 'model.php';
-include 'review.php';
-include 'version.php';
+module_load_include('php', 'openabmma', 'admin');
+module_load_include('php', 'openabmma', 'classes');
+module_load_include('php', 'openabmma', 'files');
+module_load_include('php', 'openabmma', 'misc');
+module_load_include('php', 'openabmma', 'model');
+module_load_include('php', 'openabmma', 'review');
+module_load_include('php', 'openabmma', 'version');
 
-function openabmma_showProjects ()
-{
+function openabmma_block($op = 'list', $delta = 0) {
   global $user;
 
-  $count = 0;
-  $output .= '<br/><b>Your submitted models:</b><hr/><br/>';
-  $query = "SELECT m.name, m.title, m.owner_uid, m.replicatedModel, m.replicators FROM openabm_model m WHERE m.owner_uid=%d";
-#  $output .= "what is: " . ${model}->getId();
-  /*
-    $query = "SELECT owner_uid, name, title, replicatedModel, replicators, reference from openabm_model WHERE name='%s'";
-    $result = (array) db_fetch_object (db_query ($query, $modelName));
-    $owner_uid = $result ['owner_uid'];
-    $name = $result ['name'];
-    $title = $result ['title'];
-    $replicated = $result ['replicatedModel'] == "1" ? "Yes" : "No";
-    $replicators = $result ['replicators'];
-    $reference_url = $result ['reference'];
+  switch ($op) {
 
-    // FIXME: hacky, use split/join instead and an array.
-    $keywordList = '';
-    $query = "SELECT keyword FROM openabm_model_keywords WHERE model_id=%d";
-    $result = db_query ($query, openabmma_getModelId ($modelName));
-    while ($element = db_fetch_object ($result))
-        $keywordList .= $element->keyword . ", ";
-    $keywordList = substr ($keywordList, 0, strlen($keywordList)-2);
+    case 'list':
+      $block[0]["info"] = t("OpenABM Resource Links");
+      return $block;
 
-    $header = array( 'Name/URL', 'Owner', 'Title', 'Replicated?');
-    $data = array(
-                array($name, openabmma_getModelOwner($name), $title,
-                $replicated));
-    if ($replicated == "Yes") {
-        array_push($header, 'Other Authors', 'Reference / URL', 'Keywords');
-        array_push($data[0], $replicators, $reference_url, $keywordList);
-    }
+    case 'view': default:
+      $block_content = l("Browse models", "models/browse") ."<br/>". l("Search Models", "models/search") ."<br/>";
 
-    $output .= theme_table($header, $data);
+      if ($user->uid != 0) {
+        $block_content .= "<br/>". l("My Models", "models/") ."<br/>". l("Add A New Model", "models/add") ."<br/>";
+      }
 
+      if (user_access('review models')) {
+        $block_content .= "<hr/>". l("Review Models", "review") ."<br/>";
+      }
 
-    if ($owner == $user->name)
-    {
-        $output .= '(' . l('Change model metadata', 'models/edit/' . $modelName);
-        $output .= ' | ' . l('Manage members of this model', MODEL_DIRECTORY . $modelName . '/members') . ')';
-    }
-    */
+      if (user_access('administer models')) {
+        $block_content .= "<br/>". l("Model licenses", "config/licenses");
+        $block_content .= "<br/>". l("Member roles", "config/roles");
+        $block_content .= "<br/>". l("Programming languages", "config/planguages");
+        $block_content .= "<br/>". l("Frameworks", "config/frameworks");
+      }
 
-
-  $result = db_query ($query, $user->uid);
-  while ($node = db_fetch_object ($result))
-  {
-    $count++;
-    $output .= "<b>" . l ($node->title . " (" . $node->name . ")", MODEL_DIRECTORY . $node->name) . "</b>&nbsp;";
-
-    $output .= "&nbsp;<br/><small>" . $node->description . "<hr/>";
-    $output .= "</small><br/>";
+      $block['subject'] = 'Model Archive';
+      $block['content'] = $block_content;
+      return $block;
   }
-
-  $output .= "You have submitted <b>" . $count . "</b> model(s).<br/>&nbsp;<br/>";
-  $count = 0;
-
-  $output .= '<br/><b>Other models:</b><hr/><br/>';
-  $query = "SELECT m.owner_uid, m.name, m.title, B.role 
-    FROM openabm_model m INNER JOIN openabm_model_member B ON m.id=B.project_id
-    WHERE B.user_id=%d";
-  $result = db_query ($query, $user->uid);
-  while ($node = db_fetch_object ($result))
-  {
-    $count++;
-    $owner = openabmma_getUserName ($node->owner_uid);
-    $output .= "<b>" . l ($node->title . " (" . $node->name . ")", MODEL_DIRECTORY . $node->name) . "</b>&nbsp;";
-
-    if ($node->visible == 1)	$output .= "[Public]";
-    else				$output .= "[Private]";
-
-    $output .= "&nbsp;<br/><small>" . $node->description . "<br/>";
-    $output .= "Owned by: <b>" . $owner . "</b></small><hr/><br/>";
-  }
-
-  $output .= "You are a member of <b>" . $count . "</b> model(s).<br/>&nbsp;<br/>";
-  $output .= "<br/>" . l ("To submit a new model, please click here", "models/add");
-  return $output;
 }
 
-function openabmma_browseModels ()
-{
-  $query = "SELECT owner_uid, name, title FROM openabm_model ORDER BY name";
-  $result = db_query ($query);
+function openabmma_menu() {
+  $items = array();
 
-  while ($model = db_fetch_object ($result))
-  {
-    $pId = $model->id;
-    $modelName = $model->name;
-    $pTitle = $model->title;
-    $owner_uid = $model->owner_uid;
+/* TODO
+   Non menu code that was placed in hook_menu under the '!$may_cache' block
+   so that it could be run during initialization, should now be moved to hook_init.
+   Previously we called hook_init twice, once early in the bootstrap process, second
+   just after the bootstrap has finished. The first instance is now called boot
+   instead of init.
+   
+   In Drupal 6, there are now two hooks that can be used by modules to execute code
+   at the beginning of a page request. hook_boot() replaces hook_boot() in Drupal 5
+   and runs on each page request, even for cached pages. hook_boot() now only runs
+   for non-cached pages and thus can be used for code that was previously placed in
+   hook_menu() with $may_cache = FALSE:
+   
+   Dynamic menu items under a '!$may_cache' block can often be simplified
+   to remove references to arg(n) and use of '%<function-name>' to check
+   conditions. See http://drupal.org/node/103114.
+   
+   The title and description arguments should not have strings wrapped in t(),
+   because translation of these happen in a later stage in the menu system.
+*/
 
-    $count++;
-    $output .= l ($pTitle . " [" . $modelName . "]", MODEL_DIRECTORY . $modelName) . "<br/><small>Owner: " . openabmma_getUserName ($owner_uid) . "</small>&nbsp;<br/>";
-  }
+	// admin settings for model archive.  Right now I can only think of
+	// group membership in the review committee as a configurable option.
+	$items['admin/settings/openabmma'] = array(
+	  'title' => 'OpenABM Model Archive Settings',
+	  'description' => 'Change model archive settings.',
+	  'page callback' => 'drupal_get_form',
+	  'page arguments' => array('openabmma_settings_form'),
+	  'access arguments' => array('administer site configuration'),
+	  'type' => MENU_CALLBACK,
+	);
 
-  if ($count) {
-    $output = "<hr/>" . $count . " model(s) available.<br/>&nbsp;<br/>" . $output;
-  }
-  else {
-    $output = "<hr/>No models available.";
-  }
-  return $output;
+  $items['models/browse'] = array(
+    'title' => 'Browse models',
+    'description' => "",
+    'page callback' => 'openabmma_browseModels',
+    'access arguments' => array('view models'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['models/search'] = array(
+    'title' => 'Search Models',
+    'description' => "",
+    'page callback' => 'openabmma_searchProjects',
+    'access arguments' => array('view models'),
+    'type' => MENU_CALLBACK,
+  );
+  
+	$items['models/search/%'] = array(
+    'title' => 'Search models',
+    'description' => "",
+    'page callback' => 'openabmma_searchProjects',
+    'page arguments' => array(2),
+    'access arguments' => array('modify models'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['models'] = array(
+    'title' => 'My models',
+    'description' => "",
+    'page callback' => 'openabmma_showProjects',
+    'access arguments' => array('modify models'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['models/add'] = array(
+    'title' => 'Add a new model',
+    'description' => 'Add a new model to the model archive.',
+    'page callback' => 'openabmma_addModel',
+    'page arguments' => array(1),
+    'access arguments' => array('modify models'),
+    'type' => MENU_CALLBACK,
+  );
+
+	$items['models/edit/%'] = array(
+	  'title' => 'Edit model metadata',
+	  'description' => NULL,
+	  'page callback' => 'openabmma_addModel',
+	  'page arguments' => array(1, 2),
+	  'access arguments' => array('modify models'),
+	  'type' => MENU_CALLBACK,
+	);
+
+  $items['review'] = array(
+    'title' => 'Review models',
+    'description' => "",
+    'page callback' => 'openabmma_reviewModels',
+    'access arguments' => array('review models'),
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['config/roles'] = array(
+    'title' => 'User roles',
+    'description' => "",
+    'page callback' => 'openabmma_showRoles',
+    'access arguments' => array('administer models'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['config/licenses'] = array(
+    'title' => 'Manage licenses',
+    'description' => "",
+    'page callback' => 'openabmma_showLicenses',
+    'access arguments' => array('administer models'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['config/planguages'] = array(
+    'title' => 'Programming languages listed',
+    'description' => "",
+    'page callback' => 'openabmma_showPLanguages',
+    'access arguments' => array('administer models'),
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['config/frameworks'] = array(
+    'title' => 'Manage frameworks',
+    'description' => "",
+    'page callback' => 'openabmma_showFrameworks',
+    'access arguments' => array('administer models'),
+    'type' => MENU_CALLBACK,
+  );
+
+	$items['config/roles/delete/%'] = array(
+	  'title' => 'Delete role',
+	  'description' => "",
+	  'page callback' => 'openabmma_deleteRole',
+	  'page arguments' => array(3),
+	  'access arguments' => array('administer models'),
+	  'type' => MENU_CALLBACK,
+	);
+
+	$items['config/licenses/delete/%'] = array(
+	  'title' => 'Delete license',
+	  'description' => "",
+	  'page callback' => 'openabmma_deleteLicense',
+	  'page arguments' => array(3),
+	  'access arguments' => array('administer models'),
+	  'type' => MENU_CALLBACK,
+	);
+
+	$items['config/planguages/delete/%'] = array(
+	  'title' => 'Delete language',
+	  'description' => "",
+	  'page callback' => 'openabmma_deletePLanguages',
+	  'page arguments' => array(3),
+	  'access arguments' => array('administer models'),
+	  'type' => MENU_CALLBACK,
+	);
+
+	$items['config/frameworks/delete/%'] = array(
+	  'title' => 'Delete framework',
+	  'description' => "",
+	  'page callback' => 'openabmma_deleteFramework',
+	  'page arguments' => array(3),
+	  'access arguments' => array('administer models'),
+	  'type' => MENU_CALLBACK,
+	);
+
+	$items[MODEL_DIRECTORY .'%/members'] = array(
+	  'title' => 'Model members',
+	  'description' => "",
+	  'page callback' => 'openabmma_manageMembers',
+	  'page arguments' => array(1),
+	  'access arguments' => array('modify models'),
+	  'type' => MENU_CALLBACK,
+	);
+
+	$items[MODEL_DIRECTORY ."%/add/version"] = array(
+	  'title' => 'Step 1 : Adding a version to your model',
+	  'description' => "",
+	  'page callback' => 'openabmma_addVersion',
+	  'page arguments' => array(1),
+	  'access arguments' => array('modify models'),
+	  'type' => MENU_CALLBACK,
+	);
+
+	$items[MODEL_DIRECTORY ."%/add/version/step01"] = array(
+	  'title' => 'Step 1 : Adding a version',
+	  'description' => "",
+	  'page callback' => 'drupal_get_form',
+	  'page arguments' => array('openabmma_addVersion01', 1),
+	  'access arguments' => array('modify models'),
+	  'type' => MENU_CALLBACK,
+	);
+
+	$items[MODEL_DIRECTORY ."%/add/%/step02"] = array(
+	  'title' => 'Step 2 : Adding a version',
+	  'description' => "",
+	  'page callback' => 'drupal_get_form',
+	  'page arguments' => array('openabmma_addVersion02', 1, 3),  //VERIFY:
+	  'access arguments' => array('modify models'),
+	  'type' => MENU_CALLBACK,
+	);
+
+	$items[MODEL_DIRECTORY ."%/add/%/step03"] = array(
+	  'title' => 'Step 3 : Adding a version',
+	  'description' => "",
+	  'page callback' => 'drupal_get_form',
+	  'page arguments' => array('openabmma_addVersion03', 1, 3),  //VERIFY:
+	  'access arguments' => array('modify models'),
+	  'type' => MENU_CALLBACK,
+	);
+
+	$items[MODEL_DIRECTORY ."%/add/%/step04"] = array(
+	  'title' => 'Step 4 : Adding a version',
+	  'description' => "",
+	  'page callback' => 'drupal_get_form',
+	  'page arguments' => array('openabmma_addVersion04', 1, 3),  //VERIFY:
+	  'access arguments' => array('modify models'),
+	  'type' => MENU_CALLBACK,
+	);
+
+	$items[MODEL_DIRECTORY ."%/%/%/reviewnote"] = array(
+	  'title' => 'Step 4 : Review step',
+	  'description' => "",
+	  'page callback' => 'drupal_get_form',
+	  'page arguments' => array('openabmma_askIfReview', 1, 2, 3),  //VERIFY:
+	  'access arguments' => array('modify models'),
+	  'type' => MENU_CALLBACK,
+	);
+
+	$items[MODEL_DIRECTORY ."%/add/%/complete"] = array(
+	  'title' => 'Add new version complete',
+	  'description' => "",
+	  'page callback' => 'openabmma_addVersionComplete',
+	  'page arguments' => array(1, 3),
+	  'access arguments' => array('modify models'),
+	  'type' => MENU_CALLBACK,
+	);
+
+	$items[MODEL_DIRECTORY ."%/edit/%/step01"] = array(
+	  'title' => 'Step 1 : Editing a version',
+	  'description' => "",
+	  'page callback' => 'drupal_get_form',
+	  'page arguments' => array('openabmma_addVersion01', 1, 3),  //VERIFY:
+	  'access arguments' => array('modify models'),
+	  'type' => MENU_CALLBACK,
+	);
+
+	$items[MODEL_DIRECTORY ."%/edit/%/step02"] = array(
+	  'title' => 'Step 2 : Editing a version',
+	  'description' => "",
+	  'page callback' => 'drupal_get_form',
+	  'page arguments' => array('openabmma_addVersion02', 1, 3),  //VERIFY:
+	  'access arguments' => array('modify models'),
+	  'type' => MENU_CALLBACK,
+	);
+
+	$items[MODEL_DIRECTORY ."%/edit/%/step03"] = array(
+	  'title' => 'Step 3 : Editing a version',
+	  'description' => "",
+	  'page callback' => 'drupal_get_form',
+	  'page arguments' => array('openabmma_addVersion03', 1, 3),  //VERIFY:
+	  'access arguments' => array('modify models'),
+	  'type' => MENU_CALLBACK,
+	);
+
+	$items[MODEL_DIRECTORY ."%/edit/%/step04"] = array(
+	  'title' => 'Step 4 : Editing a version',
+	  'description' => "",
+	  'page callback' => 'drupal_get_form',
+	  'page arguments' => array('openabmma_addVersion04', 1, 3),  //VERIFY:
+	  'access arguments' => array('modify models'),
+	  'type' => MENU_CALLBACK,
+	);
+
+
+
+
+
+
+
+  $items['download/%/%/%'] = array(
+    'title' => 'Download file',
+    'description' => NULL,
+    'page callback' => 'openabmma_downloadFile',
+    'page arguments' => array(1, 2, 3),
+    'access arguments' => array('view models'),
+    'type' => MENU_CALLBACK,
+  );	 // FIXME: Users with both Review access and View should be able to download files.
+
+  $items['review/%/%'] = array(
+    'title' => 'Review model',
+    'description' => NULL,
+    'page callback' => 'openabmma_reviewThisModel',
+    'page arguments' => array(1, 2),
+    'access arguments' => array('review models'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items[MODEL_DIRECTORY .'%/%/metadata'] = array(
+    'title' => 'Model version metadata',
+    'description' => "",
+    'page callback' => 'openabmma_versionMetadata',
+    'page arguments' => array(1, 2),
+    'access arguments' => array('view models'),
+    'type' => MENU_CALLBACK,
+  );
+
+
+
+  $items[MODEL_DIRECTORY ."%/delete/%"] = array(
+    'title' => 'Delete a version',
+    'description' => "",
+    'page callback' => 'openabmma_deleteVersion',
+    'page arguments' => array(1, 3),
+    'access arguments' => array('modify models'),
+    'type' => MENU_CALLBACK,
+  );
+
+
+
+
+
+
+
+  $items[MODEL_DIRECTORY ."%/edit/%/files_basic/delete/%"] = array(
+    'title' => NULL,
+    'description' => NULL,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('openabmma_basicFiles_delete', 1, 3, 6),  //VERIFY:
+    'access arguments' => array('modify models'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items[MODEL_DIRECTORY ."%/add/%/files_basic/delete/%"] = array(
+    'title' => NULL,
+    'description' => NULL,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('openabmma_basicFiles_delete', 1, 3, 6),  //VERIFY:
+    'access arguments' => array('modify models'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items[MODEL_DIRECTORY ."%/add/%/files_opt/delete/%"] = array(
+    'title' => NULL,
+    'description' => NULL,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('openabmma_optFiles_delete', 1, 3, 6),  //VERIFY:
+    'access arguments' => array('modify models'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items[MODEL_DIRECTORY ."%/edit/%/files_opt/delete/%"] = array(
+    'title' => NULL,
+    'description' => NULL,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('openabmma_optFiles_delete', 1, 3, 6),  //VERIFY:
+    'access arguments' => array('modify models'),
+    'type' => MENU_CALLBACK,
+  );
+
+
+
+  $items[MODEL_DIRECTORY ."%/edit/%/complete"] = array(
+    'title' => 'Add new version complete',
+    'description' => "",
+    'page callback' => 'openabmma_addVersionComplete',
+    'page arguments' => array(1, 3),
+    'access arguments' => array('modify models'),
+    'type' => MENU_CALLBACK,
+  );
+
+
+
+
+
+
+  $items[MODEL_DIRECTORY .'%/members/delete'] = array(
+    'title' => 'Delete members',
+    'description' => "",
+    'page callback' => 'openabmma_deleteMember',
+    'page arguments' => array(1),             //VERIFY:
+    'access arguments' => array('modify models'),
+    'type' => MENU_CALLBACK,
+  );
+
+
+
+  $items[MODEL_DIRECTORY .'%/viewMetadata'] = array(
+    'title' => '@modeltitle',
+    'title arguments' => array('@modeltitle' => 1),
+    'description' => "",
+    'page callback' => 'openabmma_showMetaData',
+    'page arguments' => array(1),
+    'access arguments' => array('view models'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items[MODEL_DIRECTORY .'%'] = array(
+    'title' => '@modeltitle',
+    'title arguments' => array('@modeltitle' => 1),
+    'description' => "",
+    'page callback' => 'openabmma_openProject',
+    'page arguments' => array(1),
+    'access arguments' => array('view models'),
+    'type' => MENU_CALLBACK,
+  );
+  
+  return $items;
 }
 
-?>
+function openabmma_perm() {
+  return array('view models', 'modify models', 'review models', 'administer models');
+}
+
+function openabmma_getUserId($name) {
+  if ($name == '')
+    return -1;
+
+  $result = db_fetch_array(db_query("SELECT uid FROM {users} WHERE name='%s'", $name));
+  $id = $result['uid'];
+
+  if ($id == "")
+    $id = -1;
+
+  return $id;
+}
+
+function openabmma_getUserName($uid) {
+  if ($uid == '')
+    return "";
+
+  $result = db_fetch_array(db_query("SELECT name FROM {users} WHERE uid=%d", $uid));
+  $name = $result['name'];
+
+  return $name;
+}
+
+function openabmma_settings_form() {
+  $form['openabmma_settings'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Testing'),
+    '#options' => node_get_types('names'),
+    '#default_value' => 'story',
+    '#description' => t('Some description'),
+  );
+
+  $form['array_filter'] = array('#type' => 'hidden');
+  return system_settings_form($form);
+}

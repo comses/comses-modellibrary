@@ -2,142 +2,367 @@
 // vim:sts=2:sw=2:filetype=php
 // $Id$
 
+/**
+ * @file
+ * Install, update and uninstall functions for the openabmma module.
+ */
+
+
+/**
+ * Implementation of hook_schema().
+ */
+function openabmma_schema() {
+  $schema['openabm_role'] = array(
+    'description' => t('Reference table of model roles with role_ids.'),
+    'fields' => array(
+      'id' => array(
+        'description' => t('Key id for role.'),
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'name' => array(
+        'description' => t('Role name'),
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  
+  $schema['openabm_model_keywords'] = array(
+    'description' => t('Table of model keywords'),
+    'fields' => array(
+      'id' => array(
+        'description' => t('Key id for keyword'),
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'model_id' => array(
+        'description' => t('Reference id of model associated to keyword'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'keyword' => array(
+        'description' => t('Text keyword'),
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'model_id' => array('model_id'),
+    ),
+  );
+  
+  $schema['openabm_model_language'] = array(
+    'description' => t('Table of programming languages used for modelling'),
+    'fields' => array(
+      'id' => array(
+        'description' => t('Key id of programming language'),
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'name' => array(
+        'description' => t('Name of programming language'),
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'url' => array(
+        'description' => t('URL to reference website'),
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  
+  $schema['openabm_model_member'] = array(
+    'description' => t('Table of users assigned as members of model projects'),
+    'fields' => array(
+      'id' => array(
+        'description' => t('Member key id'),
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'project_id' => array(
+        'description' => t('Reference id of model project'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'user_id' => array(
+        'description' => t('Reference id of member user'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'role' => array(
+        'description' => t("Reference id of member\'s project role"),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'project_id' => array('project_id'),
+      'role' => array('role'),
+    ),
+  );
+  
+  $schema['openabm_model_version'] = array(
+    'description' => t('Master table of all saved versions of all models'),
+    'fields' => array(
+      'id' => array(
+        'description' => t('Key id for saved version'),
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'version_num' => array(
+        'description' => t('Version number used by model updater'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'model_id' => array(
+        'description' => t('Reference id to model associated with this version data'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'description' => array(
+        'description' => t('Text description of saved version'),
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => TRUE,
+      ),
+      'model_language_id' => array(
+        'description' => t('Reference id of programming language used'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+      ),
+      'other_language' => array(
+        'description' => t('Name of programming language if Other language selected'),
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'language_version' => array(
+        'description' => t('Version number of programming language used'),
+        'type' => 'varchar',
+        'length' => '10',
+        'not null' => FALSE,
+      ),
+      'os' => array(
+        'description' => t('Name of Operating System used'),
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'framework' => array(
+        'description' => t('Name of modeling framework used'),
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'reference_text' => array(
+        'description' => t('Text of reference sources associated with model version'),
+        'type' => 'text',
+        'not null' => FALSE,
+      ),
+      'examples' => array(
+        'description' => t('Text of example models'),
+        'type' => 'text',
+        'not null' => FALSE,
+      ),
+      'submittedReview' => array(
+        'description' => t('Whether this model version has been submitted for review (0/1)'),
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => FALSE,
+        'default' => 0,
+      ),
+      'visible' => array(
+        'description' => t('Whether this model version is publicly viewable (0/1)'),
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => FALSE,
+        'default' => 0,
+      ),
+      'date_modified' => array(
+        'description' => t('Date & time when this model version was last modified'),
+        'type' => 'datetime',
+        'not null' => FALSE,
+      ),
+      'run_conditions' => array(
+        'description' => t('Text notes on how to run model'),
+        'type' => 'text',
+        'not null' => FALSE,
+      ),
+      'license_id' => array(
+        'description' => t('Reference id of license used'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+      ),
+      'os_version' => array(
+        'description' => t('Version number of Operating System'),
+        'type' => 'varchar',
+        'length' => '10',
+        'not null' => FALSE,
+      ),
+      'framework_version' => array(
+        'description' => t('Version number of modelling framework'),
+        'type' => 'varchar',
+        'length' => '10',
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'license_id' => array('license_id'),
+      'model_id' => array('model_id'),
+      'model_language_id' => array('model_language_id'),
+    ),
+  );
+  
+  $schema['openabm_model'] = array(
+    'description' => t('Master table of models'),
+    'fields' => array(
+      'id' => array(
+        'description' => t('Key id for model'),
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'owner_uid' => array(
+        'description' => t('Reference user id of the model owner'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'name' => array(
+        'description' => t('Name of the model, formatted for URL access'),
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'title' => array(
+        'description' => t('Descriptive name of the model'),
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'replicators' => array(
+        'description' => t('List of authors of original model'),
+        'type' => 'text',
+        'not null' => FALSE,
+      ),
+      'replicatedModel' => array(
+        'description' => t('Whether this model is replicated (0/1)'),
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => FALSE,
+        'default' => 0,
+      ),
+      'reference' => array(
+        'description' => t('Reference citation or URL of original model'),
+        'type' => 'text',
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  
+  $schema['openabm_license'] = array(
+    'description' => t('Table of software licenses available'),
+    'fields' => array(
+      'id' => array(
+        'description' => t('Key id of license'),
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'name' => array(
+        'description' => t('Name of the software license'),
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'license_text' => array(
+        'description' => t('Text of the license'),
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => TRUE,
+      ),
+      'url' => array(
+        'description' => t('URL to license website'),
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  
+  $schema['openabm_framework'] = array(
+    'description' => t('Table of modelling frameworks'),
+    'fields' => array(
+      'id' => array(
+        'description' => t('Key id of framework'),
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'name' => array(
+        'description' => t('Name of framework'),
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'url' => array(
+        'description' => t('URL to framework website'),
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+ 
+  return $schema;
+}
+
 function openabmma_install() {
-// this is a comment
     drupal_set_message( t('Beginning installation of openabmma module') );
-    switch ($GLOBALS['db_type']) {
-        case 'mysql':
-        case 'mysqli':
-        // XXX: first create tables with no foreign key dependencies, then
-        // tables with dependencies.
-
-            // create model project table.  Stores all metadata associated
-            // with a model project in the model archive.  Every project has
-            // a single associated owner.
-            db_query("CREATE TABLE openabm_model (
-		id		INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
-                owner_uid       INT(10) UNSIGNED NOT NULL,
-                name            VARCHAR(255) NOT NULL,
-		title		VARCHAR(255) NOT NULL,
-		replicators     TEXT NULL,
-		replicatedModel bool default 0,
-                reference       TEXT NULL,
-                PRIMARY KEY(id),
-                UNIQUE(name)
-                );");
-            // create license table
-            db_query("CREATE TABLE openabm_license (
-                id INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
-                name VARCHAR(255) NOT NULL,
-                license_text MEDIUMTEXT NOT NULL,
-                url     VARCHAR(255),
-                PRIMARY KEY(id)
-                );");
-
-            db_query("CREATE TABLE openabm_model_language (
-                id              INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
-                name            VARCHAR(255) NOT NULL,
-                url             VARCHAR(255) NOT NULL,
-                PRIMARY KEY(id)
-		);");
-
-            // versioning information table
-            db_query("CREATE TABLE openabm_model_version (
-                id              INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
-		version_num	INT(10) UNSIGNED NOT NULL,
-                model_id        INT(10) UNSIGNED NOT NULL,
-                description     MEDIUMTEXT NOT NULL,
-                model_language_id INT(10) UNSIGNED,
-		other_language	VARCHAR(255) NULL,
-		language_version VARCHAR(10) NULL,
-                os              VARCHAR(255) NOT NULL,
-                os_version      VARCHAR(10) NULL,
-                framework	VARCHAR(255) NOT NULL,
-                framework_version VARCHAR(10) NULL,
-                reference_text  TEXT,
-                examples        TEXT,
-                submittedReview bool default 0,
-		visible		bool default 0,
-		date_modified	DATETIME,
-		run_conditions  TEXT NULL,
-                license_id      INT(10) UNSIGNED,
-                PRIMARY KEY(id),
-                FOREIGN KEY (model_id) REFERENCES openabm_model(id),
-                FOREIGN KEY (license_id) REFERENCES openabm_license(id),
-                FOREIGN KEY (model_language_id) REFERENCES openabm_model_language(id)
-                );");
-
-            db_query("CREATE TABLE openabm_model_keywords (
-                id              INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
-		model_id        INT(10) UNSIGNED NOT NULL,
-                keyword         VARCHAR(255) NOT NULL,
-                PRIMARY KEY(id),
-                FOREIGN KEY (model_id) REFERENCES openabm_model(id) ON DELETE CASCADE
-                );");
-
-
-            db_query("CREATE TABLE openabm_framework (
-                id              INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
-                name            VARCHAR(255) NOT NULL,
-                url             VARCHAR(255) NOT NULL,
-                PRIMARY KEY(id)
-                );");
-
-            // model role table
-            db_query("CREATE TABLE openabm_role (
-		id		INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
-		name		VARCHAR(255) NOT NULL,
-                PRIMARY KEY (id)
-                );");
-
-            // members of a model
-            db_query("CREATE TABLE openabm_model_member (
-		id		INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
-                project_id      INT(10) UNSIGNED NOT NULL,
-                user_id         INT(10) UNSIGNED NOT NULL,
-                role            INT(10) UNSIGNED NOT NULL,
-                PRIMARY KEY (id),
-                FOREIGN KEY (project_id) REFERENCES openabm_model(id) ON DELETE CASCADE,
-                FOREIGN KEY (role) REFERENCES openabm_role(id)
-                );");
-
-		// default values
-            db_query ("INSERT INTO openabm_framework (name) VALUES ('Ascape 5');");
-            db_query ("INSERT INTO openabm_framework (name) VALUES ('Breve');");
-            db_query ("INSERT INTO openabm_framework (name) VALUES ('Cormas');");
-            db_query ("INSERT INTO openabm_framework (name) VALUES ('DEVSJAVA');");
-            db_query ("INSERT INTO openabm_framework (name) VALUES ('Ecolab');");
-            db_query ("INSERT INTO openabm_framework (name) VALUES ('Mason');");
-            db_query ("INSERT INTO openabm_framework (name) VALUES ('MASS');");
-            db_query ("INSERT INTO openabm_framework (name) VALUES ('MobiDyc');");
-            db_query ("INSERT INTO openabm_framework (name) VALUES ('NetLogo');");
-            db_query ("INSERT INTO openabm_framework (name) VALUES ('Repast');");
-            db_query ("INSERT INTO openabm_framework (name) VALUES ('Sesam');");
-            db_query ("INSERT INTO openabm_framework (name) VALUES ('StarLogo');");
-            db_query ("INSERT INTO openabm_framework (name) VALUES ('Swarm');");
-
-            db_query ("INSERT INTO openabm_license (name, url, license_text) VALUES ('GNU GPL', 'http://www.gnu.org/copyleft/gpl.html', '');");
-            db_query ("INSERT INTO openabm_license (name, url, license_text) VALUES ('Apache License, Version 2.0', 'http://www.apache.org/licenses/LICENSE-2.0.html', '');");
-
-            db_query ("INSERT INTO openabm_model_language (name) VALUES ('C');");
-            db_query ("INSERT INTO openabm_model_language (name) VALUES ('C++');");
-            db_query ("INSERT INTO openabm_model_language (name) VALUES ('Haskell');");
-            db_query ("INSERT INTO openabm_model_language (name) VALUES ('Java');");
-            db_query ("INSERT INTO openabm_model_language (name) VALUES ('Lisp');");
-            db_query ("INSERT INTO openabm_model_language (name) VALUES ('ML');");
-            db_query ("INSERT INTO openabm_model_language (name) VALUES ('NetLogo');");
-            db_query ("INSERT INTO openabm_model_language (name) VALUES ('Perl');");
-            db_query ("INSERT INTO openabm_model_language (name) VALUES ('Python');");
-            db_query ("INSERT INTO openabm_model_language (name) VALUES ('Scheme');");
-            db_query ("INSERT INTO openabm_model_language (name) VALUES ('Other');");
-
-            db_query ("INSERT INTO openabm_role (name) VALUES ('Owner');");
-            db_query ("INSERT INTO openabm_role (name) VALUES ('Developer');");
-
-            break;
-        case 'pgsql':
-        default:
-            drupal_set_message( t('Unsupported database.') );
-    }
+    drupal_install_schema('openabmma');
 }
 
