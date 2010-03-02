@@ -2,7 +2,7 @@
 define('MODEL_DIRECTORY', 'model-archive/');
 
 function openabmma_browseModels() {
-  $query = "SELECT owner_uid, name, title FROM openabm_model ORDER BY name";
+  $query = "SELECT owner_uid, name, title FROM openabm_model ORDER BY title";
   $result = db_query($query);
 
   while ($model = db_fetch_object($result)) {

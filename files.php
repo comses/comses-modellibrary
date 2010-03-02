@@ -48,8 +48,8 @@ function openabmma_uploadFile($subdir, $formVar, $permission=0760) {
    This array is used in the revised file_save_upload */
   $validators = array(
 //    'file_validate_is_image' => array(),
-    'file_validate_image_resolution' => array('85x85'),
-    'file_validate_size' => array(30 * 1024),
+//    'file_validate_image_resolution' => array('85x85'),
+//    'file_validate_size' => array(30 * 1024),
   );
 
     $file = file_save_upload($formVar, $validators);
