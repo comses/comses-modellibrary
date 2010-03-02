@@ -276,7 +276,7 @@ function openabmma_addVersion02(&$form_state) {
 		);
 	}
 
-	$languages = array ();
+	$languages = array();
 	$result = db_query ("SELECT id, name FROM openabm_model_language ORDER BY name");
 	while ($node = db_fetch_object($result)) {
 		$languages[$node->id] = $node->name;
@@ -401,7 +401,7 @@ function openabmma_addVersion02_submit ($form, &$form_state) {
 		return openabmma_accessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
 
 	$versionNumber = openabmma_parseVersionNumber (arg(3));
-	
+
 	$directory = "files/models/". $modelName ."/v". $versionNumber ."/code";
 	$fileCount = openabmma_getFileCount($directory);
 	if ($fileCount == 0) {
@@ -490,8 +490,13 @@ function openabmma_addVersion03(&$form_state) {
 	$stepLinkText = "<table width='100%'><tr><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 3, '" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step01") . "');\">Step 1</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 3, '" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step02") . "');\">Step 2</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 3, '" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step03") . "');\">Step 3</a></td><td><a href=\"javascript:validateAndGo ('" . $modelName . "', " . $versionNumber . ", '" . $action . "', 3, '" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/step04") . "');\">Step 4</a></td></tr></table><p>&nbsp;</p>";
 
 // Files
+	$files_root = "files/models/" . $modelName . "/v" . $versionNumber;
+	if (openabmma_getFileCount ($files_root . "/doc") == 0)
+		$stepLinkText = "";	// Don't allow user to navigate unless he uploads a code file OR unless he clicks 'Back'
+					// There is a possibility that the user may escape from having to upload the code file, but we make all
+					// these checks at the end before the model is submitted and then redirect him to the appropriate step
 
-//	$form['#attributes'] = array('enctype' => "multipart/form-data", 'onsubmit' => 'return validate_version_step03 (' . $newVersion . ')');
+	$form['#attributes'] = array('enctype' => "multipart/form-data", 'onsubmit' => 'return validate_version_step03 (' . $newVersion . ')');
 	$form["details"] = array(
 		"#type" => 'fieldset',
 		"#collapsible" => FALSE,
@@ -533,6 +538,52 @@ function openabmma_addVersion03(&$form_state) {
 
 // File Uploads
 
+	$form["details"]["version_docfile"] = array(
+			"#type" => "file",
+			"#description" => t("Preferably following the ODD protocol [". l("http://www.openabm.org/site/odd", "http://www.openabm.org/site/odd") ."]"),
+			"#title" => t("Documentation (required)"),
+		  );
+
+
+	$form["details"]["version_sensitivity"] = array(
+			"#type" => "file",
+			"#description" => null,
+			"#title" => t("File containing information of sensitivity analysis")
+		  );
+					
+					
+/*	$directory = "files/models/" . $modelName . "/v" . $versionNumber . "/doc";
+	$fileCount = openabmma_getFileCount ($directory);
+	if ($fileCount > 0)
+	{
+		$form ["details"]["version_doc_file"] = array (
+			"#type" => "item",
+			"#value" => "The file '<b>" . openabmma_getFirstFile ($directory) . "</b>' has been uploaded as the Documentation. To delete this file and upload a different one, click <a href='" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/files_opt/delete/doc") . "'>delete</a>."
+		);
+	}
+	else
+	{
+		$form ["details"]["version_doc_file"] = array (
+			"#type" => "file",
+			"#description" => t("Preferably following the ODD protocol [" . l ("http://www.openabm.org/site/odd", "http://www.openabm.org/site/odd") . "]"),
+			"#title" => t("Documentation (required)")
+		);
+	} */
+
+/*	$directory = "files/models/" . $modelName . "/v" . $versionNumber . "/sensitivity";
+	$fileCount = openabmma_getFileCount ($directory);
+	if ($fileCount > 0)
+		$form ["details"]["version_sensitivity"] = array (
+			"#type" => "item",
+			"#value" => "The file '<b>" . openabmma_getFirstFile ($directory) . "</b>' has been uploaded as the sensitivity file. To delete this file and upload a different one, click <a href='" . url (MODEL_DIRECTORY . $modelName . "/" . $action . "/version" . $versionNumber . "/files_basic/delete/sensitivity") . "'>delete</a>."
+		);
+	else		
+		$form ["details"]["version_sensitivity"] = array (
+			"#type" => "file",
+			"#description" => null,
+			"#title" => t("File containing information of sensitivity analysis")
+		); */
+
 	$form ["details"]["submitAction"] = array (
 		  "#type" => "hidden",
 		  "#value" => 1,
@@ -555,6 +606,7 @@ function openabmma_addVersion03(&$form_state) {
 
 function openabmma_addVersion03_submit ($form, &$form_state) {
 	global $user;
+    $errString = '';
 	$modelName = arg(1);
 	$action = arg(2);
 	$versionNumber = openabmma_parseVersionNumber(arg(3));
@@ -563,6 +615,31 @@ function openabmma_addVersion03_submit ($form, &$form_state) {
 		return openabmma_accessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
 
 // File Uploads
+	$directory = "files/models/". $modelName ."/v". $versionNumber ."/doc";
+	$fileCount = openabmma_getFileCount($directory);
+	if ($fileCount == 0)
+	{
+//		openabmma_cleantmp($modelName .'/v'. $versionNumber .'/doc');
+		if(openabmma_uploadFile($modelName ."/v". $versionNumber ."/doc", "version_docfile") == null)
+		{
+			drupal_set_message("<font color='red'><b>Error uploading Documentation, please check the path of the file specified</b></font>");
+			return;
+		}
+	}
+
+	$directory = "files/models/". $modelName ."/v". $versionNumber ."/sensitivity";
+	$fileCount = openabmma_getFileCount($directory);
+	if ($fileCount == 0)
+	{
+//		openabmma_cleantmp($modelName . '/v' . $versionNumber . '/sensitivity');
+		openabmma_uploadFile ($modelName .'/v'. $versionNumber .'/sensitivity', 'version_sensitivity');
+	}
+
+	if ($errString != "")
+	{
+		drupal_set_message("<b><font color='red'>". $errString ."</font></b>");
+		return;
+	}
 
 	$query = "UPDATE openabm_model_version SET date_modified='%s', license_id=%d, reference_text='%s', examples='%s' WHERE model_id=%d AND version_num=%d";
 	db_query ($query, date("Y-m-d H:i:s"), $form_state['values']["version_licenseId"], $form_state['values']["version_ref"], $form_state['values']["version_examples"], openabmma_getModelId($modelName), $versionNumber);
