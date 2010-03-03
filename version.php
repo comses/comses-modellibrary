@@ -229,17 +229,18 @@ function openabmma_addVersion02(&$form_state) {
   }
 
   $versionNumber = openabmma_parseVersionNumber(arg(3));
-  $query = "SELECT model_language_id, os, os_version, other_language, language_version, framework, framework_version FROM openabm_model_version WHERE model_id=%d AND version_num=%d";
+  $query = "SELECT model_language_id, other_language, language_version, os_id, other_os, os_version, framework_id, other_framework, framework_version FROM openabm_model_version WHERE model_id=%d AND version_num=%d";
   $result = db_fetch_array(db_query($query, openabmma_getModelId($modelName), $versionNumber));
   
 	$progLang = $result['model_language_id'];
   $other_language = $result['other_language'];
   $progLangVer = $result['language_version'];
-  $osName = $result['os'];
+  $osId = $result['os_id'];
+  $other_os = $result['other_os'];
   $osVersion = $result['os_version'];
-  $frameworkName = $result['framework'];
+  $frameworkId = $result['framework_id'];
+  $other_framework = $result['other_framework'];
   $framework_version = $result['framework_version'];
-
   $newVersion = ($action == "add") ? 1 : 0;		
   drupal_add_js( openabmma_get_js_path() );
 
@@ -252,7 +253,7 @@ function openabmma_addVersion02(&$form_state) {
 					// these checks at the end before the model is submitted and then redirect him to the appropriate step
 
 
-  $form['#attributes'] = array('enctype' => "multipart/form-data", 'onsubmit' => 'return validate_version_step02('. $newVersion .')');
+  $form['#attributes'] = array('enctype' => "multipart/form-data");
   $form["details"] = array(
           "#type" => 'fieldset',
           "#collapsible" => FALSE,
@@ -308,18 +309,24 @@ function openabmma_addVersion02(&$form_state) {
 	        "#description" => 'The version of the programming language used to implement this model, if necessary.',
 	        );
 
-	$arrayElements = array (
+/*	$arrayElements = array (
 			'Linux' => 'Linux',
 			'Mac' => 'Mac',
 			'Windows' => 'Windows',
 			'Platform Independent' => 'Platform Independent',
-			'Other' => 'Other');
+			'Other' => 'Other'); */
+
+	$oses = array();
+	$result = db_query ("SELECT id, name FROM openabm_os ORDER BY id");
+	while ($node = db_fetch_object($result)) {
+		$oses[$node->id] = $node->name;
+	}
 
 	$form ["details"]["os"] = array (
       "#type" => "select",
       "#title" => t("Operating System"),
-      "#default_value" => $form_state['values']["os"] == "" ? (openabmma_inList($osName, $arrayElements) == -1 ? "Other" : $osName) : $form_state['values']["os"],
-      "#options" => $arrayElements,
+	    "#default_value" => $form_state['values']["os"] == "" ? $osId : $form_state['values']["os"],
+      "#options" => $oses,
       "#description" => NULL,
       );
 
@@ -327,7 +334,7 @@ function openabmma_addVersion02(&$form_state) {
 	        "#type" => "textfield",
 	        "#title" => t("Other OS (if not mentioned in above list)"),
 	        "#maxlength" => 255,
-	        "#default_value" => $form_state['values']["other_os"] == "" ? (openabmma_inList($osName, $arrayElements) == -1 ? $osName : "") : $form_state['values']["other_os"],
+	        "#default_value" => $form_state['values']["other_os"] == "" ? $other_os : $form_state['values']["other_os"],
 	        "#required" => FALSE,
 	        );
 
@@ -336,22 +343,22 @@ function openabmma_addVersion02(&$form_state) {
 	        "#size" => 10,
 	        "#title" => t("Operating System Version"),
 	        "#default_value" => $form_state['values']["os_ver"] == "" ? $osVersion : $form_state['values']["os_ver"],
-	        "#description" => NULL,
+	        "#description" => 'The version of the operating system used, if relevant.',
 	        );
 
-	$arrayElements = array ();
-	$result = db_query ("SELECT name FROM openabm_framework ORDER BY name");
-	while ($node = db_fetch_object ($result)) {
-	    $arrayElements [$node->name] = $node->name;
+	$frameworks = array();
+	$result = db_query ("SELECT id, name FROM openabm_framework ORDER BY id");
+	while ($node = db_fetch_object($result)) {
+		$frameworks[$node->id] = $node->name;
 	}
-	$arrayElements ["Other"] = "Other";
+	//$frameworks ["Other"] = "Other";
 
 	$form ["details"]["framework"] = array (
 	        '#id' => 'framework',
 	        "#type" => "select",
 	        "#title" => t("Framework used"),
-	        "#default_value" => $form_state['values']["framework"] == "" ? (openabmma_inList($frameworkName, $arrayElements) == -1 ? "Other" : $frameworkName) : $form_state['values']["framework"],
-	        "#options" => $arrayElements,
+          	"#default_value" => $form_state['values']["framework"] == "" ? $frameworkId : $form_state['values']["framework"],	
+          	"#options" => $frameworks,
 	        "#description" => 'The ABM framework used to implement this model',
 	        );
 
@@ -359,7 +366,7 @@ function openabmma_addVersion02(&$form_state) {
 	        "#type" => "textfield",
 	        "#title" => t("Other framework (if not mentioned in above list)"),
 	        "#maxlength" => 255,
-	        "#default_value" => $form_state['values']["other_framework"] == "" ? (openabmma_inList ($frameworkName, $arrayElements) == -1 ? $frameworkName : "") : $form_state['values']["other_framework"],
+	        "#default_value" => $form_state['values']["other_framework"] == "" ? $other_framework : $form_state['values']["other_framework"],
 	        "#required" => FALSE,
 	        );
 
@@ -368,9 +375,9 @@ function openabmma_addVersion02(&$form_state) {
 	        "#size" => 10,
 	        "#title" => t("Framework Version"),
 	        "#default_value" => $form_state['values']["framework_ver"] == "" ? $framework_version : $form_state['values']["framework_ver"],
-	        "#description" => NULL,
-	        );
-
+	        "#description" => 'The version of the modeling platform.',
+	        );									
+					
 	$form ["details"]["submitAction"] = array (
 	        "#type" => "hidden",
 	        "#value" => 1,
@@ -396,7 +403,7 @@ function openabmma_addVersion02_submit ($form, &$form_state) {
 	$errString = '';
 	$modelName = arg(1);
 	$action = arg(2);
-	
+		
 	if ($user->name != openabmma_getModelOwner ($modelName))
 		return openabmma_accessError ("Only model owners can change metadata details of any version in the model. You are not registered as the owner of this model.");
 
@@ -418,51 +425,55 @@ function openabmma_addVersion02_submit ($form, &$form_state) {
 		return;
 	}
 
-	$os = $edit ["os"];
-	if ($os == "Other")	{ // selected other, so get the "other" fields contents first
-		$os = $form_state['values']["other_os"];
-		if ($os == "") {
-			drupal_set_message("<b><font color='red'>Please choose an operating system from the dropdown list or enter the name in the text box below it.</font></b>");
-			return;
-		}
-	}
-	
-	$osVersion = $form_state['values']["os_ver"];
-
-	$framework = $form_state['values']["framework"];
-	if ($framework == "Other") {	// selected other, so get the "other" fields contents first
-		$framework = $form_state['values']["other_framework"];
-		if ($framework == "") {
-			drupal_set_message("<b><font color='red'>Please choose a Framework from the dropdown list or enter the name in the text box below it.</font></b>");
-			return;
-		}
-	}
-
-	$framework_version = $form_state['values']["framework_ver"];
-        if ($framework = '') {
-            // allow framework version without framework?  or spit out an
-            // error?  Actually, should have JS enable textfields
-        }
-
 	$pLanguage = $form_state['values']["version_language"];
-
+	$other_language = $form_state['values']["other_language"];
+	$pLanguageVersion = $form_state['values']["version_language_ver"];
+	
 	// Check if this is the index of the "Other"
 	$query = "SELECT id FROM openabm_model_language WHERE name = 'Other'";
 	$result = (array) db_fetch_object(db_query($query));
-
-	$other_language = '';
 	if ($pLanguage == $result['id']) {
-		$other_language = $form_state['values']["other_language"];
     if ($other_language == "") {
 			drupal_set_message ("<b><font color='red'>Please choose a programming language from the dropdown list or enter the name in the text box below it.</font></b>");
 			return;
 		}
 	}	
-	
-	$pLanguageVersion = $form_state['values']["version_language_ver"];
 
-	$query = "UPDATE openabm_model_version SET date_modified='%s', model_language_id=%d, other_language='%s', language_version='%s', os='%s', os_version='%s', framework='%s', framework_version='%s' WHERE model_id=%d AND version_num=%d";
-	db_query($query, date("Y-m-d H:i:s"), $pLanguage, $other_language, $pLanguageVersion, $os, $osVersion, $framework, $framework_version, openabmma_getModelId($modelName), $versionNumber);
+
+	$modelOS = $form_state['values']["os"];
+	$other_os = $form_state['values']["other_os"];
+	$osVersion = $form_state['values']["os_ver"];
+	
+	$query = "SELECT id FROM openabm_os WHERE name = 'Other'";
+	$result = (array) db_fetch_object(db_query($query));
+	if ($modelOS == $result['id'])	{ // selected other, so get the "other" fields contents first
+		if ($other_os == "") {
+			drupal_set_message("<b><font color='red'>Please choose an operating system from the dropdown list or enter the name in the text box below it.</font></b>");
+			return;
+		}
+	}
+
+		
+	$modelFramework = $form_state['values']["framework"];
+	$other_framework = $form_state['values']["other_framework"];
+	$framework_version = $form_state['values']["framework_ver"];
+
+	$query = "SELECT id FROM openabm_framework WHERE name = 'Other'";
+	$result = (array) db_fetch_object(db_query($query));
+	if ($modelFramework == $result['id']) {	// selected other, so get the "other" fields contents first
+		if ($other_framework == "") {
+			drupal_set_message("<b><font color='red'>Please choose a Framework from the dropdown list or enter the name in the text box below it.</font></b>");
+			return;
+		}
+	}
+
+/*  if ($framework_version = '') {
+      // allow framework version without framework?  or spit out an
+      // error?  Actually, should have JS enable textfields
+  } */
+
+	$query = "UPDATE openabm_model_version SET date_modified='%s', model_language_id=%d, other_language='%s', language_version='%s', os_id='%s', other_os='%s', os_version='%s', framework_id='%s', other_framework='%s', framework_version='%s' WHERE model_id=%d AND version_num=%d";
+	db_query($query, date("Y-m-d H:i:s"), $pLanguage, $other_language, $pLanguageVersion, $modelOS, $other_os, $osVersion, $modelFramework, $other_framework, $framework_version, openabmma_getModelId($modelName), $versionNumber);
 
 	$form_state['redirect'] = MODEL_DIRECTORY . $modelName ."/". $action ."/version". $versionNumber ."/step03";
 }
@@ -925,20 +936,26 @@ function openabmma_versionMetadata() {
 
   drupal_add_css(openabmma_get_css_path());
 
-  $query = "SELECT description, model_language_id, other_language, language_version, os, framework, reference_text, examples, submittedReview, visible, date_modified, run_conditions, license_id from openabm_model_version WHERE model_id=%d AND version_num=%d";
+  $query = "SELECT description, model_language_id, other_language, language_version, os_id, other_os, os_version, framework_id, other_framework, framework_version, reference_text, examples, submittedReview, visible, date_modified, run_conditions, license_id from openabm_model_version WHERE model_id=%d AND version_num=%d";
   $result = (array) db_fetch_object(db_query($query, openabmma_getModelId($modelName), $versionNumber));
   
   $description = ($result['description'] == '' ? '(none)' : $result['description']);
   $model_language_id = $result['model_language_id'];
-  $os = $result['os'];
-  $framework = $result['framework'];
+  $other_language = ($result['other_language']);
+  $pLanguageVersion = ($result['language_version']);
+  $os = $result['os_id'];
+  $other_os = $result['other_os'];
+	$os_version = $result['os_version'];
+  $framework = $result['framework_id'];
+  $other_framework = $result['other_framework'];
+	$framework_version = $result['framework_version'];
   $reference_text = $result['reference_text'];
   $examples = $result['examples'];
   $submittedReview = ($result['submittedReview'] == "1" ? "Yes" : "No");
   $visible = ($result['visible'] == "1" ? "Yes" : "No");
   $license_id = ($result['license_id']);
-  $other_language = ($result['other_language']);
-  $pLanguageVersion = ($result['language_version']);
+	$date_modified = $result['date_modified'];
+	$run_conditions = $result['run_conditions'];
 
   $query = "SELECT name from openabm_model_language WHERE id=%d";
   $result = (array) db_fetch_object(db_query($query, $model_language_id));
@@ -947,8 +964,31 @@ function openabmma_versionMetadata() {
     $model_language_id = $other_language;
   }
 
+  $query = "SELECT name from openabm_os WHERE id=%d";
+  $result = (array) db_fetch_object(db_query($query, $os));
+  $os = $result['name'];
+  if ($os == "Other") {
+    $os = $other_os;
+  }
+
+  $query = "SELECT name from openabm_framework WHERE id=%d";
+  $result = (array) db_fetch_object(db_query($query, $framework));
+  $framework = $result['name'];
+  if ($framework == "Other") {
+    $framework = $other_framework;
+  }
+
+
   if ($pLanguageVersion != "") {
     $model_language_id .= ", Version: " . $pLanguageVersion;
+  }
+
+  if ($os_version != "") {
+    $os .= ", Version: " . $os_version;
+  }
+
+  if ($framework_version != "") {
+    $framework .= ", Version: " . $framework_version;
   }
 
   $query = "SELECT name from openabm_license WHERE id=%d";
@@ -1036,11 +1076,11 @@ function openabmma_versionMetadata() {
   $output .= "<tr class='openabmData'><td><b>Additional file:</b></td><td><i>" . $additionalStr . "</i></td></tr>";
   $output .= "</table>";
 
-  if (strcasecmp($user->name, $owner) == 0) {
+/*  if (strcasecmp($user->name, $owner) == 0) {
     $output .= "<p></p>" . l("To change your metadata settings, click here", array('attributes' => MODEL_DIRECTORY . $modelName . "/edit/version" . $versionNumber . "/step01"));
-  }
+  } */
 
-  $output .= "<p></p>" . l("To go to model workspace, click here", array('attributes' => MODEL_DIRECTORY . $modelName));
+//  $output .= "<p></p>" . l("To go to model workspace, click here", array('attributes' => MODEL_DIRECTORY . $modelName));
   return $output;
 }
 
