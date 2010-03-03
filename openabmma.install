@@ -411,7 +411,7 @@ function openabmma_install() {
 }
 
 function openabmma_update_6020() {
-	$items = array();
+	$ret = array();
 	$items[] = db_change_field($ret, 'openabm_model', 'replicators', 'replicators', array('type' => 'text', 'not null' => TRUE, 'default' => ''));
 	$items[] = db_change_field($ret, 'openabm_model', 'replicatedModel', 'replicatedModel', array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE));
 	$items[] = db_change_field($ret, 'openabm_model', 'reference', 'reference', array('type' => 'text', 'not null' => TRUE, 'default' => ''));
@@ -451,11 +451,11 @@ function openabmma_update_6020() {
 	  'primary key' => array('id'),
 	));
 
-	return $items;
+	return $ret;
 }
 
 function openabmma_update_6021() {
-	$items = array();
+	$ret = array();
 	
 	$record = new stdClass();
 	$record->name = 'Linux';
@@ -493,5 +493,5 @@ function openabmma_update_6021() {
 	$items[] = update_sql("UPDATE {openabm_model_version} SET framework_id = 12 WHERE other_framework = 'StarLogo'");
 	$items[] = update_sql("UPDATE {openabm_model_version} SET framework_id = 13 WHERE other_framework = 'Swarm'");
 
-	return $items;
+	return $ret;
 }
