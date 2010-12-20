@@ -1,6 +1,5 @@
 <?php
 // $Id: $
-
   /**
    * @file
    * This is the new NSF Model Library module for OpenABM.org. This 
@@ -255,7 +254,7 @@ function modellibrary_access($op, $node, $account) {
     return (user_access('edit any model', $account) || (user_access('edit own model', $account) && ($account->uid == $node->uid)));
   }
   elseif ($op == 'delete') {
-    return (user_access('delete any model',$account) || (user_access('delete own model',$account) && ($account->uid == $node->uid)));
+    return (user_access('delete any model', $account) || (user_access('delete own model', $account) && ($account->uid == $node->uid)));
   }
 }
 
@@ -348,7 +347,8 @@ function _model_add_form($form_state) {
     $version = node_load($versionnid);
 
     $action_text = "Edit";
-  } else {
+  } 
+  else {
     $action_text = "Add New";
     $versionnum = helper_get_max_versionnum($modelnid);
   }
@@ -383,7 +383,7 @@ function _model_add_form($form_state) {
     );
   }
 
-  switch($form_state['storage']['step']) {
+  switch ($form_state['storage']['step']) {
     case 1: // page 1
       $form['title'] = array(
         '#type' => 'textfield',
@@ -409,7 +409,8 @@ function _model_add_form($form_state) {
           '#required' => TRUE,
           '#element_validate' => array('_model_add_element_validate'),
         );
-      } else {
+      } 
+      else {
         $form['field_model_uri'] = array(
           '#type' => 'value',
           '#value' => $node->field_model_uri[0]['value'],
@@ -445,7 +446,7 @@ function _model_add_form($form_state) {
        * configured in the Content Type management screens.
        */
       $fields = array('field_model_tags'); // array list of the fields to be accessed
-      foreach($fields as $name) {
+      foreach ($fields as $name) {
         //Create the field by calling the CCK API:
         $field = content_fields($name);
         // This is a non-display container for passing the field information along:
@@ -489,7 +490,7 @@ function _model_add_form($form_state) {
 
       // Generate the CCK fields
       $fields = array('field_model_image', 'field_model_video');
-      foreach($fields as $name) {
+      foreach ($fields as $name) {
         $field = content_fields($name);
         $form['#field_info'][$name] = $field;
         $form_state['values'][$name] = $node->$name;
@@ -521,7 +522,7 @@ function _model_add_form($form_state) {
 
       // Generate the CCK fields
       $fields = array('field_modelversion_language', 'field_modelversion_otherlang', 'field_modelversion_langversion', 'field_modelversion_os', 'field_modelversion_osversion', 'field_modelversion_platform', 'field_modelversion_platformver');
-      foreach($fields as $name) {
+      foreach ($fields as $name) {
         $field = content_fields($name);
         $form['#field_info'][$name] = $field;
         $form_state['values'][$name] = $version->$name;
@@ -538,7 +539,7 @@ function _model_add_form($form_state) {
 
       // CCK Fields
       $fields = array('field_modelversion_code', 'field_modelversion_documentation', 'field_modelversion_sensitivity', 'field_modelversion_dataset', 'field_modelversion_addfiles');
-      foreach($fields as $name) {
+      foreach ($fields as $name) {
         $field = content_fields($name);
         $form['#field_info'][$name] = $field;
         $form_state['values'][$name] = $version->$name;
@@ -555,7 +556,7 @@ function _model_add_form($form_state) {
       
       // CCK Fields
       $fields = array('field_modelversion_license', 'field_modelversion_review', 'field_modelversion_runconditions');
-      foreach($fields as $name) {
+      foreach ($fields as $name) {
         $field = content_fields($name);
         $form['#field_info'][$name] = $field;
         $form_state['values'][$name] = $version->$name;
@@ -630,7 +631,8 @@ function _model_add_form_submit($form, &$form_state) {
     $form_state['storage']['step']--;
     $form_state['storage']['values'] = $form_state['values'] + $form_state['storage']['values'];
     return;
-  } elseif ($form_state['clicked_button']['#id'] == 'edit-next' && $form_state['storage']['step'] < MODEL_STEPS) {
+  } 
+  elseif ($form_state['clicked_button']['#id'] == 'edit-next' && $form_state['storage']['step'] < MODEL_STEPS) {
     $form_state['storage']['step']++;
     $form_state['storage']['values'] = $form_state['values'] + $form_state['storage']['values'];
     return;
@@ -678,7 +680,8 @@ function _model_add_form_submit($form, &$form_state) {
 
   if ($action == 'edit') {
     $model = node_load($modelnid); // if we are editing, load the model
-  } else {
+  } 
+  else {
     $model->type = 'model'; // otherwise prep the new node
   }
 
@@ -687,7 +690,7 @@ function _model_add_form_submit($form, &$form_state) {
   // drupal_execute can process the field values
   // we stored in $form_state[storage]
   $new_state = array();  
-  $node_updated = false; // flag to indicate whether any fields have been changed in an update
+  $node_updated = FALSE; // flag to indicate whether any fields have been changed in an update
 
   // drupal_execute() will use the values in $new_state for generating the new node
   $new_state['values']['title'] = $form_state['storage']['values']['title'];
@@ -699,7 +702,8 @@ function _model_add_form_submit($form, &$form_state) {
   $new_state['values']['language'] = 'en';
   if ($action == 'add') {
     $new_state['values']['name'] =  $user->name;
-  } else {
+  } 
+  else {
     $new_state['values']['name'] =  $user->name; // TODO: figure out how to retain the original user when editing
   }
 
@@ -773,37 +777,42 @@ function _model_add_form_submit($form, &$form_state) {
   $new_state['values']['field_modelversion_runconditions'] = $form_state['values']['field_modelversion_runconditions'];
   $new_state['values']['op'] = t('Save');  // This seems to be a required value
 
-  $new_version = false;  // flag to indicate a new version needs to be created.
+  $new_version = FALSE;  // flag to indicate a new version needs to be created.
 
   // If we are in Edit mode, then we need to check to see which fields have
   // been changed.  For most fields, if any changes have been made, we want to update
   // the current version.  However, if any of the file upload fields have been changed
   // we are going to create a new version.
   if ($action == 'edit') {  
-    if ($version->field_modelversion_code[0][fid] != $form_state['storage']['values']['field_modelversion_code'][0][fid]) {
-      $new_version = true;
-    } elseif ($version->field_modelversion_documentation[0][fid] != $form_state['storage']['values']['field_modelversion_documentation'][0][fid]) {
-      $new_version = true;
-    } elseif ($version->field_modelversion_sensitivity[0][fid] != $form_state['storage']['values']['field_modelversion_sensitivity'][0][fid]) {
-      $new_version = true;
-    } elseif ($version->field_modelversion_dataset[0][fid] != $form_state['storage']['values']['field_modelversion_dataset'][0][fid]) {
-      $new_version = true;
-    } elseif ($version->field_modelversion_addfiles[0][fid] != $form_state['storage']['values']['field_modelversion_addfiles'][0][fid]) {
-      $new_version = true;
+    if ($version->field_modelversion_code[0]['fid'] != $form_state['storage']['values']['field_modelversion_code'][0]['fid']) {
+      $new_version = TRUE;
+    } 
+    elseif ($version->field_modelversion_documentation[0]['fid'] != $form_state['storage']['values']['field_modelversion_documentation'][0]['fid']) {
+      $new_version = TRUE;
+    } 
+    elseif ($version->field_modelversion_sensitivity[0]['fid'] != $form_state['storage']['values']['field_modelversion_sensitivity'][0]['fid']) {
+      $new_version = TRUE;
+    } 
+    elseif ($version->field_modelversion_dataset[0]['fid'] != $form_state['storage']['values']['field_modelversion_dataset'][0]['fid']) {
+      $new_version = TRUE;
+    } 
+    elseif ($version->field_modelversion_addfiles[0]['fid'] != $form_state['storage']['values']['field_modelversion_addfiles'][0]['fid']) {
+      $new_version = TRUE;
     }
-  } else {
-    $new_version = true;    
+  } 
+  else {
+    $new_version = TRUE;    
   }
 
-//  drupal_set_message('Form: '. $form_state['storage']['values']['field_modelversion_code'][0][fid]);
-//  drupal_set_message('Field: '. $version->field_modelversion_code[0][fid]);
+//  drupal_set_message('Form: '. $form_state['storage']['values']['field_modelversion_code'][0]['fid']);
+//  drupal_set_message('Field: '. $version->field_modelversion_code[0]['fid']);
 
 //  print("<pre>");
 //  print_r($form_state['storage']['values']['field_modelversion_code']);
 //  print("</pre><br /><pre>");
 //  print_r($version->field_modelversion_code);
 //  print("</pre>");
-	
+
   if ($new_version) {
     $version = new stdClass();
     $version->type = 'modelversion';
@@ -851,7 +860,8 @@ function _model_add_form_submit($form, &$form_state) {
        $version->field_modelversion_license == NULL ) {
     $model->status = 0;
     $model->field_model_enabled[0]['value'] = 0;
-  } else {
+  } 
+  else {
     $model->status = 1;
   }
   node_save($model);
@@ -1005,7 +1015,7 @@ function _modelversion_add_form($form_state) {
 
       // These are the CCK fields we need to include in the form.
       $fields = array('field_modelversion_language', 'field_modelversion_otherlang', 'field_modelversion_langversion', 'field_modelversion_os', 'field_modelversion_osversion', 'field_modelversion_platform', 'field_modelversion_platformver');
-      foreach($fields as $name) {
+      foreach ($fields as $name) {
         $field = content_fields($name);                  //Create the field by calling the CCK API.
         $form['#field_info'][$name] = $field;            // This is a non-display container for passing the field information along.
         $form_state['values'][$name] = $version->$name;  // If you set the field value here it will be used as default for the field, see line 67 of file content.node_form.inc.
@@ -1023,7 +1033,7 @@ function _modelversion_add_form($form_state) {
       );
 
       $fields = array('field_modelversion_code', 'field_modelversion_documentation', 'field_modelversion_sensitivity', 'field_modelversion_dataset', 'field_modelversion_addfiles');
-      foreach($fields as $name) {
+      foreach ($fields as $name) {
         $field = content_fields($name);                  //Create the field by calling the CCK API.
         $form['#field_info'][$name] = $field;            // This is a non-display container for passing the field information along.
         $form_state['values'][$name] = $version->$name;  // If you set the field value here it will be used as default for the field, see line 67 of file content.node_form.inc.
@@ -1040,7 +1050,7 @@ function _modelversion_add_form($form_state) {
       );
 
       $fields = array('field_modelversion_license', 'field_modelversion_review', 'field_modelversion_runconditions');
-      foreach($fields as $name) {
+      foreach ($fields as $name) {
         $field = content_fields($name);                  //Create the field by calling the CCK API.
         $form['#field_info'][$name] = $field;            // This is a non-display container for passing the field information along.
         $form_state['values'][$name] = $version->$name;  // If you set the field value here it will be used as default for the field, see line 67 of file content.node_form.inc.

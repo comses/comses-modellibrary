@@ -3,7 +3,7 @@
 name = "NSF Model Library"
 description = "The NSF Model Library for OpenABM.org"
 package = OpenABM
-version = 6.x-0.95
+version = 6.x-0.95.1
 dependencies[] = content
 dependencies[] = noderelationships
 dependencies[] = content_copy
