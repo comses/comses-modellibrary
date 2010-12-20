@@ -1,0 +1,17 @@
+;Id$
+
+name = "NSF Model Library"
+description = "The NSF Model Library for OpenABM.org"
+package = OpenABM
+version = 6.x-0.95
+dependencies[] = content
+dependencies[] = noderelationships
+dependencies[] = content_copy
+dependencies[] = alternate_content_copy
+dependencies[] = content_taxonomy
+dependencies[] = filefield
+dependencies[] = imagefield
+dependencies[] = stringoverrides
+dependencies[] = video
+core = 6.x
+php = 5.2

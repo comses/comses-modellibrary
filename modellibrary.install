@@ -1,0 +1,107 @@
+<?php
+// $Id: $
+
+/**
+* Implementation of hook_requirements()
+*/
+function modellibrary_requirements($phase) {
+    $requirements = array();
+    $t = get_t();
+
+    // an array of the dependencies
+    // where the array key is the module machine-readable name
+    // and the value is the module human-readable name
+    $dependencies = array(
+        'content' => 'Content',
+        'content_copy' => 'Content Copy',
+        'alternate_content_copy' => 'Alternate Content Copy',
+        'content_taxonomy' => 'Content Taxonomy',
+        'filefield' => 'FileField',
+        'imagefield' => 'ImageField',
+        'noderelationships' => 'Node Relationships',
+        'stringoverrides' => 'String Overrides',
+        'video' => 'Video',
+    );
+
+    switch ($phase) {
+        case 'install':
+            $error = FALSE;
+            $value = '';
+            foreach ($dependencies as $dependency => $module_nice_name) {
+                if (!module_exists($dependency)) {
+                    $error = TRUE;
+                    $value .= $t($module_nice_name . " to be pre-installed; ");
+                    $severity = REQUIREMENT_ERROR;
+                }
+            }
+
+            if ($error) {
+                $requirements['modellibrary'] = array(
+                  'title' => $t('NSF Model Library requires: '),
+                  'value' => $value . $t(' if the required modules are now installed, please enable this module again.'),
+                  'severity' => $severity,
+                );
+            }
+        break;
+    }
+
+    return $requirements;
+}
+
+/**
+ * Implementation of hook_install
+ */
+function modellibrary_install() {
+  _modellibrary_save_cck_node();
+  db_query("UPDATE {system} SET weight = 11 WHERE name = 'modellibrary'");
+}
+
+
+/**
+ * Implementation of hook_uninstall
+ */
+function modellibrary_uninstall() {
+    // the type_name must be the type_name
+    // as specified in the .def.inc file
+    node_type_delete('model');
+    node_type_delete('modelversion');
+    menu_rebuild();
+}
+
+function _modellibrary_save_cck_node() {
+    module_load_include('inc', 'modellibrary', 'inc/model.def');
+    module_load_include('inc', 'modellibrary', 'inc/modelversion.def');
+
+    $content = _model_cck_export();
+
+    // we do not want too many modules enabled - the content_copy and 
+    // alternate_content_copy modules are just needed in order to install the
+    // content type, so we just require them here (require_once prevent to
+    // include it more than once in case it is already enabled)
+    require_once './' . drupal_get_path('module', 'content') .  '/modules/content_copy/content_copy.module';
+    require_once './' . drupal_get_path('module', 'alternate_content_copy') .  '/alternate_content_copy.module';
+    alternate_content_copy_import_content($content);
+
+    $content = _modelversion_cck_export();
+    alternate_content_copy_import_content($content);
+}
+
+// EXAMPLE hook_update_N
+// every hook_update_N will look the same 
+// and you will need to write a new one 
+// every time you update the .def.inc file
+
+//function modellibrary_update_1() {
+//    _modellibrary_save_cck_node();
+//    return array();
+//}
+//
+//function modellibrary_update_2() {
+//    _modellibrary_save_cck_node();
+//    return array();
+//}
+//
+//function modellibrary_update_3() {
+//    _modellibrary_save_cck_node();
+//    return array();
+//}

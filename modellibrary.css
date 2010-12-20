@@ -1,0 +1,209 @@
+/* ;Id$ */
+
+  .views-field-field-model-image-fid
+  {
+    height: 50px;
+  }
+
+  .model-region1
+  {
+    float: left;
+  }
+
+  .model-region2
+  {
+    float: right;
+  }
+
+  .model-region3
+  {
+    float: left;
+  }
+
+  .model-region4
+  {
+    float: right;
+  }
+
+  .model-tags
+  {
+    float: left;
+    padding-left: 0;
+    padding-right: 6px;
+  }
+
+  div.modelstatus
+  {
+    background: #CADCA7;
+  }
+
+  div.versions-list
+  {
+    background: #CADCA7;
+  }
+
+  div.versions-list table
+  {
+    margin: 0;
+  }
+
+  div.model-author h3
+  {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .model-pane-1 
+  { 
+    float: left; 
+    width: 50%; 
+  }  
+ 
+  .model-pane-2 
+  { 
+    float: right; 
+    width: 50%; 
+  }  
+
+  .addmodel
+  {
+    font-size: 1.2em;
+    float: right;
+    margin-bottom: 10px;
+  }
+
+  .over
+  {
+    background-color: #969696;
+    color: #F6FF97;
+  }
+
+  td.active {
+    background-color: #969696;
+    color: #F6FF97;
+  }
+
+  td.views-field-field-model-image-fid
+  {
+    width: 50px;
+    padding: 0;
+  }
+
+  td.views-field-title
+  {
+  }
+
+  td.views-field-field-fullname-value
+  {
+    width: 150px;
+  }
+
+  td.views-field-created
+  {
+    width: 90px;
+  }
+
+  td.views-field-field-model-teaser-value
+  {
+  }
+
+  td.views-field-field-modelversion-number-value
+  {
+    width: 30px;
+    text-align: center;
+  }
+
+  a.tag 
+  { 
+    display: block; 
+    float: left; 
+    padding: 3px 2px; 
+    margin: 0 3px; 
+    font: 100% Verdana, Arial, sans-serif; 
+    text-transform: lowercase; 
+    background: #E6E6E6; 
+    color: #342F65; 
+    text-decoration:none; 
+    text-align:center 
+  } 
+ 
+  a.tag:link 
+  { 
+    text-decoration: none; 
+  } 
+ 
+  a.tag:hover 
+  { 
+    text-decoration: underline; 
+  } 
+ 
+  a.button 
+  { 
+    display:block; 
+    float: right; 
+    width:9em; 
+    padding:5px 0; 
+    font: bold 100% Verdana,Arial,sans-serif; 
+    text-transform:uppercase; 
+    background: #7F9E56; 
+    color: #F6FF97; 
+    text-decoration:none; 
+    text-align:center 
+  } 
+ 
+  a.button:hover 
+  { 
+    background: #CADCA7; 
+    color:#718B4B 
+  } 
+
+  ul.button, ul.button li 
+  { 
+    margin:0; 
+    padding:0; 
+    list-style-type:none 
+  } 
+ 
+  ul.button li 
+  { 
+    float:left; 
+    width: 9em; 
+    font-size: .8em; 
+    margin-right: 5px 
+  } 
+ 
+  ul.button a 
+  { 
+    display:block; 
+    width:9em; 
+    padding:5px 0; 
+    font: bold 100% Verdana,Arial,sans-serif; 
+    text-transform:uppercase; 
+    background: #7F9E56; 
+    color: #F6FF97; 
+    text-decoration:none; 
+    text-align:center 
+  } 
+ 
+  ul.button a:hover 
+  { 
+    background: #CADCA7; 
+    color:#718B4B 
+  } 
+
+  tr.even /* Some tables have rows marked even or odd. */
+  {
+    background-color: #E6E6E6; /* Drupal core uses a #eee background */
+  }
+
+  tr.odd
+  {
+    background-color: #CADCA7; /* Drupal core uses a #eee background */
+  }
+
+  tr.highlight /* To allow row highlighting for mouseovers */
+  {
+    background-color: #FFF; /* Drupal core uses a #eee background */
+    cursor: pointer;
+  }
+
