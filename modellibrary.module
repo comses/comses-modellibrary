@@ -48,7 +48,7 @@ function modellibrary_help($path, $arg) {
  * Implementation of hook_init()
  */
 function modellibrary_init() {
-  drupal_add_css(drupal_get_path('module', 'modellibrary') .'/modellibrary.css');
+  drupal_add_css(drupal_get_path('module', 'modellibrary') .'/includes/modellibrary.css');
 }
 
 /**
@@ -60,8 +60,8 @@ function modellibrary_init() {
  * then made to the views must be re-exported to the module to ensure if it
  * is ever reinstalled into a new installation, the default views are correct.
  *
- * Information on this functionality is documented in Views Advanced
- * Help -> Views API -> Using default views in your module
+ * Information on this functionality is documented in Advanced Help -> Views ->
+ * Views API -> Using default views in your module
  */
 function modellibrary_views_api() {
   return array(
@@ -79,8 +79,8 @@ function modellibrary_views_api() {
  * it is tidier to keep the tpl files in this module rather than over
  * in the theme directory.)
  *
- * Information on this functionality is documented in Views Advanced
- * Help -> Views API -> Using default views in your module
+ * Information on this functionality is documented in Advanced Help -> Views ->
+ * Views API -> Using default views in your module
  */
 function modellibrary_theme($existing) {
   return array(
@@ -109,6 +109,115 @@ function modellibrary_theme($existing) {
       'path' => drupal_get_path('module', 'modellibrary') .'/tpl',
     ),
   );
+}
+
+/**
+ * Implementation of hook_imagecache_default_presets().
+ *
+ * Autoinstall the two imagecache presets used by modellibrary.
+ */
+function mymodule_imagecache_default_presets() {
+  $presets = array();
+  $presets['Icon'] = array (
+    'presetname' => 'Icon',
+    'actions' => 
+    array (
+      0 => 
+      array (
+        'weight' => '0',
+        'module' => 'imagecache_coloractions',
+        'action' => 'imagecache_convert',
+        'data' => 
+        array (
+          'format' => 'image/png',
+        ),
+      ),
+      1 => 
+      array (
+        'weight' => '0',
+        'module' => 'imagecache',
+        'action' => 'imagecache_scale_and_crop',
+        'data' => 
+        array (
+          'width' => '50',
+          'height' => '50',
+        ),
+      ),
+      2 => 
+      array (
+        'weight' => '0',
+        'module' => 'imagecache_canvasactions',
+        'action' => 'canvasactions_roundedcorners',
+        'data' => 
+        array (
+          'radius' => '10',
+          'independent_corners_set' => 
+          array (
+            'independent_corners' => 0,
+            'radii' => 
+            array (
+              'tl' => '',
+              'tr' => '',
+              'bl' => '',
+              'br' => '',
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  $presets = array();
+  $presets['Preview'] = array (
+    'presetname' => 'Preview',
+    'actions' => 
+    array (
+      0 => 
+      array (
+        'weight' => '0',
+        'module' => 'imagecache',
+        'action' => 'imagecache_scale_and_crop',
+        'data' => 
+        array (
+          'width' => '250',
+          'height' => '250',
+        ),
+      ),
+      1 => 
+      array (
+        'weight' => '0',
+        'module' => 'imagecache_coloractions',
+        'action' => 'imagecache_convert',
+        'data' => 
+        array (
+          'format' => 'image/png',
+        ),
+      ),
+      2 => 
+      array (
+        'weight' => '0',
+        'module' => 'imagecache_canvasactions',
+        'action' => 'canvasactions_roundedcorners',
+        'data' => 
+        array (
+          'radius' => '15',
+          'independent_corners_set' => 
+          array (
+            'independent_corners' => 0,
+            'radii' => 
+            array (
+              'tl' => '',
+              'tr' => '',
+              'bl' => '',
+              'br' => '',
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  return $presets;
 }
 
 /**
@@ -161,8 +270,8 @@ function modellibrary_menu() {
   );
 
   /*
-    Menu: model/%uri/version/%num/view
-    This is the default menu tab which is provided by Views.
+   * Menu: model/%uri/version/%num/view
+   * The default menu tab is provided by Views.
    */
 
   // This is the Edit model tab which redirects to the official edit address.
@@ -592,17 +701,22 @@ function _model_add_form_validate($form, &$form_state) {
     $action = 'add';
   }
 
-  if ($action == 'add' && helper_check_if_cck_fieldvalue_exists('field_model_uri', $form_state['values']['field_model_uri'])) {
-    form_set_error('', t('That URI is already in use.  Please select a different value.'));
+  if ($form_state['storage']['step'] == 1) { 
+    if ($action == 'add' && helper_check_if_cck_fieldvalue_exists('field_model_uri', $form_state['values']['field_model_uri'])) {
+      form_set_error('', t('That URI is already in use.  Please select a different value.'));
+    }
+
+    // Verify URI only contains valid characters
+    if ($action == 'add' && !(preg_match('/^[a-z\d_]{5,20}$/i', $form_state['values']['field_model_uri']))) {
+      form_set_error('', t('Invald characters entered in URI.  Only alphanumeric characters and the underscore are permitted.  Please select a different value.'));
+    }
   }
 
-  // Verify URI only contains valid characters
-  if ($action == 'add' && !(preg_match('/^[a-z\d_]{5,20}$/i', $form_state['values']['field_model_uri']))) {
-    form_set_error('', t('Invald characters entered in URI.  Only alphanumeric characters and the underscore are permitted.  Please select a different value.'));
-  }
 
-  if ($form_state['values']['field_model_replicated'] == 1 ) {
-    form_set_error('', t('You have flagged this model as a replication.  You must also enter the bibliographic reference to the original model implementation.'));
+  if ($form_state['storage']['step'] == 2) {
+    if ($form_state['values']['field_model_replicated'] == 1 ) {
+      form_set_error('', t('You have flagged this model as a replication.  You must also enter the bibliographic reference to the original model implementation.'));
+    }
   }
 }
 
@@ -620,10 +734,6 @@ function _model_add_form_submit($form, &$form_state) {
   // storage area for previous pages of the form
   if (!$form_state['storage']['values']) {
     $form_state['storage']['values'] = array();
-  }
-
-  if ($form_state['storage']['step'] == 2) {
-    drupal_set_message('Ref: "'. $form_state['values']['field_model_reference'] .'"');
   }
 
   //increment the button, overwrite the storage values with the new values, and return
@@ -718,7 +828,8 @@ function _model_add_form_submit($form, &$form_state) {
   if ($action == 'add') {
     $new_state['values']['field_model_enabled'][0]['value'] = 0;
   }
-//  $new_state['values']['field_model_tags'][0]['value'] = $form_state['storage']['values']['field_model_tags'];
+
+  $new_state['values']['field_model_tags'][0]['value'] = $form_state['storage']['values']['field_model_tags'];
 
   // The imagefield has to be loaded into the temp node variable in order for drupal_execute() to process it.
   $model->field_model_image = $form_state['storage']['values']['field_model_image'];
@@ -726,10 +837,7 @@ function _model_add_form_submit($form, &$form_state) {
   $model->field_model_video = $form_state['storage']['values']['field_model_video'];
   $new_state['values']['op'] = t('Save');  // This seems to be a required value
 
-
-
-
-  // There is an alternate metho for saving nodes using node_save().  However,
+  // There is an alternate method for saving nodes using node_save().  However,
   // node_save() doesn't handle the Image and Video CCK fields properly (or at least
   // I was never able to figure out how to get it to work properly.) node_save() is
   // more commonly used and discussed in the Drupal community, however there are
@@ -804,15 +912,6 @@ function _model_add_form_submit($form, &$form_state) {
     $new_version = TRUE;    
   }
 
-//  drupal_set_message('Form: '. $form_state['storage']['values']['field_modelversion_code'][0]['fid']);
-//  drupal_set_message('Field: '. $version->field_modelversion_code[0]['fid']);
-
-//  print("<pre>");
-//  print_r($form_state['storage']['values']['field_modelversion_code']);
-//  print("</pre><br /><pre>");
-//  print_r($version->field_modelversion_code);
-//  print("</pre>");
-
   if ($new_version) {
     $version = new stdClass();
     $version->type = 'modelversion';
@@ -850,13 +949,12 @@ function _model_add_form_submit($form, &$form_state) {
        $model->body == "" ||
        $version->field_modelversion_code == NULL ||
        $version->field_modelversion_documentation == NULL ||
-       $version->field_modelversion_language == NULL ||
-       $version->field_modelversion_langver == NULL ||
-       $version->field_modelversion_otherlang == NULL ||
-       $version->field_modelversion_os == NULL ||
-       $version->field_modelversion_osversion == NULL ||
-       $version->field_modelversion_platform == NULL ||
-       $version->field_modelversion_platformver == NULL ||
+       ($version->field_modelversion_language == NULL && $version->field_modelversion_otherlang == NULL) ||
+       //$version->field_modelversion_langver == NULL ||
+       //$version->field_modelversion_os == NULL ||
+       //$version->field_modelversion_osversion == NULL ||
+       //$version->field_modelversion_platform == NULL ||
+       //$version->field_modelversion_platformver == NULL ||
        $version->field_modelversion_license == NULL ) {
     $model->status = 0;
     $model->field_model_enabled[0]['value'] = 0;
@@ -864,7 +962,7 @@ function _model_add_form_submit($form, &$form_state) {
   else {
     $model->status = 1;
   }
-  node_save($model);
+  //node_save($model);
 
   drupal_goto('model/'. $uri);
 }
