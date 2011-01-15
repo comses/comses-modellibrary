@@ -27,7 +27,20 @@
   $model_view->set_display($display_id);
   $model_view->pre_execute();
   $model_view->execute();
+
+  $uri = arg(1);
+  $version = arg(3);
 ?>
+
+<script>
+  ZeroClipboard.setMoviePath(drupal_get_path('theme', 'openabm') .'/includes/zeroclipboard/ZeroClipboard.swf');
+  var clip = new ZeroClipboard.Client();
+  clip.setText('');
+  clip.addEventListener('mouseDown', function(){
+    clip.setText('http://dev.comses.asu.edu/');
+  });
+  clip.glue('button-share');
+</script>
 <table style="margin: 0;" border="0" width="100%">
   <tr>
     <td>
@@ -39,10 +52,10 @@
       <div class="model-alerts">
       </div>
       <div class="model-buttons">
-        <a class="button" style="float: right; margin-right: 10px; margin-top: 5px;" href="#">Share</a>
+        <a id="button-share" class="button" style="float: right; margin-top: 5px;" href="#">Share</a>
         <?php 
-          if ($model_view->render_field('status', 0) == TRUE && $model_view->render_field('field_model_enabled_value', 0) == "Disabled") {
-            echo '<a class="button" style="float: left; margin-left: 10px; margin-top: 5px;" href="#">Enable</a>';
+          if ($model_view->render_field('status', 0) == TRUE && $model_view->render_field('field_model_enabled_value', 0) == 0) {
+            echo '<a class="button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://dev.comses.asu.edu/model/'. $model_view->render_field('field_model_uri_value', 0) .'/enable">Enable</a>';
           }
         ?>
       </div>
@@ -99,30 +112,22 @@
   <tr>
     <td>
       <?php
-        if ($model_view->render_field('field_model_featured_value', 0) == "Featured" || $model_view->render_field('status', 0) == FALSE || $model_view->render_field('field_model_enabled_value', 0) == "Disabled") {
+        if ($model_view->render_field('field_model_featured_value', 0) == "Featured" || $model_view->render_field('status', 0) == FALSE || $model_view->render_field('field_model_enabled_value', 0) == 0) {
           echo '<div class="modelstatus">';
           echo '<h2>Model Status</h2>';
           if ($model_view->render_field('field_model_featured_value', 0) == "Featured") {
             print "<p>This is an OpenABM Featured Model.</p>";
           }
 
-          if ($model_view->render_field('status', 0) == FALSE || $model_view->render_field('field_model_enabled_value', 0) == "Disabled") {
+
+          if ($model_view->render_field('status', 0) == TRUE && $model_view->render_field('field_model_enabled_value', 0) == 0) {
+            print "<h3>This model is currently disabled. To enable it, click the Enable button.</h3>";
+          }
+          elseif ($model_view->render_field('status', 0) == FALSE) {
             print "<h3>This model is currently disabled. To enable it, the following issues must be resolved:</h3>";
             
-            $view_args = array(arg(1));
-            $display_id = 'page_3';
-            $versionlist_view = views_get_view('modelversion');
-            $versionlist_view->set_arguments($view_args);
-            $versionlist_view->set_display($display_id);
-            $versionlist_view->pre_execute();
-            $versionlist_view->execute();
-
             print "<ol>";
             $issuecount = 0;
-            if (count($versionlist_view->result) == 0) {
-              print "<li>No versions have been published.";
-              $issuecount++;
-            }
 
             if ($model_view->render_field('field_model_teaser_value', 0) == "") {
               print "<li>Teaser text is missing.";
@@ -136,11 +141,6 @@
            
             if ($model_view->render_field('body', 0) == "") {
               print "<li>Model description is missing.";
-              $issuecount++;
-            }
-
-            if ($model_view->render_field('field_model_teaser_value', 0) == "") {
-              print "<li>Teaser text is missing.";
               $issuecount++;
             }
 
