@@ -492,7 +492,7 @@ function _model_add_form($form_state) {
     $model_view->execute();
 
     $modelnid = $model_view->render_field('nid', 0);
-    $node = node_load($modelnid);
+    $model = node_load($modelnid);
 
     // Now we need to look up the Version NID
     $view_args = array($uri);
@@ -512,36 +512,58 @@ function _model_add_form($form_state) {
     $action_text = "Add New";
     $versionnum = helper_get_max_versionnum($modelnid);
   }
-  
-  if (!$form_state['storage']['step']) {
+
+  if (!isset($form_state['storage']['step'])) {
     $form_state['storage']['step'] = 1;
     // set the form encoding type
     $form['#attributes']['enctype'] = "multipart/form-data";
   }
+  
+  // If this is an edit, we need to pull in the current values from the node
+  if ($action == 'edit') {
+    $node = _load_model($uri);
+    $edit_value = array();
+    $edit_value['title'] = $node->title;
+    $edit_value['description'] = $node->body;
+    $edit_value['field_model_uri'] = $node->field_model_uri[0]['value'];
+    $edit_value['field_model_teaser'] = $node->field_model_teaser[0]['value'];
+    $edit_value['field_model_replicated'] = $node->field_model_replicated[0]['value'];
+    //watchdog('modellibrary', 'modellibrary.module (532): replicated: '. $default_value['field_model_replicated'], NULL, WACHDOG_INFO);
+    $edit_value['field_model_reference'] = $node->field_model_reference[0]['value'];
+    //watchdog('modellibrary', 'modellibrary.module (534): reference: '. $default_value['field_model_reference'], NULL, WACHDOG_INFO);
+    //$default_value['field_model_enabled'] = $node->field_model_enabled[0]['value'];
+    $edit_value['field_model_image'] = $node->field_model_image;
+    $edit_value['field_model_video'] = $node->field_model_video;
 
-  //move previous values into storage
-  $form_state['values'] = $form_state['storage']['values'];
+    $node = _load_modelversion($uri);
+    $edit_value['notes'] = $node->body;
+    $edit_value['field_modelversion_language'] = $node->field_modelversion_language;
+    $edit_value['field_modelversion_otherlang'] = $node->field_modelversion_otherlang;
+    $edit_value['field_modelversion_langversion'] = $node->field_modelversion_langversion;
+    $edit_value['field_modelversion_os'] = $node->field_modelversion_os;
+    $edit_value['field_modelversion_osversion'] = $node->field_modelversion_osversion;
+    $edit_value['field_modelversion_platform'] = $node->field_modelversion_platform;
+    $edit_value['field_modelversion_platformver'] = $node->field_modelversion_platformver;
+    $edit_value['field_modelversion_license'] = $node->field_modelversion_license;
+    $edit_value['field_modelversion_review'] = $node->field_modelversion_review;
+    $edit_value['field_modelversion_runconditions'] = $node->field_modelversion_runconditions;
+    $edit_value['field_modelversion_code'] = $node->field_modelversion_code;
+    $edit_value['field_modelversion_documentation'] = $node->field_modelversion_documentation;
+    $edit_value['field_modelversion_sensitivity'] = $node->field_modelversion_sensitivity;
+    $edit_value['field_modelversion_dataset'] = $node->field_modelversion_dataset;
+    $edit_value['field_modelversion_addfiles'] = $node->field_modelversion_addfiles;
+  }
+
+  //Don't lose our old data when returning to a page with data already typed in.
+  //$default_value = '';
+  if (isset($form_state['storage']['values'])) {
+    $default_value = $form_state['storage']['values'];
+  }
 
   // We need to set the page title since executing the views earlier caused
   // those views to change the page title.  This line has to be after
   // all executed views.
   drupal_set_title($action_text .' Model - Step '. $form_state['storage']['step'] . ' of '. MODEL_STEPS);
-
-  //'Next' appears at every step except for the final page as 'Submit'
-  if ($form_state['storage']['step'] < MODEL_STEPS) {
-    $form['next'] = array(//corresponds to 'edit-next' in form_submit
-      '#type' => 'submit',
-      '#value' => 'Next',
-      '#weight' => 21
-    );
-  }
-  else {
-    $form['next'] = array(//corresponds to 'edit-next' in form_submit
-      '#type' => 'submit',
-      '#value' => 'Submit',
-      '#weight' => 21
-    );
-  }
 
   switch ($form_state['storage']['step']) {
     case 1: // page 1
@@ -551,10 +573,10 @@ function _model_add_form($form_state) {
         '#description' => t('The human-friendly name for this model.'),
         '#size' => 60,
         '#maxlength' => 60,
-        '#default_value' => $node->title,
+        '#default_value' => isset($default_value['title']) ? $default_value['title'] : $edit_value['title'],
         //'#weight' => -5,
         '#required' => TRUE,
-        '#element_validate' => array('_model_add_element_validate'),
+        //'#element_validate' => array('_model_add_element_validate'),
       );
 
       if ($action == 'add') {
@@ -564,16 +586,16 @@ function _model_add_form($form_state) {
           '#description' => t('The computer-friendly identifier for this model. Only lowercase letters, numbers, and underscore are allowable.'),
           '#size' => 30,
           '#maxlength' => 30,
-          '#default_value' => isset($node->field_model_uri[0]['value']) ? $node->field_model_uri[0]['value'] : '',
+          '#default_value' => isset($default_value['field_model_uri']) ? $default_value['field_model_uri'] : $edit_value['field_model_uri'],
           //'#weight' => -5,
           '#required' => TRUE,
-          '#element_validate' => array('_model_add_element_validate'),
+          //'#element_validate' => array('_model_add_element_validate'),
         );
       } 
       else {
         $form['field_model_uri'] = array(
           '#type' => 'value',
-          '#value' => $node->field_model_uri[0]['value'],
+          '#value' => $model->field_model_uri[0]['value'],
         );
       }
  
@@ -583,7 +605,7 @@ function _model_add_form($form_state) {
         '#description' => t('The model teaser'),
         '#cols' => 50,
         '#rows' => 3,
-        '#default_value' => $node->field_model_teaser[0]['value'],
+        '#default_value' => isset($default_value['field_model_teaser']) ? $default_value['field_model_teaser'] : $edit_value['field_model_teaser'],
         //'#weight' => 0,
         '#required' => FALSE,
       );
@@ -594,9 +616,9 @@ function _model_add_form($form_state) {
         '#description' => t('The model\'s description'),
         '#cols' => 50,
         '#rows' => 10,
-        '#default_value' => $node->body,
+        '#default_value' => isset($default_value['description']) ? $default_value['description'] : $edit_value['description'],
       );
-      $form['body_filter']['filter'] = filter_form($node->format);
+      $form['body_filter']['filter'] = filter_form($model->format);
       //$form['body_filter']['#weight'] = -3;
 
       /* The following block uses CCK's internal functions to retrieve and render
@@ -613,13 +635,12 @@ function _model_add_form($form_state) {
         $form['#field_info'][$name] = $field;
         // If you set the field value here it will be used as default for the field,
         // see line 67 of file content.node_form.inc.:
-        $form_state['values'][$name] = $node->$name;
+        $form_state['values'][$name] = isset($default_value[$name]) ? $default_value[$name] : $edit_value[$name];
         // This does the element rendering:
         $element = (array)content_field_form($form, $form_state, $field);
         // Add the fields to the form:
         $form += $element;
       }
-
 
       break;
 
@@ -634,7 +655,7 @@ function _model_add_form($form_state) {
         '#type' => 'checkbox',
         '#title' => t('Replicated Model?'),
         '#description' => t('If this is checked, the model is a replication of another model, published or otherwise. You must also provide the bibliographic reference to that model in the field below.'),
-        '#default_value' => isset($node->field_model_replicated[0]['value']) ? $node->field_model_replicated[0]['value'] : 0,
+        '#default_value' => isset($default_value['field_model_replicated']) ? $default_value['field_model_replicated'] : $edit_value['field_model_replicated'],
         //'#element_validate' => array('_model_add_element_validate'),
         //'#weight' => 7,
       );
@@ -645,15 +666,15 @@ function _model_add_form($form_state) {
         '#cols' => 50,
         '#rows' => 5,
         //'#weight' => 8,
-        '#default_value' => isset($node->field_model_reference[0]['value']) ? $node->field_model_reference[0]['value'] : '',
-      );
+        '#default_value' => isset($default_value['field_model_reference']) ? $default_value['field_model_reference'] : $edit_value['field_model_reference'],
+      ); 
 
       // Generate the CCK fields
       $fields = array('field_model_image', 'field_model_video');
       foreach ($fields as $name) {
         $field = content_fields($name);
         $form['#field_info'][$name] = $field;
-        $form_state['values'][$name] = $node->$name;
+        $form_state['values'][$name] = isset($default_value[$name]) ? $default_value[$name] : $edit_value[$name];
         $element = (array)content_field_form($form, $form_state, $field);
         $form += $element;
       }
@@ -675,7 +696,7 @@ function _model_add_form($form_state) {
         '#title' => t('Version Notes'),
         '#cols' => 50,
         '#rows' => 5,
-        '#default_value' => $version->body,
+        '#default_value' => isset($default_value['notes']) ? $default_value['notes'] : $edit_value['notes'],
       );
       //$form['body_filter']['filter'] = filter_form($version->format);
       //$form['body_filter']['#weight'] = -3;
@@ -685,7 +706,7 @@ function _model_add_form($form_state) {
       foreach ($fields as $name) {
         $field = content_fields($name);
         $form['#field_info'][$name] = $field;
-        $form_state['values'][$name] = $version->$name;
+        $form_state['values'][$name] = isset($default_value[$name]) ? $default_value[$name] : $edit_value[$name];
         $element = (array)content_field_form($form, $form_state, $field);
         $form += $element;                    
       }
@@ -702,7 +723,7 @@ function _model_add_form($form_state) {
       foreach ($fields as $name) {
         $field = content_fields($name);
         $form['#field_info'][$name] = $field;
-        $form_state['values'][$name] = $version->$name;
+        $form_state['values'][$name] = isset($default_value[$name]) ? $default_value[$name] : $edit_value[$name];
         $element = (array)content_field_form($form, $form_state, $field);
         $form += $element; 
       }
@@ -719,7 +740,7 @@ function _model_add_form($form_state) {
       foreach ($fields as $name) {
         $field = content_fields($name);
         $form['#field_info'][$name] = $field;
-        $form_state['values'][$name] = $version->$name;
+        $form_state['values'][$name] = isset($default_value[$name]) ? $default_value[$name] : $edit_value[$name];
         $element = (array)content_field_form($form, $form_state, $field);
         $form += $element; 
       }
@@ -733,6 +754,22 @@ function _model_add_form($form_state) {
       '#value' => 'Back',
       '#type' => 'submit',
       '#weight' => 20
+    );
+  }
+
+  //'Next' appears at every step except for the final page as 'Submit'
+  if ($form_state['storage']['step'] < MODEL_STEPS) {
+    $form['next'] = array(//corresponds to 'edit-next' in form_submit
+      '#type' => 'submit',
+      '#value' => 'Next',
+      '#weight' => 21
+    );
+  }
+  else {
+    $form['next'] = array(//corresponds to 'edit-next' in form_submit
+      '#type' => 'submit',
+      '#value' => 'Submit',
+      '#weight' => 21
     );
   }
 
@@ -790,12 +827,12 @@ function _model_add_form_submit($form, &$form_state) {
   //increment the button, overwrite the storage values with the new values, and return
   if ($form_state['clicked_button']['#id'] == 'edit-back') {
     $form_state['storage']['step']--;
-    $form_state['storage']['values'] = $form_state['values'] + $form_state['storage']['values'];
+    $form_state['storage']['values'] = $form_state['storage']['values'] + $form_state['values'];
     return;
   } 
   elseif ($form_state['clicked_button']['#id'] == 'edit-next' && $form_state['storage']['step'] < MODEL_STEPS) {
     $form_state['storage']['step']++;
-    $form_state['storage']['values'] = $form_state['values'] + $form_state['storage']['values'];
+    $form_state['storage']['values'] = $form_state['storage']['values'] + $form_state['values'];
     return;
   }
 
@@ -808,7 +845,7 @@ function _model_add_form_submit($form, &$form_state) {
   if (arg(2) == 'edit') {
     $action = 'edit';
     $uri = arg(1);
-    watchdog('modellibrary', 'modellibrary.module (753): uri: '. $uri, NULL, WACHDOG_INFO);
+    //watchdog('modellibrary', 'modellibrary.module (753): uri: '. $uri, NULL, WACHDOG_INFO);
   }
   else {
     $action = 'add';
@@ -837,7 +874,7 @@ function _model_add_form_submit($form, &$form_state) {
   $modeltitle = $new_state['values']['title']; // will need this later for the Version node
   $new_state['values']['body'] = $form_state['storage']['values']['description'];
   $new_state['values']['type'] = 'model';  
-  $new_state['values']['status'] = 1;
+  $new_state['values']['status'] = 0;
   $new_state['values']['promote'] = 0;
   $new_state['values']['sticky'] = 0;
   $new_state['values']['format'] = 1;
@@ -860,6 +897,11 @@ function _model_add_form_submit($form, &$form_state) {
   if ($action == 'add') {
     $new_state['values']['field_model_enabled'][0]['value'] = 0;
   }
+
+
+//watchdog('modellibrary', 'modellibrary.module (902): title: '. $new_state['values']['title']);
+//watchdog('modellibrary', 'modellibrary.module (903): title: '. $new_state['values']['body']);
+//watchdog('modellibrary', 'modellibrary.module (904): title: '. $new_state['values']['field_model_teaser'][0]['value']);
 
   $new_state['values']['field_model_tags'][0]['value'] = $form_state['storage']['values']['field_model_tags'];
 
@@ -915,7 +957,6 @@ function _model_add_form_submit($form, &$form_state) {
   $new_state['values']['format'] = 1;
   $new_state['values']['language'] = 'en';
   $new_state['values']['name'] =  $user->name;
-  //$new_state['values']['field_modelversion_number'][0]['value'] = helper_get_max_versionnum($modelnid);
   $new_state['values']['field_modelversion_modelnid'][0]['value'] = $modelnid;
   $new_state['values']['field_modelversion_language'] = $form_state['storage']['values']['field_modelversion_language'];
   $new_state['values']['field_modelversion_otherlang'] = $form_state['storage']['values']['field_modelversion_otherlang'];

@@ -41,6 +41,7 @@
   });
   clip.glue('button-share');
 </script>
+
 <table style="margin: 0;" border="0" width="100%">
   <tr>
     <td>
@@ -54,7 +55,7 @@
       <div class="model-buttons">
         <a id="button-share" class="button" style="float: right; margin-top: 5px;" href="#">Share</a>
         <?php 
-          if ($model_view->render_field('status', 0) == TRUE && $model_view->render_field('field_model_enabled_value', 0) == 0) {
+          if ($model_view->render_field('status', 0) == "True" && $model_view->render_field('field_model_enabled_value', 0) == "Disabled") {
             echo '<a class="button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://dev.comses.asu.edu/model/'. $model_view->render_field('field_model_uri_value', 0) .'/enable">Enable</a>';
           }
         ?>
@@ -112,7 +113,7 @@
   <tr>
     <td>
       <?php
-        if ($model_view->render_field('field_model_featured_value', 0) == "Featured" || $model_view->render_field('status', 0) == FALSE || $model_view->render_field('field_model_enabled_value', 0) == 0) {
+        if ($model_view->render_field('field_model_featured_value', 0) == "Featured" || $model_view->render_field('status', 0) == "False" || $model_view->render_field('field_model_enabled_value', 0) == "Disabled") {
           echo '<div class="modelstatus">';
           echo '<h2>Model Status</h2>';
           if ($model_view->render_field('field_model_featured_value', 0) == "Featured") {
@@ -120,10 +121,13 @@
           }
 
 
-          if ($model_view->render_field('status', 0) == TRUE && $model_view->render_field('field_model_enabled_value', 0) == 0) {
+//watchdog('modellibrary', 'views-view-fields-modelversion-page-7.tpl.php (124): status: '. $model_view->render_field('status', 0));
+//watchdog('modellibrary', 'views-view-fields-modelversion-page-7.tpl.php (125): enabled: '. $model_view->render_field('field_model_enabled_value', 0));
+
+          if ($model_view->render_field('status', 0) == "True" && $model_view->render_field('field_model_enabled_value', 0) == "Disabled") {
             print "<h3>This model is currently disabled. To enable it, click the Enable button.</h3>";
           }
-          elseif ($model_view->render_field('status', 0) == FALSE) {
+          elseif ($model_view->render_field('status', 0) == "False") {
             print "<h3>This model is currently disabled. To enable it, the following issues must be resolved:</h3>";
             
             print "<ol>";
@@ -134,7 +138,7 @@
               $issuecount++;
             }
 
-            if ($model_view->render_field('field_model_replicated_value', 0) == 1 && $model_view->render_field('field_model_reference_value', 0) == "") {
+            if ($model_view->render_field('field_model_replicated_value', 0) == "Replicated" && $model_view->render_field('field_model_reference_value', 0) == "") {
               print "<li>Model is flagged as a replication, but no reference is given for the original model.";
               $issuecount++;
             }
@@ -192,10 +196,10 @@
       <p><?php print $fields["body"]->content; ?></p>
       <p><strong>Instructions on Running This Model:</strong>
       <?php
-        if ($fields["field_modelversion_runconditions"]->content == "")
+        if ($fields["field_modelversion_runconditions_value"]->content == "")
           print " None.";
         else
-          print $fields["field_modelversion_runconditions"]->content;
+          print $fields["field_modelversion_runconditions_value"]->content;
       ?></p>
     </td>
     <td width="255px">
