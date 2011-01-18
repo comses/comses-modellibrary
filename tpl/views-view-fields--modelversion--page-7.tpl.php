@@ -31,17 +31,6 @@
   $uri = arg(1);
   $version = arg(3);
 ?>
-
-<script>
-  ZeroClipboard.setMoviePath(drupal_get_path('theme', 'openabm') .'/includes/zeroclipboard/ZeroClipboard.swf');
-  var clip = new ZeroClipboard.Client();
-  clip.setText('');
-  clip.addEventListener('mouseDown', function(){
-    clip.setText('http://dev.comses.asu.edu/');
-  });
-  clip.glue('button-share');
-</script>
-
 <table style="margin: 0;" border="0" width="100%">
   <tr>
     <td>
@@ -52,11 +41,32 @@
     <td>
       <div class="model-alerts">
       </div>
+
       <div class="model-buttons">
-        <a id="button-share" class="button" style="float: right; margin-top: 5px;" href="#">Share</a>
+        <div id='basic-modal'>
+          <a href='#' class='basic button' style="float: right; margin-top: 5px;">Share</a>
+        </div>
+
+        <!-- modal content -->
+        <div id="basic-modal-content">
+          <h3>Share This Model</h3>
+          <p>To share this model with others, use one of the following blocks of text.  Because this model may change over time, it is important, particularly in citation usage, that this link is clearly annotated to be associated with the specific version that exists at this time.</p>
+          <p>Sharing Text:</p>
+          <p><code><?php print $model_view->render_field('title', 0); ?> - Version <?php print $fields['field_modelversion_number_value']->content; ?> : http://dev.comses.asu.edu/model/<?php print $model_view->render_field('field_model_uri', 0); ?>/version/<?php print $fields['field_modelversion_number_value']->content; ?></code></p>
+          <p><code>http://dev.comses.asu.edu/model/<?php print $model_view->render_field('field_model_uri', 0); ?>/version/<?php print $fields['field_modelversion_number_value']->content; ?></code></p>
+        </div>
+
+        <!-- preload the images -->
+        <div style='display:none'>
+          <img src='img/basic/x.png' alt='' />
+        </div>
         <?php 
-          if ($model_view->render_field('status', 0) == "True" && $model_view->render_field('field_model_enabled_value', 0) == "Disabled") {
+          if ($model_view->render_field('status', 0) == "True" && $model_view->render_field('field_model_enabled_value', 0) != "Enabled") {
             echo '<a class="button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://dev.comses.asu.edu/model/'. $model_view->render_field('field_model_uri_value', 0) .'/enable">Enable</a>';
+          }
+
+          if ($fields['field_modelversion_number_value']->content != helper_get_max_versionnum($model_view->render_field('nid', 0))) {
+            print '<a class="button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://dev.comses.asu.edu/model/'. $model_view->render_field('field_model_uri_value', 0) .'">Latest</a>';
           }
         ?>
       </div>
@@ -102,7 +112,7 @@
         </div>
       </div>
     </td>
-    <td>
+    <td width=250>
       <div class="model-region3">
         <div class="model-image">
           <?php print $model_view->render_field('field_model_image_fid', 0); ?>
@@ -113,18 +123,22 @@
   <tr>
     <td>
       <?php
-        if ($model_view->render_field('field_model_featured_value', 0) == "Featured" || $model_view->render_field('status', 0) == "False" || $model_view->render_field('field_model_enabled_value', 0) == "Disabled") {
+//watchdog('modellibrary', 'views-view-fields-modelversion-page-7.tpl.php (125): enabled: '. $model_view->render_field('field_model_enabled_value', 0));
+        if ($model_view->render_field('field_model_featured_value', 0) == "Featured" || $model_view->render_field('status', 0) == "False" || $model_view->render_field('field_model_enabled_value', 0) != "Enabled" || $fields['field_modelversion_number_value']->content != helper_get_max_versionnum($model_view->render_field('nid', 0))) {
           echo '<div class="modelstatus">';
           echo '<h2>Model Status</h2>';
           if ($model_view->render_field('field_model_featured_value', 0) == "Featured") {
             print "<p>This is an OpenABM Featured Model.</p>";
           }
 
+          if ($fields['field_modelversion_number_value']->content != helper_get_max_versionnum($model_view->render_field('nid', 0))) {
+            print "<h3>You are viewing an old version of this model with out-of-date file downloads.  To view the latest model version, click the \"Latest\" button above.<h3>";
+          }
 
 //watchdog('modellibrary', 'views-view-fields-modelversion-page-7.tpl.php (124): status: '. $model_view->render_field('status', 0));
 //watchdog('modellibrary', 'views-view-fields-modelversion-page-7.tpl.php (125): enabled: '. $model_view->render_field('field_model_enabled_value', 0));
 
-          if ($model_view->render_field('status', 0) == "True" && $model_view->render_field('field_model_enabled_value', 0) == "Disabled") {
+          if ($model_view->render_field('status', 0) == "True" && $model_view->render_field('field_model_enabled_value', 0) != "Enabled") {
             print "<h3>This model is currently disabled. To enable it, click the Enable button.</h3>";
           }
           elseif ($model_view->render_field('status', 0) == "False") {

@@ -534,6 +534,7 @@ function _model_add_form($form_state) {
     //$default_value['field_model_enabled'] = $node->field_model_enabled[0]['value'];
     $edit_value['field_model_image'] = $node->field_model_image;
     $edit_value['field_model_video'] = $node->field_model_video;
+    $edit_value['field_model_tags'] = $node->field_model_tags;
 
     $node = _load_modelversion($uri);
     $edit_value['notes'] = $node->body;
@@ -681,10 +682,10 @@ function _model_add_form($form_state) {
       break;
 
     case 3: // Page 3
-      $form['help'] = array(
+      /*$form['help'] = array(
         '#value' => '<div class="setoff"><h3>Instructions for Page 3.</h3></div>',
         '#weight' => -20,
-      );
+      ); */
 
       $form['version_number'] = array(
         '#type' => 'value',
@@ -713,10 +714,10 @@ function _model_add_form($form_state) {
       break;
 
     case 4: // page 4
-      $form['help'] = array(
+      /* $form['help'] = array(
         '#value' => '<div class="setoff"><h3>Instructions for Page 4.</h3></div>',
         '#weight' => -20,
-      );
+      ); */
 
       // CCK Fields
       $fields = array('field_modelversion_code', 'field_modelversion_documentation', 'field_modelversion_sensitivity', 'field_modelversion_dataset', 'field_modelversion_addfiles');
@@ -730,10 +731,10 @@ function _model_add_form($form_state) {
       break;
 
     case 5: // page 5
-      $form['help'] = array(
+      /* $form['help'] = array(
         '#value' => '<div class="setoff"><h3>Instructions for Page 5.</h3></div>',
         '#weight' => -20,
-      );
+      ); */
       
       // CCK Fields
       $fields = array('field_modelversion_license', 'field_modelversion_review', 'field_modelversion_runconditions');
@@ -886,7 +887,7 @@ function _model_add_form_submit($form, &$form_state) {
     $new_state['values']['name'] =  $user->name; // TODO: figure out how to retain the original user when editing
   }
 
-  //    print_r($form['storage']['values']['field_model_tags']);
+//      print_r($form['storage']['values']['field_model_tags']);
 
   $new_state['values']['field_model_uri'][0]['value'] = $form_state['storage']['values']['field_model_uri'];
   $new_state['values']['field_model_teaser'][0]['value'] = $form_state['storage']['values']['field_model_teaser'];
@@ -902,8 +903,9 @@ function _model_add_form_submit($form, &$form_state) {
 //watchdog('modellibrary', 'modellibrary.module (902): title: '. $new_state['values']['title']);
 //watchdog('modellibrary', 'modellibrary.module (903): title: '. $new_state['values']['body']);
 //watchdog('modellibrary', 'modellibrary.module (904): title: '. $new_state['values']['field_model_teaser'][0]['value']);
+//watchdog('modellibrary', 'modellibrary.module (905): enabled: '. $new_state['values']['field_model_enabled'][0]['value']);
 
-  $new_state['values']['field_model_tags'][0]['value'] = $form_state['storage']['values']['field_model_tags'];
+  $new_state['values']['field_model_tags'] = $form_state['storage']['values']['field_model_tags'];
 
   // The imagefield has to be loaded into the temp node variable in order for drupal_execute() to process it.
   $model->field_model_image = $form_state['storage']['values']['field_model_image'];
