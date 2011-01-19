@@ -147,33 +147,13 @@
             print "<ol>";
             $issuecount = 0;
 
-            if ($model_view->render_field('field_model_teaser_value', 0) == "") {
-              print "<li>Teaser text is missing.";
-              $issuecount++;
-            }
-
             if ($model_view->render_field('field_model_replicated_value', 0) == "Replicated" && $model_view->render_field('field_model_reference_value', 0) == "") {
               print "<li>Model is flagged as a replication, but no reference is given for the original model.";
               $issuecount++;
             }
            
-            if ($model_view->render_field('body', 0) == "") {
-              print "<li>Model description is missing.";
-              $issuecount++;
-            }
-
-            if ($fields['field_modelversion_code_fid']->content == NULL) {
-              print "<li>Code file is missing.";
-              $issuecount++;
-            }
-
-            if ($fields['field_modelversion_documentation_fid']->content == NULL) {
-              print "<li>Documentation file is missing.";
-              $issuecount++;
-            }
-
             if ($version->field_modelversion_language == 7 && $version->field_modelversion_otherlang == "") {
-              print "<li>Other language category is selected but not specified.";
+              print "<li>\"Other\" language category is selected but not specified.";
               $issuecount++;
             }
 

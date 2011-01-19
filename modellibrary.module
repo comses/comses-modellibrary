@@ -284,17 +284,6 @@ function modellibrary_menu() {
     'weight' => -5,
   );
 
-  // This is the link for sharing a model, which will be displayed later in a modal frame.
-  $items['model/%/version/%/share'] = array(
-    'title' => 'Share Model',
-    'description' => "",
-    'page callback' => '_share_model',
-    'page arguments' => array(array(1, 3)),
-    'access callback' => TRUE,
-    //'access arguments' => array('modify model'),
-    'type' => MENU_CALLBACK,
-  );
-
   /*
    * Menu: model/%uri/version/%num/view
    * The default menu tab is provided by Views.
@@ -452,7 +441,7 @@ function _model_redirect_edit() {
 }
 
 
-define(MODEL_STEPS, 5);  // Number of steps in _model_add_form()
+define(MODEL_STEPS, 6);  // Number of steps in _model_add_form()
 
 /* Implementation of Drupal Form API hook_form
  *
@@ -520,6 +509,10 @@ function _model_add_form($form_state) {
   }
   
   // If this is an edit, we need to pull in the current values from the node
+  // The values stored in this array will be used to populate form fields unless
+  // a value has already been entered into that field previously in this session
+  // (this allows the user to step back and forward through the form pages
+  // without losing the data they have entered or changed.)
   if ($action == 'edit') {
     $node = _load_model($uri);
     $edit_value = array();
@@ -547,7 +540,7 @@ function _model_add_form($form_state) {
     $edit_value['field_modelversion_platformver'] = $node->field_modelversion_platformver;
     $edit_value['field_modelversion_license'] = $node->field_modelversion_license;
     $edit_value['field_modelversion_review'] = $node->field_modelversion_review;
-    $edit_value['field_modelversion_runconditions'] = $node->field_modelversion_runconditions;
+    $edit_value['runconditions'] = $node->field_modelversion_runconditions[0]['value'];
     $edit_value['field_modelversion_code'] = $node->field_modelversion_code;
     $edit_value['field_modelversion_documentation'] = $node->field_modelversion_documentation;
     $edit_value['field_modelversion_sensitivity'] = $node->field_modelversion_sensitivity;
@@ -567,11 +560,19 @@ function _model_add_form($form_state) {
   drupal_set_title($action_text .' Model - Step '. $form_state['storage']['step'] . ' of '. MODEL_STEPS);
 
   switch ($form_state['storage']['step']) {
+    /*case 1: // Page 1
+      $form['help'] = array(
+        '#value' => '<div class="setoff"><h3>Instructions.</h3></div>',
+        '#weight' => -20,
+      );
+
+      break; */
+
     case 1: // page 1
       $form['title'] = array(
         '#type' => 'textfield',
         '#title' => t('Title'),
-        '#description' => t('The human-friendly name for this model.'),
+        '#description' => t('This is the name of the model. [REQUIRED]'),
         '#size' => 60,
         '#maxlength' => 60,
         '#default_value' => isset($default_value['title']) ? $default_value['title'] : $edit_value['title'],
@@ -584,7 +585,7 @@ function _model_add_form($form_state) {
         $form['field_model_uri'] = array(
           '#type' => 'textfield',
           '#title' => t('URI'),
-          '#description' => t('The computer-friendly identifier for this model. Only lowercase letters, numbers, and underscore are allowable.'),
+          '#description' => t('This required value will be the computer-friendly identifier for this model. It will be used in the web address for this model, and once it is set, it cannot be changed.  Only lowercase letters, numbers, and underscores are allowable. [REQUIRED]'),
           '#size' => 30,
           '#maxlength' => 30,
           '#default_value' => isset($default_value['field_model_uri']) ? $default_value['field_model_uri'] : $edit_value['field_model_uri'],
@@ -603,21 +604,22 @@ function _model_add_form($form_state) {
       $form['field_model_teaser'] = array(
         '#type' => 'textarea',
         '#title' => t('Teaser'),
-        '#description' => t('The model teaser'),
+        '#description' => t('You must provide a short summary of the model.  This teaser is displayed in the library model listings and must not exceed 250 characters. [REQUIRED]'),
         '#cols' => 50,
         '#rows' => 3,
         '#default_value' => isset($default_value['field_model_teaser']) ? $default_value['field_model_teaser'] : $edit_value['field_model_teaser'],
         //'#weight' => 0,
-        '#required' => FALSE,
+        '#required' => TRUE,
       );
 
       $form['body_filter']['description'] = array(
         '#type' => 'textarea',
         '#title' => t('Description'),
-        '#description' => t('The model\'s description'),
+        '#description' => t('This field contains the model\'s full description.  Please be clear about the model\'s purpose and design. [REQUIRED]'),
         '#cols' => 50,
         '#rows' => 10,
         '#default_value' => isset($default_value['description']) ? $default_value['description'] : $edit_value['description'],
+        '#required' => TRUE,
       );
       $form['body_filter']['filter'] = filter_form($model->format);
       //$form['body_filter']['#weight'] = -3;
@@ -663,7 +665,7 @@ function _model_add_form($form_state) {
       $form['replication']['field_model_reference'] = array(
         '#type' => 'textarea',
         '#title' => t('Model Reference'),
-        '#description' => t('The bibliographic reference for the original model implementation.'),
+        '#description' => t('If this model is a replication of another model, you must provide the bibliographic reference for the original model implementation.'),
         '#cols' => 50,
         '#rows' => 5,
         //'#weight' => 8,
@@ -695,6 +697,7 @@ function _model_add_form($form_state) {
       $form['notes'] = array(
         '#type' => 'textarea',
         '#title' => t('Version Notes'),
+        '#description' => t('If you have specific notes about this version of the model, distinct from the general model details, enter that information here.'),
         '#cols' => 50,
         '#rows' => 5,
         '#default_value' => isset($default_value['notes']) ? $default_value['notes'] : $edit_value['notes'],
@@ -714,10 +717,10 @@ function _model_add_form($form_state) {
       break;
 
     case 4: // page 4
-      /* $form['help'] = array(
-        '#value' => '<div class="setoff"><h3>Instructions for Page 4.</h3></div>',
+      $form['help'] = array(
+        '#value' => '<div class="setoff"><p>Upload the files for your model.  At a minimum, you must upload the code and documentation for this model.  Users may find it very helpful if you also share any sensitivity analysis information, datasets, or other files that can be used with your model or for gaining understanding into its functionality.</p><p>When editing this model after it has been created, any changes to these files will result in a new model version being created.</p></div>',
         '#weight' => -20,
-      ); */
+      );
 
       // CCK Fields
       $fields = array('field_modelversion_code', 'field_modelversion_documentation', 'field_modelversion_sensitivity', 'field_modelversion_dataset', 'field_modelversion_addfiles');
@@ -731,13 +734,13 @@ function _model_add_form($form_state) {
       break;
 
     case 5: // page 5
-      /* $form['help'] = array(
-        '#value' => '<div class="setoff"><h3>Instructions for Page 5.</h3></div>',
+      $form['help'] = array(
+        '#value' => '<div class="setoff"><p>Select a software license that you wish to apply to your model.  Each license establishes a set of permissions and restrictions under which you allow others to use your code.  These licenses range from quite liberal (Creative Commons Attribution 3.0) to relatively restrictive.   (This help information is incomplete and requires additional work.)</p></div>',
         '#weight' => -20,
-      ); */
+      );
       
       // CCK Fields
-      $fields = array('field_modelversion_license', 'field_modelversion_review', 'field_modelversion_runconditions');
+      $fields = array('field_modelversion_license');
       foreach ($fields as $name) {
         $field = content_fields($name);
         $form['#field_info'][$name] = $field;
@@ -746,13 +749,31 @@ function _model_add_form($form_state) {
         $form += $element; 
       }
       
+      $form['runconditions'] = array(
+        '#type' => 'textarea',
+        '#title' => t('Operating Instructions'),
+        '#description' => t('If your model requires any specific steps or setup procedures in order to run, please provide that information here and be as complete and thorough as possible, to ensure model users can successfully run the model.'),
+        '#cols' => 50,
+        '#rows' => 5,
+        '#weight' => 19,
+        '#default_value' => isset($default_value['runconditions']) ? $default_value['runconditions'] : $edit_value['runconditions'],
+      );
+
+      break;
+
+    case 6: // page 6
+      $form['help'] = array(
+        '#value' => '<div class="setoff"><h3>Save Model.</h3><p>You may now save your model by clicking "Submit" or return to previous pages by clicking "Previous" to review your data entry and make changes.</div>',
+        '#weight' => -20,
+      );
+      
       break;
   }
 
   // Back button
   if ($form_state['storage']['step'] > 1) {
     $form['back'] = array( //corresponds to 'edit-back' in form_submit
-      '#value' => 'Back',
+      '#value' => '<< Previous',
       '#type' => 'submit',
       '#weight' => 20
     );
@@ -762,7 +783,7 @@ function _model_add_form($form_state) {
   if ($form_state['storage']['step'] < MODEL_STEPS) {
     $form['next'] = array(//corresponds to 'edit-next' in form_submit
       '#type' => 'submit',
-      '#value' => 'Next',
+      '#value' => 'Next >>',
       '#weight' => 21
     );
   }
@@ -796,16 +817,14 @@ function _model_add_form_validate($form, &$form_state) {
     }
 
     // Verify URI only contains valid characters
-    if ($action == 'add' && !(preg_match('/^[a-z\d_]{5,20}$/i', $form_state['values']['field_model_uri']))) {
-      form_set_error('', t('Invald characters entered in URI.  Only alphanumeric characters and the underscore are permitted.  Please select a different value.'));
+    if ($action == 'add' && !(preg_match('/^([a-z0-9])[a-z_-]*[\w_-]*[\S]$|^([a-z])[0-9_-]*[\S]$|^[a-z]*[\S]$/i', $form_state['values']['field_model_uri']))) {
+      form_set_error('', t('Invalid entry for model URI.  Only alphanumeric characters, the underscore, and dash are permitted.  The URI must begin with an alphanumeric character (no underscore or dash.) Please correct your entry.'));
     }
   }
 
 
-  if ($form_state['storage']['step'] == 2) {
-    if ($form_state['values']['field_model_replicated'] == 1 ) {
-      form_set_error('', t('You have flagged this model as a replication.  You must also enter the bibliographic reference to the original model implementation.'));
-    }
+  if ($form_state['storage']['step'] == 2 && $form_state['values']['field_model_replicated'][0]['value'] == 1 ) {
+    form_set_error('', t('You have flagged this model as a replication.  You must also enter the bibliographic reference to the original model implementation.'));
   }
 }
 
@@ -901,8 +920,8 @@ function _model_add_form_submit($form, &$form_state) {
 
 
 //watchdog('modellibrary', 'modellibrary.module (902): title: '. $new_state['values']['title']);
-//watchdog('modellibrary', 'modellibrary.module (903): title: '. $new_state['values']['body']);
-//watchdog('modellibrary', 'modellibrary.module (904): title: '. $new_state['values']['field_model_teaser'][0]['value']);
+//watchdog('modellibrary', 'modellibrary.module (903): body: '. $new_state['values']['body']);
+//watchdog('modellibrary', 'modellibrary.module (904): teaser: '. $new_state['values']['field_model_teaser'][0]['value']);
 //watchdog('modellibrary', 'modellibrary.module (905): enabled: '. $new_state['values']['field_model_enabled'][0]['value']);
 
   $new_state['values']['field_model_tags'] = $form_state['storage']['values']['field_model_tags'];
@@ -967,10 +986,14 @@ function _model_add_form_submit($form, &$form_state) {
   $new_state['values']['field_modelversion_osversion'] = $form_state['storage']['values']['field_modelversion_osversion'];
   $new_state['values']['field_modelversion_platform'] = $form_state['storage']['values']['field_modelversion_platform'];
   $new_state['values']['field_modelversion_platformver'] = $form_state['storage']['values']['field_modelversion_platformver'];
-  $new_state['values']['field_modelversion_license'] = $form_state['values']['field_modelversion_license'];
-  $new_state['values']['field_modelversion_review'] = $form_state['values']['field_modelversion_review'];
-  $new_state['values']['field_modelversion_runconditions'] = $form_state['values']['field_modelversion_runconditions'];
+  $new_state['values']['field_modelversion_license'] = $form_state['storage']['values']['field_modelversion_license'];
+  $new_state['values']['field_modelversion_review'] = $form_state['storage']['values']['field_modelversion_review'];
+  $new_state['values']['field_modelversion_runconditions'][0]['value'] = $form_state['storage']['values']['runconditions'];
   $new_state['values']['op'] = t('Save');  // This seems to be a required value
+
+//watchdog('modellibrary', 'modellibrary.module (995): runconditions: '. $form_state['storage']['values']['runconditions']);
+
+
 
   $new_version = FALSE;  // flag to indicate a new version needs to be created.
 
@@ -1032,12 +1055,7 @@ function _model_add_form_submit($form, &$form_state) {
   // If not, then the published (status) and Enabled flags are turned off.
   // If so, then the Published flag is turned on.  The model owner is only allowed to
   // Enable the model once it is Published.
-  if (
-       $node->field_model_teaser[0]['value'] == "" ||
-       ($node->field_model_replicated[0]['value'] == 1 && $node->field_model_reference[0]['value'] == "") ||
-       $node->title == "" ||
-       $node->body == "" ||
-       $version->field_modelversion_license[0]['value'] == '' ) {
+  if (($node->field_model_replicated[0]['value'] == 1 && $node->field_model_reference[0]['value'] == "") || $version->field_modelversion_license[0]['value'] == '' ) {
     $node->status = 0;
     $node->field_model_enabled[0]['value'] = 0;
   } 
