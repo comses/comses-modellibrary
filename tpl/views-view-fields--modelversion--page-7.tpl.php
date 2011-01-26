@@ -20,6 +20,8 @@
  * @ingroup views_templates
  */
 
+  global $user;
+
   $view_args = array(arg(1));
   $display_id = 'page_6';
   $model_view = views_get_view('model');
@@ -35,8 +37,8 @@
   <tr>
     <td>
       <span class="model-author1">By:</span>
-      <span class="model-author2"> <?php print $model_view->render_field('field_fullname_value', 0) .' ('. $model_view->render_field('name', 0) .')'; ?></span>
-      <div class="model-updated">Last Update:<?php print $model_view->render_field('last_updated', 0); ?></div>
+      <span class="model-author2"> <?php print $model_view->render_field('field_fullname_value', 0); if (in_array('comses member', array_values($user->roles)) || in_array('administrator', array_values($user->roles)) || $user->uid) print ' ('. $model_view->render_field('name', 0) .')'; ?></span>
+      <div class="model-updated">Last Update: <?php print $model_view->render_field('last_updated', 0); ?></div>
     </td>
     <td>
       <div class="model-alerts">
@@ -215,7 +217,61 @@
     <td>
       <h2>Version Details</h2>
       <?php
-        print "<p><strong>Platform:</strong> ". $fields['field_modelversion_platform_value']->content ." ". $fields['field_modelversion_platformver_value']->content ."</p>";
+        switch ($fields['field_modelversion_platform_value']->content) {
+          case 'Ascape 5':
+            $platform_url = 'http://ascape.sourceforge.net/';
+            break;
+
+          case 'Breve':
+            $platform_url = 'http://www.spiderland.org/';
+            break;
+
+          case 'Cormas':
+            $platform_url = 'http://cormas.cirad.fr/en/outil/outil.htm';
+            break;
+
+          case 'DEVSJAVA':
+            $platform_url = 'http://www.acims.arizona.edu/SOFTWARE/software.shtml';
+            break;
+
+          case 'Ecolab':
+            $platform_url = 'http://ecolab.sourceforge.net/';
+            break;
+
+          case 'Mason':
+            $platform_url = 'http://www.cs.gmu.edu/~eclab/projects/mason/';
+            break;
+
+          case 'MASS':
+            $platform_url = 'http://mass.aitia.ai/';
+            break;
+
+          case 'MobiDyc':
+            $platform_url = 'http://w3.avignon.inra.fr/mobidyc/index.php/English_summary';
+            break;
+
+          case 'NetLogo':
+            $platform_url = 'http://ccl.northwestern.edu/netlogo/';
+            break;
+
+          case 'Repast':
+            $platform_url = 'http://repast.sourceforge.net/';
+            break;
+
+          case 'Sesam':
+            $platform_url = 'http://www.simsesam.de/';
+            break;
+
+          case 'StarLogo':
+            $platform_url = 'http://education.mit.edu/starlogo/';
+            break;
+
+          case 'Swarm':
+            $platform_url = 'http://www.swarm.org/';
+            break;
+        }
+
+        print "<p><strong>Platform:</strong> <a href=\"". $platform_url ."\">". $fields['field_modelversion_platform_value']->content ."</a> ". $fields['field_modelversion_platformver_value']->content ."</p>";
 
         print "<p><strong>Programming Language:</strong> ";
         if ($fields['field_modelversion_language_value']->content == "Other") {
@@ -227,7 +283,49 @@
 
         print "<p><strong>Operating System:</strong> ". $fields['field_modelversion_os_value']->content ." ". $fields['field_modelversion_osversion_value']->content ."</p>";
 
-        print "<p><strong>Licensed Under:</strong> ". $fields['field_modelversion_license_value']->content ."</p>";
+        switch ($fields['field_modelversion_license_value']->content) {
+          case 'GNU GPL, Version 2':
+            $license_url = 'http://www.gnu.org/licenses/gpl-2.0.html';
+            break;
+
+          case 'GNU GPL, Version 3':
+            $license_url = 'http://www.gnu.org/licenses/gpl-3.0.html';
+            break;
+
+          case 'Apache License, Version 2.0':
+            $license_url = 'http://www.apache.org/licenses/LICENSE-2.0.html';
+            break;
+
+          case 'Creative Commons (cc by)':
+            $license_url = 'http://creativecommons.org/licenses/by/3.0/';
+            break;
+
+          case 'Creative Commons(cc by-sa)':
+            $license_url = 'http://creativecommons.org/licenses/by-sa/3.0/';
+            break;
+
+          case 'Creative Commons (cc by-nd)':
+            $license_url = 'http://creativecommons.org/licenses/by-nd/3.0';
+            break;
+
+          case 'Creative Commons (cc by-nc)':
+            $license_url = 'http://creativecommons.org/licenses/by-nc/3.0';
+            break;
+
+          case 'Creative Commons (cc by-nc-sa)':
+            $license_url = 'http://creativecommons.org/licenses/by-nc-sa/3.0';
+            break;
+
+          case 'Creative Commons (cc by-nc-nd)':
+            $license_url = 'http://creativecommons.org/licenses/by-nc-nd/3.0';
+            break;
+
+          case 'Academic Free License 3.0':
+            $license_url = 'http://www.opensource.org/licenses/afl-3.0.php';
+            break;
+        }
+
+        print "<p><strong>Licensed Under:</strong> <a href=\"". $license_url ."\">". $fields['field_modelversion_license_value']->content ."</a></p>";
 
 
       ?>

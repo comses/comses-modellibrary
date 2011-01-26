@@ -78,7 +78,7 @@
     color: #F6FF97;
   }
 
-  td.active {
+  table#striped td.active {
     background-color: #969696;
     color: #F6FF97;
   }
@@ -191,17 +191,17 @@
     color:#718B4B 
   } 
 
-  tr.even /* Some tables have rows marked even or odd. */
+  table#striped tr.even /* Some tables have rows marked even or odd. */
   {
     background-color: #E6E6E6; /* Drupal core uses a #eee background */
   }
 
-  tr.odd
+  table#striped tr.odd
   {
     background-color: #CADCA7; /* Drupal core uses a #eee background */
   }
 
-  tr.highlight /* To allow row highlighting for mouseovers */
+  table#striped tr.highlight /* To allow row highlighting for mouseovers */
   {
     background-color: #FFF; /* Drupal core uses a #eee background */
     cursor: pointer;

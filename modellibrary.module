@@ -353,6 +353,13 @@ function modellibrary_menu() {
 }
 
 /**
+ * Implementation of hook_menu_alter().
+ */
+function modellibrary_menu_alter(&$items) {
+  $items['user/%user/view']['title'] = 'Profile';
+}
+
+/**
  * Implementation of hook_perm().
  */
 function modellibrary_perm() {
@@ -392,10 +399,7 @@ function _enable_model() {
   // If so, then the Published flag is turned on.  The model owner is only allowed to
   // Enable the model once it is Published.
   if (
-       $model->field_model_teaser[0]['value'] > "" &&
-       ($model->field_model_replicated[0]['value'] == 0 || $model->field_model_reference[0]['value'] > "") ||
-       $model->title > "" &&
-       $model->body > "" &&
+       ($model->field_model_replicated[0]['value'] == 0 || $model->field_model_reference[0]['value'] > "") &&
        ($version->field_modelversion_language[0]['value'] > '' || $version->field_modelversion_otherlang[0]['value'] > '') &&
        $version->field_modelversion_os[0]['value'] > '' &&
        $version->field_modelversion_platform[0]['value'] > '' &&
@@ -779,6 +783,16 @@ function _model_add_form($form_state) {
     );
   }
 
+  // Cancel button
+  $form['cancel'] = array(
+    '#type' => 'button',
+    '#value' => 'Cancel',
+    '#weight' => 22,
+    '#executes_submit_callback' => TRUE,
+    '#submit' => array('_model_add_cancel'),
+  );
+  $form['#after_build'][] = '_model_add_form_after_build'; // Needed to disable form validation, so our cancel can be performed
+
   //'Next' appears at every step except for the final page as 'Submit'
   if ($form_state['storage']['step'] < MODEL_STEPS) {
     $form['next'] = array(//corresponds to 'edit-next' in form_submit
@@ -798,6 +812,15 @@ function _model_add_form($form_state) {
   return $form;
 }
 
+function _model_add_cancel() {
+  if (arg(1) == 'add') {
+    drupal_goto('models/browse');
+  } else {
+    drupal_goto('model/'. arg(1));
+  }
+}
+
+
 /**
  * Implementation of hook_validate().
  *
@@ -811,27 +834,45 @@ function _model_add_form_validate($form, &$form_state) {
     $action = 'add';
   }
 
-  if ($form_state['storage']['step'] == 1) { 
-    if ($action == 'add' && helper_check_if_cck_fieldvalue_exists('field_model_uri', $form_state['values']['field_model_uri'])) {
-      form_set_error('', t('That URI is already in use.  Please select a different value.'));
+  if($form_state['clicked_button']['#value'] != 'Cancel') { // we don't want to process any validation, if the user clicked Cancel
+    if ($form_state['storage']['step'] == 1) { 
+      if ($action == 'add' && helper_check_if_cck_fieldvalue_exists('field_model_uri', $form_state['values']['field_model_uri'])) {
+        form_set_error('', t('That URI is already in use.  Please select a different value.'));
+      }
+
+      // Verify URI only contains valid characters (also make sure 'add' isn't used, would cause problems.)
+      if ($action == 'add' && (!(preg_match('/^([a-z0-9])[a-z_-]*[\w_-]*[\S]$|^([a-z])[0-9_-]*[\S]$|^[a-z]*[\S]$/i', $form_state['values']['field_model_uri'])) || $form_state['values']['field_model_uri'] == 'add')) {
+        form_set_error('', t('Invalid entry for model URI.  Only alphanumeric characters, the underscore, and dash are permitted.  The URI must begin with an alphanumeric character (no underscore or dash.) Please correct your entry.'));
+      }
     }
 
-    // Verify URI only contains valid characters
-    if ($action == 'add' && !(preg_match('/^([a-z0-9])[a-z_-]*[\w_-]*[\S]$|^([a-z])[0-9_-]*[\S]$|^[a-z]*[\S]$/i', $form_state['values']['field_model_uri']))) {
-      form_set_error('', t('Invalid entry for model URI.  Only alphanumeric characters, the underscore, and dash are permitted.  The URI must begin with an alphanumeric character (no underscore or dash.) Please correct your entry.'));
+    if ($form_state['storage']['step'] == 2 && $form_state['values']['field_model_replicated'][0]['value'] == 1 ) {
+      form_set_error('', t('You have flagged this model as a replication.  You must also enter the bibliographic reference to the original model implementation.'));
     }
-  }
-
-
-  if ($form_state['storage']['step'] == 2 && $form_state['values']['field_model_replicated'][0]['value'] == 1 ) {
-    form_set_error('', t('You have flagged this model as a replication.  You must also enter the bibliographic reference to the original model implementation.'));
   }
 }
 
-function _model_add_element_validate($element, &$form_state) {
-  //drupal_set_message('validating field: '. $element['#name']);
+/**
+ * Called after form has been submitted.  Used here to disable form validation when the
+ * Cancel button has been clicked. (Otherwise cancelling during a model Add, the cancel
+ * will fail if required fields have not been filled in.)
+ */
+function _model_add_form_after_build($form, &$form_state) {
+  if($form_state['clicked_button']['#value'] == 'Cancel') {
+    _model_add_form_disable_validation($form);
+  }
+  return $form;
 }
 
+/**
+ * Recursively remove #required validation flags on fields in current form.
+ */
+function _model_add_form_disable_validation(&$element) {
+  unset($element['#needs_validation']);
+  foreach(element_children($element) as $key) {
+    _model_add_form_disable_validation($element[$key]);
+  }
+}
 
 /**
  * Implementation of hook_submit().
@@ -992,8 +1033,6 @@ function _model_add_form_submit($form, &$form_state) {
   $new_state['values']['op'] = t('Save');  // This seems to be a required value
 
 //watchdog('modellibrary', 'modellibrary.module (995): runconditions: '. $form_state['storage']['values']['runconditions']);
-
-
 
   $new_version = FALSE;  // flag to indicate a new version needs to be created.
 
@@ -1177,304 +1216,4 @@ function helper_cck_field_sql($field_name, $type) {
   }
     return NULL;
 }
-
-
-/* ************************************************************************ */
-/*
-define(VERSION_STEPS, 3);  // Number of steps in _modelversion_add_form()
-function _modelversion_add_form($form_state) {
-  module_load_include('inc', 'content', 'includes/content.node_form');  // Must have this in order to call content_field_form later.
-
-  $modelnid = arg(1);
-  $action = arg(3);
-  $versionnid = arg(4);
-  $action_text = "";
-
-  // Load the model node and setup version variable
-  $model = node_load($modelnid);
-  $version = new stdClass();
-
-  if ($action == 'edit') {
-    $action_text = "Edit";
-    $version = node_load($versionnid);
-    $versionnum = $version->field_modelversion_number[0]['value'];
-  } else {
-    $action_text = "Add New";
-    $versionnum = helper_get_max_versionnum($modelnid);
-  }
-  
-  if (!$form_state['storage']['step']) {
-    $form_state['storage']['step'] = 1;
-    // set the form encoding type
-    $form['#attributes']['enctype'] = "multipart/form-data";
-  }
-
-  $form_state['values'] = $form_state['storage']['values'];  //move previous values into storage
-  drupal_set_title($action_text .' Model Version - Step '. $form_state['storage']['step'] . ' of '. VERSION_STEPS);
-
-  switch($form_state['storage']['step']) {
-    case 1: // page 1
-
-      $form['help'] = array(
-        '#value' => '<div class="setoff"><h3>Please enter the following information about this version of your model.</h3></div>',
-        '#weight' => -20,
-      );
-
-      $form['version_number'] = array(
-        '#type' => 'item',
-        '#title' => t('Version Number'),
-        //'#description' => t('The human-friendly name for this model.'),
-        '#size' => 5,
-        '#maxlength' => 5,
-        '#value' => $versionnum,
-        //'#weight' => -5,
-        //'#required' => TRUE,
-      );
-
-      $form['body_filter']['notes'] = array(
-        '#type' => 'textarea',
-        '#title' => t('Version Notes'),
-        //'#description' => t('The model\'s description'),
-        '#cols' => 50,
-        '#rows' => 10,
-        '#default_value' => $version->body,
-      );
-      $form['body_filter']['filter'] = filter_form($version->format);
-      //$form['body_filter']['#weight'] = -3;
-
-      // These are the CCK fields we need to include in the form.
-      $fields = array('field_modelversion_language', 'field_modelversion_otherlang', 'field_modelversion_langversion', 'field_modelversion_os', 'field_modelversion_osversion', 'field_modelversion_platform', 'field_modelversion_platformver');
-      foreach ($fields as $name) {
-        $field = content_fields($name);                  //Create the field by calling the CCK API.
-        $form['#field_info'][$name] = $field;            // This is a non-display container for passing the field information along.
-        $form_state['values'][$name] = $version->$name;  // If you set the field value here it will be used as default for the field, see line 67 of file content.node_form.inc.
-        $element = (array)content_field_form($form, $form_state, $field);  // This does the element rendering.
-        $form += $element;                               // Add the field to the form.
-      }
-
-      break;
-
-    case 2: // page 2
-
-      $form['help'] = array(
-        '#value' => '<div class="setoff"><h3>Instructions for Page 2.</h3></div>',
-        '#weight' => -20,
-      );
-
-      $fields = array('field_modelversion_code', 'field_modelversion_documentation', 'field_modelversion_sensitivity', 'field_modelversion_dataset', 'field_modelversion_addfiles');
-      foreach ($fields as $name) {
-        $field = content_fields($name);                  //Create the field by calling the CCK API.
-        $form['#field_info'][$name] = $field;            // This is a non-display container for passing the field information along.
-        $form_state['values'][$name] = $version->$name;  // If you set the field value here it will be used as default for the field, see line 67 of file content.node_form.inc.
-        $element = (array)content_field_form($form, $form_state, $field);  // This does the element rendering.
-        $form += $element;                               // Add the field to the form.
-      }
-      
-      break;
-
-    case 3: // page 3
-      $form['help'] = array(
-        '#value' => '<div class="setoff"><h3>Instructions for Page 3.</h3></div>',
-        '#weight' => -20,
-      );
-
-      $fields = array('field_modelversion_license', 'field_modelversion_review', 'field_modelversion_runconditions');
-      foreach ($fields as $name) {
-        $field = content_fields($name);                  //Create the field by calling the CCK API.
-        $form['#field_info'][$name] = $field;            // This is a non-display container for passing the field information along.
-        $form_state['values'][$name] = $version->$name;  // If you set the field value here it will be used as default for the field, see line 67 of file content.node_form.inc.
-        $element = (array)content_field_form($form, $form_state, $field);  // This does the element rendering.
-        $form += $element;                               // Add the field to the form.
-      }
-      
-      break;
-  }
-
-  // Back button
-  if ($form_state['storage']['step'] > 1) {
-    $form['back'] = array( //corresponds to 'edit-back' in form_submit
-      '#value' => 'back',
-      '#type' => 'submit',
-      '#weight' => 20
-    );
-  }
-  //'next' appears at every step
-  $form['next'] = array(//corresponds to 'edit-next' in form_submit
-    '#type' => 'submit',
-    '#value' => 'submit',
-    '#weight' => 21
-  );
-
-  return $form;
-}
-*/
-
-/**
- * Implementation of hook_validate().
- *
- */
-/* function _modelversion_add_form_validate($form, &$form_state) {
- 
-} */
-
-/**
- * Implementation of hook_submit().
- *
- */
-/* function _modelversion_add_form_submit($form, &$form_state) {
-  //multistep processing
-  if (!$form_state['storage']['values']) {
-    $form_state['storage']['values'] = array();
-  }
-
-  //increment the button, overwrite the storage values with the new values, and return
-  if ($form_state['clicked_button']['#id'] == 'edit-back') {
-    $form_state['storage']['step']--;
-    $form_state['storage']['values'] = $form_state['values'] + $form_state['storage']['values'];
-    return;
-  } elseif ($form_state['clicked_button']['#id'] == 'edit-next' && $form_state['storage']['step'] < VERSION_STEPS) {
-    $form_state['storage']['step']++;
-    $form_state['storage']['values'] = $form_state['values'] + $form_state['storage']['values'];
-    return;
-  }
-
-  //if this is the last step, save the data
-  global $user;
-
-  module_load_include('inc', 'node', 'node.pages');  // new for Drupal 6
-  
-  $modelnid = arg(1);
-  $action = arg(3);
-  $versionnid = arg(4);
-  $action_text = "";
-
-  // Load the model node and setup version variable
-  $model = node_load($modelnid);
-  $version = new stdClass();
-
-  if ($action == 'edit') {
-    $version = node_load($versionnid);
-  } else {
-    $version->type = 'modelversion';
-  }
-
-  $new_state = array();  // Use to setup form_state array for the drupal_execute function.  This might be a little cumbersome, but I am not sure drupal_execute can handle processing the field values we stored in $form_state[storage]
-  
-  //$new_state['values'] = $form_state['storage']['values'];  // Grab the storage values
-  //$new_state['values'] = $form_state['values'];  // Then grab the final page values
-
-  if ($action == 'edit') {
-    $new_state['values']['title'] = $version->title;
-  } else {
-    $new_state['values']['title'] = $model->title ." - Version ". helper_get_max_versionnum($modelnid);
-  }
-
-  $new_state['values']['body'] = $form_state['storage']['values']['notes'];
-  $new_state['values']['type'] = 'modelversion';  // drupal_execute() will use these values for generating the new node
-  $new_state['values']['status'] = 1;
-  $new_state['values']['promote'] = 0;
-  $new_state['values']['sticky'] = 0;
-  $new_state['values']['format'] = 1;
-  $new_state['values']['language'] = 'en';
-  $new_state['values']['name'] =  $user->name;
-
-  if ($action == 'add') {
-    $new_state['values']['field_modelversion_number'][0]['value'] = helper_get_max_versionnum($modelnid);
-    $new_state['values']['field_modelversion_modelnid'][0]['value'] = $modelnid;
-    $new_state['values']['field_modelversion_uri'][0]['value'] = $model->field_model_uri[0]['value'];
-  }
-  $new_state['values']['field_modelversion_language'] = $form_state['storage']['values']['field_modelversion_language'];
-  $new_state['values']['field_modelversion_otherlang'] = $form_state['storage']['values']['field_modelversion_otherlang'];
-  $new_state['values']['field_modelversion_langversion'] = $form_state['storage']['values']['field_modelversion_langversion'];
-  $new_state['values']['field_modelversion_os'] = $form_state['storage']['values']['field_modelversion_os'];
-  $new_state['values']['field_modelversion_osversion'] = $form_state['storage']['values']['field_modelversion_osversion'];
-  $new_state['values']['field_modelversion_platform'] = $form_state['storage']['values']['field_modelversion_platform'];
-  $new_state['values']['field_modelversion_platformver'] = $form_state['storage']['values']['field_modelversion_platformver'];
-  $new_state['values']['field_modelversion_license'] = $form_state['values']['field_modelversion_license'];
-  $new_state['values']['field_modelversion_review'] = $form_state['values']['field_modelversion_review'];
-  $new_state['values']['field_modelversion_runconditions'] = $form_state['values']['field_modelversion_runconditions'];
-
-  $version->field_modelversion_code = $form_state['storage']['values']['field_modelversion_code']; 
-  $version->field_modelversion_documentation = $form_state['storage']['values']['field_modelversion_documentation']; 
-  $version->field_modelversion_sensitivity = $form_state['storage']['values']['field_modelversion_sensitivity']; 
-  $version->field_modelversion_dataset = $form_state['storage']['values']['field_modelversion_dataset'];  
-  $version->field_modelversion_addfiles = $form_state['storage']['values']['field_modelversion_addfiles']; 
-
-  $new_state['values']['op'] = t('Save');  // This seems to be a required value
-
-  //clear the storage and rebuild so the form doesn't rebuild and #redirect works
-  $form_state['rebuild'] = '';
-  unset($form_state['storage']);
-
-  drupal_execute('modelversion_node_form', $new_state, (object) $version); 
-  $errors = form_get_errors();
-
-  if (count($errors)) {
-    // Deal with any errors generated by drupal_execute()
-    drupal_set_message("Error saving model: \n". $errors);
-  }
-
-  drupal_goto('model/'. $new_state['values']['field_modelversion_uri'][0]['value'] .'/version/'. $new_state['values']['field_modelversion_number'][0]['value']);
-}
-*/
-
-
-
-
-/*
-function _model_view() {
-  $output = '';
-  $view_args = array(arg(1));
-  $display_id = 'page_6';
-  
-  $view = views_get_view('model');
-  $view->set_arguments($view_args);
-  $view->set_display($display_id);
-  $view->pre_execute();
-  $view->execute();
-
-  $results = $view->result;
-  //print '<pre>'; print_r($results); print '</pre>';
-
-  $output .= '<div class="model-pane-1">';
-  $output .= '<p>'. $view->render_field('field_fullname_value', 0) .'</p>';
-  foreach ($view->result as $id => $result) {
-    //print '<pre>'; print_r($result); print '</pre>';
-    $output .= '<a class="tag" href="/category/models/'. $view->render_field('field_model_tags_value', $id) .'">'. $view->render_field('field_model_tags_value', $id) .'</a>';
-  }
-  $output .= '</div>';
-
-  $display_id = 'page_4';
-  $view = views_get_view('model');
-  $view->set_arguments($view_args);
-  $view->set_display($display_id);
-  $view->pre_execute();
-  $view->execute();
-  //print '<pre>'; print_r($view->result); print '</pre>';
-
-  $output .= '<div class="model-pane-2">';
-  $output .= $view->render_field('field_model_image_fid', 0); 
-  $output .= '</div>';
-
-
-  $output .= '<div class="model-pane-3">';
-  $output .= '<h2>Versions</h2>';
-
-  $display_id = 'page_3';
-  $view = views_get_view('modelversion');
-  $view->set_arguments($view_args);
-  $view->set_display($display_id);
-  $view->pre_execute();
-  $view->execute();
-  //print '<pre>'; print_r($view->result); print '</pre>';
-  $output .= '</div>';
-  if (!empty($view)) {
-    $output .= $view->execute_display($display_id , $view_args);
-  }
-
-  drupal_set_title(check_plain($results[0]->node_title));
-  return $output;
-}
-*/
-
 
