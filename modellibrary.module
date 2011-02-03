@@ -274,8 +274,8 @@ function modellibrary_menu() {
     'type' => MENU_CALLBACK,
   );
 
-  // This is the base menu link for the model/%uri/version/%num menu tabs.
-  // It forwards to the latest model version at: model/%uri/version/%num/view
+  // This is the base menu link for the model/%nid/version/%num menu tabs.
+  // It forwards to the latest model version at: model/%nid/version/%num/view
   $items['model/%/version/%/view'] = array(
     'title' => 'View',
     'description' => "",
@@ -285,7 +285,7 @@ function modellibrary_menu() {
   );
 
   /*
-   * Menu: model/%uri/version/%num/view
+   * Menu: model/%nid/version/%num/view
    * The default menu tab is provided by Views.
    */
 
@@ -390,9 +390,9 @@ function modellibrary_access($op, $node, $account) {
 }
 
 function _enable_model() {
-  $uri = arg(1);
-  $model = _load_model($uri);
-  $version = _load_modelversion($uri);
+  $modelnid = arg(1);
+  $model = node_load($modelnid);
+  $version = _load_modelversion($modelnid);
 
   // Now we need to determine whether this model meets publication standard
   // If not, then the published (status) and Enabled flags are turned off.
@@ -409,39 +409,61 @@ function _enable_model() {
   $model = node_submit($model);
   node_save($model);
 
-  drupal_goto('model/'. $uri);
+  drupal_goto('model/'. $modelnid);
 }
 
 function _model_redirect_view() {
-  $uri = arg(1);
+  // We need to parse the url arguments to check whether a text URI has been entered
+  // or the model NID. For backwards compatibility, an old-style URL with the
+  // model URI must be converted to the current NID-format URL.
 
-  // The following block programmatically executes a Views display
-  // First we need to set the arguments to be passed to Views
-  $view_args = array($uri); // The display we are using takes an argument
-  $display_id = 'page_1';   // We are accessing the Latest Version display...
-  $view = views_get_view('modelversion'); // ...from the modelversion View
-  $view->set_arguments($view_args); // Send Views the arguments it needs
-  $view->set_display($display_id);  // and tell it which display we are accessing
-  $view->pre_execute(); // run any preprocessing
-  $view->execute(); // then execute the view
-  // Note that execute() doesn't actually output the View, it just runs the
-  // database queries.  However, it does set the page title based on the Title
-  // setting in the View display.  So if we were going to be displaying data
-  // on a page, we would have to override the page title if we didn't like
-  // the View title.
+  $arg = arg(1);
 
-  // render_field() actually fully renders the field with any widgets configured
-  // for that field.  In this case, we are just retrieving the Version Number
-  // which is rendered as plain text.  We could also retrieve the raw content
-  // from within the View result, but for most purposes we don't want that
-  // because that data hasn't been preprocessed, filtered, and doesn't provide
-  // any widget functionality.
-  drupal_goto('model/'. $uri .'/version/'. $view->render_field('field_modelversion_number_value', 0) .'/view');
+  if (preg_match("/^[+]?\d*$/", $arg)) { 
+    // The model argument is numeric, thus a model NID
+
+    // The following block programmatically executes a Views display
+    // First we need to set the arguments to be passed to Views
+    $view_args = array($arg); // The display we are using takes an argument
+    $display_id = 'page_1';   // We are accessing the Latest Version display...
+    $view = views_get_view('modelversion'); // ...from the modelversion View
+    $view->set_arguments($view_args); // Send Views the arguments it needs
+    $view->set_display($display_id);  // and tell it which display we are accessing
+    $view->pre_execute(); // run any preprocessing
+    $view->execute(); // then execute the view
+
+    // Note that execute() doesn't actually output the View, it just runs the
+    // database queries.  However, it does set the page title based on the Title
+    // setting in the View display.  So if we were going to be displaying data
+    // on a page, we would have to override the page title if we didn't like
+    // the View title.
+
+    // render_field() actually fully renders the field with any widgets configured
+    // for that field.  In this case, we are just retrieving the Version Number
+    // which is rendered as plain text.  We could also retrieve the raw content
+    // from within the View result, but for most purposes we don't want that
+    // because that data hasn't been preprocessed, filtered, and doesn't provide
+    // any widget functionality.
+    drupal_goto('model/'. $arg .'/version/'. $view->render_field('field_modelversion_number_value', 0));
+  } 
+
+  else {
+    // The model argument is a text URI
+    $view_args = array($arg); // The display we are using takes an argument
+    $display_id = 'page_2';   // We are accessing the Latest Version display...
+    $view = views_get_view('modelversion'); // ...from the modelversion View
+    $view->set_arguments($view_args); // Send Views the arguments it needs
+    $view->set_display($display_id);  // and tell it which display we are accessing
+    $view->pre_execute(); // run any preprocessing
+    $view->execute(); // then execute the view
+    
+    drupal_goto('model/'. $view->render_field('field_modelversion_modelnid_value', 0) .'/version/'. $view->render_field('field_modelversion_number_value', 0));
+  }
 }
 
 function _model_redirect_edit() {
-  $uri = arg(1);
-  drupal_goto('model/'. $uri .'/edit');
+  $modelnid = arg(1);
+  drupal_goto('model/'. $modelnid .'/edit');
 }
 
 
@@ -467,7 +489,7 @@ function _model_add_form($form_state) {
 
   if (arg(2) == 'edit') {
     $action = 'edit';
-    $uri = arg(1);
+    $modelnid = arg(1);
   }
   else {
     $action = 'add';
@@ -475,20 +497,10 @@ function _model_add_form($form_state) {
   $action_text = "";
 
   if ($action == 'edit') {
-    // We have the model URI and we need the NID
-    $view_args = array($uri);
-    $display_id = 'page_6'; // Model view
-    $model_view = views_get_view('model');
-    $model_view->set_arguments($view_args);
-    $model_view->set_display($display_id);
-    $model_view->pre_execute();
-    $model_view->execute();
-
-    $modelnid = $model_view->render_field('nid', 0);
     $model = node_load($modelnid);
 
     // Now we need to look up the Version NID
-    $view_args = array($uri);
+    $view_args = array($modelnid);
     $display_id = 'page_1'; // Latest Version view
     $version_view = views_get_view('modelversion');
     $version_view->set_arguments($view_args);
@@ -518,7 +530,7 @@ function _model_add_form($form_state) {
   // (this allows the user to step back and forward through the form pages
   // without losing the data they have entered or changed.)
   if ($action == 'edit') {
-    $node = _load_model($uri);
+    $node = node_load($modelnid);
     $edit_value = array();
     $edit_value['title'] = $node->title;
     $edit_value['description'] = $node->body;
@@ -533,7 +545,7 @@ function _model_add_form($form_state) {
     $edit_value['field_model_video'] = $node->field_model_video;
     $edit_value['field_model_tags'] = $node->field_model_tags;
 
-    $node = _load_modelversion($uri);
+    $node = _load_modelversion($modelnid);
     $edit_value['notes'] = $node->body;
     $edit_value['field_modelversion_language'] = $node->field_modelversion_language;
     $edit_value['field_modelversion_otherlang'] = $node->field_modelversion_otherlang;
@@ -828,7 +840,7 @@ function _model_add_cancel() {
 function _model_add_form_validate($form, &$form_state) {
   if (arg(2) == 'edit') {
     $action = 'edit';
-    $uri = arg(1);
+    $modelnid = arg(1);
   }
   else {
     $action = 'add';
@@ -905,7 +917,7 @@ function _model_add_form_submit($form, &$form_state) {
   
   if (arg(2) == 'edit') {
     $action = 'edit';
-    $uri = arg(1);
+    $modelnid = arg(1);
     //watchdog('modellibrary', 'modellibrary.module (753): uri: '. $uri, NULL, WACHDOG_INFO);
   }
   else {
@@ -917,7 +929,7 @@ function _model_add_form_submit($form, &$form_state) {
   $model = new stdClass();
 
   if ($action == 'edit') {
-    $model = _load_model($uri); // if we are editing, load the model
+    $model = node_load($modelnid); // if we are editing, load the model
   } 
   else {
     $model->type = 'model'; // otherwise prep the new node
@@ -934,6 +946,9 @@ function _model_add_form_submit($form, &$form_state) {
   $new_state['values']['title'] = $form_state['storage']['values']['title'];
   $modeltitle = $new_state['values']['title']; // will need this later for the Version node
   $new_state['values']['body'] = $form_state['storage']['values']['description'];
+
+  watchdog('modellibrary', 'modellibrary.module (950): body: '. $new_state['values']['body'], NULL, WACHDOG_INFO);
+
   $new_state['values']['type'] = 'model';  
   $new_state['values']['status'] = 0;
   $new_state['values']['promote'] = 0;
@@ -988,24 +1003,15 @@ function _model_add_form_submit($form, &$form_state) {
     drupal_set_message("Error saving model: \n". $errors);
   }
 
+  if ($action == 'add') 
+    $modelnid = $new_state['nid']; // drupal_execute stores the nid of the new node here in the form array
 
   //Now we need to process the version data and add a new version if necessary
   $version = new stdClass();
 
   if ($action == 'edit') {
-    $version = _load_modelversion($uri);  
+    $version = _load_modelversion($modelnid);  
   } 
-
-  // We need to retrieve the NID for the new model
-  $view_args = array($uri);
-  $display_id = 'page_6'; // Model view
-  $model_view = views_get_view('model');
-  $model_view->set_arguments($view_args);
-  $model_view->set_display($display_id);
-  $model_view->pre_execute();
-  $model_view->execute();
-
-  $modelnid = $model_view->render_field('nid', 0);
 
   // Setup form_state array for the drupal_execute function.
   $new_state = array();  
@@ -1020,6 +1026,8 @@ function _model_add_form_submit($form, &$form_state) {
   $new_state['values']['language'] = 'en';
   $new_state['values']['name'] =  $user->name;
   $new_state['values']['field_modelversion_modelnid'][0]['value'] = $modelnid;
+  if ($action == 'new') 
+    $new_state['values']['field_modelversion_modeluri'][0]['value'] = $uri;
   $new_state['values']['field_modelversion_language'] = $form_state['storage']['values']['field_modelversion_language'];
   $new_state['values']['field_modelversion_otherlang'] = $form_state['storage']['values']['field_modelversion_otherlang'];
   $new_state['values']['field_modelversion_langversion'] = $form_state['storage']['values']['field_modelversion_langversion'];
@@ -1087,8 +1095,8 @@ function _model_add_form_submit($form, &$form_state) {
     drupal_set_message("Error saving model: \n". $errors);
   }
 
-  $node = _load_model($uri);
-  $version = _load_modelversion($uri);
+  $node = node_load($modelnid);
+  $version = _load_modelversion($modelnid);
 
   // Now we need to determine whether this model meets publication standard
   // If not, then the published (status) and Enabled flags are turned off.
@@ -1104,30 +1112,14 @@ function _model_add_form_submit($form, &$form_state) {
   $node = node_submit($node);
   node_save($node);
 
-  drupal_goto('model/'. $uri);
-}
-
-
-/*
- *
- */
-function _load_model($uri) {
-    $view_args = array($uri);
-    $display_id = 'page_6'; // Model view
-    $model_view = views_get_view('model');
-    $model_view->set_arguments($view_args);
-    $model_view->set_display($display_id);
-    $model_view->pre_execute();
-    $model_view->execute();
-
-    return node_load($model_view->render_field('nid', 0));
+  drupal_goto('model/'. $modelnid);
 }
 
 /*
- *
+ * Helper function to load the latest version of a model, given that model's NID
  */
-function _load_modelversion($uri) {
-    $view_args = array($uri);
+function _load_modelversion($model_nid) {
+    $view_args = array($model_nid);
     $display_id = 'page_1'; // Model view
     $version_view = views_get_view('modelversion');
     $version_view->set_arguments($view_args);

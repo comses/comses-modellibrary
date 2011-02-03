@@ -22,16 +22,16 @@
 
   global $user;
 
-  $view_args = array(arg(1));
+  $modelnid = arg(1);
+  $version = arg(3);
+
+  $view_args = array($modelnid);
   $display_id = 'page_6';
   $model_view = views_get_view('model');
   $model_view->set_arguments($view_args);
   $model_view->set_display($display_id);
   $model_view->pre_execute();
   $model_view->execute();
-
-  $uri = arg(1);
-  $version = arg(3);
 ?>
 <table style="margin: 0;" border="0" width="100%">
   <tr>
@@ -54,8 +54,8 @@
           <h3>Share This Model</h3>
           <p>To share this model with others, use one of the following blocks of text.  Because this model may change over time, it is important, particularly in citation usage, that this link is clearly annotated to be associated with the specific version that exists at this time.</p>
           <p>Sharing Text:</p>
-          <p><code><?php print $model_view->render_field('title', 0); ?> - Version <?php print $fields['field_modelversion_number_value']->content; ?> : http://dev.comses.asu.edu/model/<?php print $model_view->render_field('field_model_uri', 0); ?>/version/<?php print $fields['field_modelversion_number_value']->content; ?></code></p>
-          <p><code>http://dev.comses.asu.edu/model/<?php print $model_view->render_field('field_model_uri', 0); ?>/version/<?php print $fields['field_modelversion_number_value']->content; ?></code></p>
+          <p><code><?php print $model_view->render_field('title', 0); ?> - Version <?php print $fields['field_modelversion_number_value']->content; ?> : http://dev.comses.asu.edu/model/<?php print $modelnid; ?>/version/<?php print $fields['field_modelversion_number_value']->content; ?></code></p>
+          <p><code>http://dev.comses.asu.edu/model/<?php print $modelnid; ?>/version/<?php print $fields['field_modelversion_number_value']->content; ?></code></p>
         </div>
 
         <!-- preload the images -->
@@ -64,11 +64,11 @@
         </div>
         <?php 
           if ($model_view->render_field('status', 0) == "True" && $model_view->render_field('field_model_enabled_value', 0) != "Enabled") {
-            echo '<a class="button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://dev.comses.asu.edu/model/'. $model_view->render_field('field_model_uri_value', 0) .'/enable">Enable</a>';
+            echo '<a class="button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://dev.comses.asu.edu/model/'. $modelnid .'/enable">Enable</a>';
           }
 
-          if ($fields['field_modelversion_number_value']->content != helper_get_max_versionnum($model_view->render_field('nid', 0))) {
-            print '<a class="button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://dev.comses.asu.edu/model/'. $model_view->render_field('field_model_uri_value', 0) .'">Latest</a>';
+          if ($fields['field_modelversion_number_value']->content != helper_get_max_versionnum($modelnid)) {
+            print '<a class="button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://dev.comses.asu.edu/model/'. $modelnid .'">Latest</a>';
           }
         ?>
       </div>
@@ -126,14 +126,14 @@
     <td>
       <?php
 //watchdog('modellibrary', 'views-view-fields-modelversion-page-7.tpl.php (125): enabled: '. $model_view->render_field('field_model_enabled_value', 0));
-        if ($model_view->render_field('field_model_featured_value', 0) == "Featured" || $model_view->render_field('status', 0) == "False" || $model_view->render_field('field_model_enabled_value', 0) != "Enabled" || $fields['field_modelversion_number_value']->content != helper_get_max_versionnum($model_view->render_field('nid', 0))) {
+        if ($model_view->render_field('field_model_featured_value', 0) == "Featured" || $model_view->render_field('status', 0) == "False" || $model_view->render_field('field_model_enabled_value', 0) != "Enabled" || $fields['field_modelversion_number_value']->content != helper_get_max_versionnum($modelnid)) {
           echo '<div class="modelstatus">';
           echo '<h2>Model Status</h2>';
           if ($model_view->render_field('field_model_featured_value', 0) == "Featured") {
             print "<p>This is an OpenABM Featured Model.</p>";
           }
 
-          if ($fields['field_modelversion_number_value']->content != helper_get_max_versionnum($model_view->render_field('nid', 0))) {
+          if ($fields['field_modelversion_number_value']->content != helper_get_max_versionnum($modelnid)) {
             print "<h3>You are viewing an old version of this model with out-of-date file downloads.  To view the latest model version, click the \"Latest\" button above.<h3>";
           }
 

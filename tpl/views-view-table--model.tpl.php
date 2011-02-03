@@ -50,14 +50,14 @@
                 $modelnid = $content;
               }
               elseif ($fields[$field] == 'field-model-image-fid') {
-                echo '<td onclick="DoNav(\'/model/'. $uri .'\');" rowspan="2" valign="top" class="views-field views-field-';
+                echo '<td onclick="DoNav(\'/model/'. $modelnid .'\');" rowspan="2" valign="top" class="views-field views-field-';
                 print $fields[$field];
                 echo '">';
                 print $content;
                 echo '</td>';
               }
               elseif ($fields[$field] == 'field-fullname-value') {
-                echo '<td onclick="DoNav(\'/model/'. $uri .'\');" class="views-field views-field-';
+                echo '<td onclick="DoNav(\'/model/'. $modelnid .'\');" class="views-field views-field-';
                 print $fields[$field];
                 echo '">';
                 if ($content > '') {
@@ -69,7 +69,7 @@
                 echo '</td>';
               }
               else {
-                echo '<td onclick="DoNav(\'/model/'. $uri .'\');" class="views-field views-field-';
+                echo '<td onclick="DoNav(\'/model/'. $modelnid .'\');" class="views-field views-field-';
                 print $fields[$field];
                 echo '">';
                 print $content;
@@ -80,7 +80,7 @@
               echo '</tr>';
               echo '<tr class="';  print $count; echo ' r2 '; print $row_class; echo '">';
               //echo '<td>&nbsp; </td>';
-              echo '<td onclick="DoNav(\'/model/'. $uri .'\');" colspan="3" class="views-field views-field-';
+              echo '<td onclick="DoNav(\'/model/'. $modelnid .'\');" colspan="3" class="views-field views-field-';
               print $fields[$field];
               echo '">';
               print $content;
