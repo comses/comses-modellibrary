@@ -18,8 +18,6 @@ function modellibrary_requirements($phase) {
         'content_taxonomy' => 'Content Taxonomy',
         'filefield' => 'FileField',
         'imagefield' => 'ImageField',
-        'noderelationships' => 'Node Relationships',
-        'stringoverrides' => 'String Overrides',
         'video' => 'Video',
     );
 
@@ -69,8 +67,8 @@ function modellibrary_uninstall() {
 }
 
 function _modellibrary_save_cck_node() {
-    module_load_include('inc', 'modellibrary', 'inc/model.def');
-    module_load_include('inc', 'modellibrary', 'inc/modelversion.def');
+    module_load_include('inc', 'modellibrary', 'includes/model.def');
+    module_load_include('inc', 'modellibrary', 'includes/modelversion.def');
 
     $content = _model_cck_export();
 
