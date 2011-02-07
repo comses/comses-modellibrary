@@ -26,7 +26,7 @@
   $version = arg(3);
 
   $view_args = array($modelnid);
-  $display_id = 'page_3';
+  $display_id = 'page_6';
   $model_view = views_get_view('model');
   $model_view->set_arguments($view_args);
   $model_view->set_display($display_id);
@@ -79,7 +79,7 @@
       <div class="model-tags">
     <?php 
       $view_args = array(arg(1));
-      $display_id = 'page_4';
+      $display_id = 'page_3';
       $tags_view = views_get_view('model');
       $tags_view->set_arguments($view_args);
       $tags_view->set_display($display_id);
@@ -335,7 +335,7 @@
 <?php if (helper_get_max_versionnum($model_view->render_field('nid', 0)) > 1) {
   print '<div class="versions-list">';
   $view_args = array(arg(1));
-  $display_id = 'page_1';
+  $display_id = 'page_3';
   $version_view = views_get_view('modelversion');
   $version_view->set_arguments($view_args);
   $version_view->set_display($display_id);

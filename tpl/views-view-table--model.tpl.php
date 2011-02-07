@@ -38,7 +38,6 @@
         <?php $uri = '';
               global $modelnid;?>
         <?php foreach ($row as $field => $content): 
-            //print $fields[$field] .': '. $content;
 
             if ($fields[$field] != 'field-model-teaser-value') {
               if ($fields[$field] == 'field-model-uri-value') {
