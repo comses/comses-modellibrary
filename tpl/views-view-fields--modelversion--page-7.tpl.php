@@ -32,12 +32,14 @@
   $model_view->set_display($display_id);
   $model_view->pre_execute();
   $model_view->execute();
+
+//watchdog('modellibrary', 'modelversion-page-7 (37): field ver num: '. $fields['field_modelversion_number_value']->content);
 ?>
 <table style="margin: 0;" border="0" width="100%">
   <tr>
     <td>
       <span class="model-author1">By:</span>
-      <span class="model-author2"> <?php print $model_view->render_field('field_fullname_value', 0); if (in_array('comses member', array_values($user->roles)) || in_array('administrator', array_values($user->roles)) || $user->uid) print ' ('. $model_view->render_field('name', 0) .')'; ?></span>
+      <span class="model-author2"> <?php print $model_view->render_field('field_fullname_value', 0); if (in_array('comses member', array_values($user->roles)) || in_array('administrator', array_values($user->roles))) print ' ('. $model_view->render_field('name', 0) .')'; ?></span>
       <div class="model-updated">Last Update: <?php print $model_view->render_field('last_updated', 0); ?></div>
     </td>
     <td>
@@ -63,8 +65,12 @@
           <img src='img/basic/x.png' alt='' />
         </div>
         <?php 
-          if ($model_view->render_field('status', 0) == "True" && $model_view->render_field('field_model_enabled_value', 0) != "Enabled") {
+          if ($model_view->render_field('status', 0) == "True" && $model_view->render_field('field_model_enabled_value', 0) != "Enabled" && (in_array('administrator', array_values($user->roles)) || $user->uid == $model_view->render_field('uid', 0))) {
             echo '<a class="button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://dev.comses.asu.edu/model/'. $modelnid .'/enable">Enable</a>';
+          }
+
+          if ($model_view->render_field('field_model_enabled_value', 0) == "Enabled" && (in_array('administrator', array_values($user->roles)) || $user->uid == $model_view->render_field('uid', 0))) {
+            echo '<a class="button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://dev.comses.asu.edu/model/'. $modelnid .'/disable">Disable</a>';
           }
 
           if ($fields['field_modelversion_number_value']->content != helper_get_max_versionnum($modelnid)) {
@@ -78,7 +84,7 @@
     <td colspan=2>
       <div class="model-tags">
     <?php 
-      $view_args = array(arg(1));
+      $view_args = array($modelnid);
       $display_id = 'page_3';
       $tags_view = views_get_view('model');
       $tags_view->set_arguments($view_args);
@@ -137,11 +143,12 @@
             print "<h3>You are viewing an old version of this model with out-of-date file downloads.  To view the latest model version, click the \"Latest\" button above.<h3>";
           }
 
-//watchdog('modellibrary', 'views-view-fields-modelversion-page-7.tpl.php (124): status: '. $model_view->render_field('status', 0));
-//watchdog('modellibrary', 'views-view-fields-modelversion-page-7.tpl.php (125): enabled: '. $model_view->render_field('field_model_enabled_value', 0));
-
           if ($model_view->render_field('status', 0) == "True" && $model_view->render_field('field_model_enabled_value', 0) != "Enabled") {
-            print "<h3>This model is currently disabled. To enable it, click the Enable button.</h3>";
+            print "<h3>This model is currently disabled.";
+            if (in_array('administrator', array_values($user->roles)) || $user->uid == $model_view->render_field('uid', 0)) {
+              print "To enable it, click the Enable button.";
+            }
+            print "</h3>";
           }
           elseif ($model_view->render_field('status', 0) == "False") {
             print "<h3>This model is currently disabled. To enable it, the following issues must be resolved:</h3>";
@@ -334,7 +341,7 @@
 </table>
 <?php if (helper_get_max_versionnum($model_view->render_field('nid', 0)) > 1) {
   print '<div class="versions-list">';
-  $view_args = array(arg(1));
+  $view_args = array($modelnid);
   $display_id = 'page_3';
   $version_view = views_get_view('modelversion');
   $version_view->set_arguments($view_args);
