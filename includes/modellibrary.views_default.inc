@@ -1,6 +1,3 @@
-<?php
-// ;Id$
-
 /**
  * Implementation of hook_views_default_views().
  */
@@ -1866,13 +1863,13 @@ function modellibrary_views_default_views() {
       'hide_empty' => 0,
       'empty_zero' => 0,
       'link_to_user' => 0,
-      'exclude' => 1,
+      'exclude' => 0,
       'id' => 'uid',
       'table' => 'users',
       'field' => 'uid',
       'relationship' => 'none',
       'override' => array(
-        'button' => 'Override',
+        'button' => 'Use default',
       ),
     ),
     'name' => array(
@@ -1942,11 +1939,14 @@ function modellibrary_views_default_views() {
         'multiple_from' => '',
         'multiple_reversed' => FALSE,
       ),
-      'exclude' => 1,
+      'exclude' => 0,
       'id' => 'field_model_uri_value',
       'table' => 'node_data_field_model_uri',
       'field' => 'field_model_uri_value',
       'relationship' => 'none',
+      'override' => array(
+        'button' => 'Use default',
+      ),
     ),
     'title' => array(
       'label' => '',
@@ -3958,7 +3958,7 @@ function modellibrary_views_default_views() {
   ));
   $handler->override_option('path', 'model/%/version/%/view');
   $handler->override_option('menu', array(
-    'type' => 'none',
+    'type' => 'tab',
     'title' => 'View',
     'description' => '',
     'weight' => '-5',
@@ -4804,3 +4804,5 @@ function modellibrary_views_default_views() {
 
   return $views;
 }
+
+
