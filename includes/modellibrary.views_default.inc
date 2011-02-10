@@ -1,3 +1,6 @@
+<?php
+// ;Id$
+
 /**
  * Implementation of hook_views_default_views().
  */
