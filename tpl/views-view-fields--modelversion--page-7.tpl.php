@@ -39,7 +39,12 @@
   <tr>
     <td>
       <span class="model-author1">By:</span>
-      <span class="model-author2"> <?php print $model_view->render_field('field_fullname_value', 0); if (in_array('comses member', array_values($user->roles)) || in_array('administrator', array_values($user->roles))) print ' ('. $model_view->render_field('name', 0) .')'; ?></span>
+      <span class="model-author2"> <?php 
+        if ($model_view->render_field('field_fullname_value', 0) > "") 
+          print $model_view->render_field('field_fullname_value', 0); 
+        else
+          print $model_view->render_field('name', 0);
+        if (in_array('comses member', array_values($user->roles)) || in_array('administrator', array_values($user->roles))) print ' ('. $model_view->render_field('name', 0) .')'; ?></span>
       <div class="model-updated">Last Update: <?php print $model_view->render_field('last_updated', 0); ?></div>
     </td>
     <td>
@@ -56,8 +61,8 @@
           <h3>Share This Model</h3>
           <p>To share this model with others, use one of the following blocks of text.  Because this model may change over time, it is important, particularly in citation usage, that this link is clearly annotated to be associated with the specific version that exists at this time.</p>
           <p>Sharing Text:</p>
-          <p><code><?php print $model_view->render_field('title', 0); ?> - Version <?php print $fields['field_modelversion_number_value']->content; ?> : http://dev.comses.asu.edu/model/<?php print $modelnid; ?>/version/<?php print $fields['field_modelversion_number_value']->content; ?></code></p>
-          <p><code>http://dev.comses.asu.edu/model/<?php print $modelnid; ?>/version/<?php print $fields['field_modelversion_number_value']->content; ?></code></p>
+          <p><code><?php print $model_view->render_field('title', 0); ?> - Version <?php print $fields['field_modelversion_number_value']->content; ?> : http://www.openabm.org/model/<?php print $modelnid; ?>/version/<?php print $fields['field_modelversion_number_value']->content; ?></code></p>
+          <p><code>http://www.openabm.org/model/<?php print $modelnid; ?>/version/<?php print $fields['field_modelversion_number_value']->content; ?></code></p>
         </div>
 
         <!-- preload the images -->
@@ -66,15 +71,15 @@
         </div>
         <?php 
           if ($model_view->render_field('status', 0) == "True" && $model_view->render_field('field_model_enabled_value', 0) != "Enabled" && (in_array('administrator', array_values($user->roles)) || $user->uid == $model_view->render_field('uid', 0))) {
-            echo '<a class="button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://dev.comses.asu.edu/model/'. $modelnid .'/enable">Enable</a>';
+            echo '<a class="button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://www.openabm.org/model/'. $modelnid .'/enable">Enable</a>';
           }
 
           if ($model_view->render_field('field_model_enabled_value', 0) == "Enabled" && (in_array('administrator', array_values($user->roles)) || $user->uid == $model_view->render_field('uid', 0))) {
-            echo '<a class="button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://dev.comses.asu.edu/model/'. $modelnid .'/disable">Disable</a>';
+            echo '<a class="button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://www.openabm.org/model/'. $modelnid .'/disable">Disable</a>';
           }
 
           if ($fields['field_modelversion_number_value']->content != helper_get_max_versionnum($modelnid)) {
-            print '<a class="button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://dev.comses.asu.edu/model/'. $modelnid .'">Latest</a>';
+            print '<a class="button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://www.openabm.org/model/'. $modelnid .'">Latest</a>';
           }
         ?>
       </div>
@@ -179,7 +184,7 @@
         <div class="model-video">
           <?php 
           if ($model_view->render_field('field_model_video_fid', 0) != "") {
-            print '<a href="http://dev.comses.asu.edu/'. $model_view->render_field('field_model_video_fid', 0) .'" rel="shadowbox;width=480;height=320"><img width="250" height="150" src="/files/video_thumbnail.png" /></a>';
+            print '<a href="http://www.openabm.org/'. $model_view->render_field('field_model_video_fid', 0) .'" rel="shadowbox;width=480;height=320"><img width="250" height="150" src="/files/video_thumbnail.png" /></a>';
           }
           ?>
         </div>

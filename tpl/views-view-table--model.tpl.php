@@ -23,7 +23,7 @@
   <thead>
     <tr>
       <?php foreach ($header as $field => $label): 
-        if ($fields[$field] != 'field-model-uri-value' && $fields[$field] != 'nid' && $fields[$field] != 'name') {
+        if ($fields[$field] != 'field-model-uri-value' && $fields[$field] != 'nid' && $fields[$field] != 'field-fullname-value') {
           echo '<th class="views-field views-field-'; print $fields[$field]; echo '">';
             print $label;
           echo '</th>';
@@ -43,8 +43,8 @@
               if ($fields[$field] == 'field-model-uri-value') {
                 $uri = $content;
               }
-              elseif ($fields[$field] == 'name') {
-                $username = $content;
+              elseif ($fields[$field] == 'field-fullname-value') {
+                $fullname = $content;
               }
               elseif ($fields[$field] == 'nid') {
                 $modelnid = $content;
@@ -60,12 +60,7 @@
                 echo '<td onclick="DoNav(\'/model/'. $modelnid .'\');" class="views-field views-field-';
                 print $fields[$field];
                 echo '">';
-                if ($content > '') {
                   print $content;
-                }
-                else {
-                  print $username;
-                }
                 echo '</td>';
               }
               else {
