@@ -35,35 +35,23 @@
   <tbody>
     <?php foreach ($rows as $count => $row): ?>
       <tr class="<?php print $count; echo ' '; $row_class = implode(' ', $row_classes[$count]); print $row_class; ?>">
-        <?php $vnum = 0;
-              foreach ($row as $field => $content): 
-
-              if ($fields[$field] == 'field-modelversion-modelnid-value') {
-                echo '<td class="views-field views-field-';
-                print $fields[$field];
-                echo '">';
-                print $content;
-                echo '</td>';
-              }
-              elseif ($fields[$field] == 'field-modelversion-number-value') {
-                $vnum = $content;
-                echo '<td onclick="DoNav(\'/model/'. arg(1) .'/version/'. $vnum .'\');" class="views-field views-field-';
-                print $fields[$field];
-                echo '">';
-                print $content;
-                echo '</td>';
-              }
-              else {
-                echo '<td onclick="DoNav(\'/model/'. arg(1) .'/version/'. $vnum .'\');" class="views-field views-field-';
-                print $fields[$field];
-                echo '">';
-                print $content;
-                echo '</td>';
-              }
-
-         ?>
-
-        <?php endforeach; ?>
+        <?php
+        foreach ($row as $field => $content): 
+          if ($fields[$field] == 'field-modelversion-modelnid-value') {
+            $modelnid = $content;
+          }
+          elseif ($fields[$field] == 'field-modelversion-number-value') {
+            print '<td onclick="DoNav(\'/model/'. $modelnid .'/version/1'.'view\');" class="views-field views-field-'. $fields[$field] .'">';
+            print $content;
+            print '</td>';
+            $vnum = $content;
+          }
+          else {
+            print '<td onclick="DoNav(\'/model/'. $modelnid .'/version/1'.'view\');" class="views-field views-field-'. $fields[$field] .'">';
+            print $content;
+            print '</td>';
+          }
+        endforeach; ?>
       </tr>
 
     <?php endforeach; ?>

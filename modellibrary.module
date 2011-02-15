@@ -991,56 +991,82 @@ function _model_add_form_submit($form, &$form_state) {
   if (arg(2) == 'edit') {
     $action = 'edit';
     $modelnid = arg(1);
-    //watchdog('modellibrary', 'modellibrary.module (753): uri: '. $uri, NULL, WACHDOG_INFO);
   }
   else {
     $action = 'add';
     $uri = $form_state['storage']['values']['field_model_uri'];
-    //watchdog('modellibrary', 'modellibrary.module (753): uri: '. $uri, NULL, WACHDOG_INFO);
   }
 
   $model = new stdClass();
 
-  if ($action == 'add') {
-    $model->type = 'model';
-    $model->status = 1;
-    $model->promote = 0;
-    $model->sticky = 0;
-    $model->format = 1;
-    $model->language = 'en';
-    $model->uid = $user->uid;
-    $model->name = $user->name; // node_submit() resets the uid to 0 if this field isn't also filled.
-    $model->field_model_featured[0]['value'] = 0;
-    $model->field_model_enabled[0]['value'] = 0;
-  } 
+  if ($action == 'edit') {
+    $model = node_load($modelnid); // if we are editing, load the model
+  }
   else {
-    $model = node_load($modelnid, NULL, TRUE); // if we are editing, load the model
+    $model->type = 'model'; // otherwise prep the new node
   }
 
-  $model->title = $form_state['storage']['values']['title'];
-  $model->body = $form_state['storage']['values']['description'];
-  $model->revision = 0;
-  $model->revision_moderation = 0;
-  $model->created = strtotime("2011-01-01");
-  $model->field_model_uri[0]['value'] = $form_state['storage']['values']['field_model_uri'];
-  $model->field_model_teaser[0]['value'] = $form_state['storage']['values']['field_model_teaser'];
-  $model->field_model_replicated[0]['value'] = $form_state['storage']['values']['field_model_replicated'];
-  $model->field_model_reference[0]['value'] = $form_state['storage']['values']['field_model_reference'];
-  $model->field_model_tags = $form_state['storage']['values']['field_model_tags'];
+  // Setup form_state array for the drupal_execute function.
+  // This might be a little cumbersome, but I am not sure
+  // drupal_execute can process the field values
+  // we stored in $form_state[storage]
+  $new_state = array();
+  $node_updated = FALSE; // flag to indicate whether any fields have been changed in an update
+
+  // drupal_execute() will use the values in $new_state for generating the new node
+  $new_state['values']['title'] = $form_state['storage']['values']['title'];
+  $modeltitle = $new_state['values']['title']; // will need this later for the Version node
+  $new_state['values']['body'] = $form_state['storage']['values']['description'];
+
+  $new_state['values']['type'] = 'model';
+  $new_state['values']['revision'] = 0;
+  $new_state['values']['revision_moderation'] = 0;
+  $new_state['values']['status'] = 1;
+  $new_state['values']['promote'] = 0;
+  $new_state['values']['sticky'] = 0;
+  $new_state['values']['format'] = 1;
+  $new_state['values']['language'] = 'en';
+  if ($action == 'add') {
+    $new_state['values']['name'] =  $user->name;
+  }
+  else {
+    $new_state['values']['name'] =  $user->name; // TODO: figure out how to retain the original user when editing
+  }
+
+  $new_state['values']['field_model_uri'][0]['value'] = $form_state['storage']['values']['field_model_uri'];
+  $new_state['values']['field_model_teaser'][0]['value'] = $form_state['storage']['values']['field_model_teaser'];  $new_state['values']['field_model_public'][0]['value'] = $form_state['storage']['values']['field_model_public'];
+  $new_state['values']['field_model_featured'][0]['value'] = $form_state['storage']['values']['field_model_featured'];
+  $new_state['values']['field_model_replicated'][0]['value'] = $form_state['storage']['values']['field_model_replicated'];
+  $new_state['values']['field_model_reference'][0]['value'] = $form_state['storage']['values']['field_model_reference'];
+  if ($action == 'add') {
+    $new_state['values']['field_model_enabled'][0]['value'] = 0;
+  }
+
+  $new_state['values']['field_model_tags'] = $form_state['storage']['values']['field_model_tags'];
+
+  // The imagefield has to be loaded into the temp node variable in order for drupal_execute() to process it.  
   $model->field_model_image = $form_state['storage']['values']['field_model_image'];
+  // Like the imagefield, this field has to be loaded into the temp node variable in order for drupal_execute() to process it.
   $model->field_model_video = $form_state['storage']['values']['field_model_video'];
-  //$model->revision = 1;
-  //drupal_set_message('Test message.');
+  $new_state['values']['csm_create_msg_en'] = '';
+  $new_state['values']['csm_update_msg_en'] = '';
+  $new_state['values']['op'] = t('Save');  // This seems to be a required value
 
-  $model = node_submit($model);
-  if ($model->validated) {
-    node_save($model);
-  } else {
-    drupal_set_message('Node: ' . $model->title . '(' . $model->nid . ') was not saved. <br />');
+  // There is an alternate method for saving nodes using node_save().  However,
+  // node_save() doesn't handle the Image and Video CCK fields properly (or at least
+  // I was never able to figure out how to get it to work properly.) node_save() is
+  // more commonly used and discussed in the Drupal community, however there are
+  // pros and cons with each method.  node_save() doesn't process any validation or
+  // preprocess settings configured for a content type.  drupal_execute does, but it
+  // also is heavier than node_save() for processing overhead (probably because of the  // preprocessing, which to my mind is really the intended behavior in Drupal.)
+  drupal_execute('model_node_form', $new_state, (object) $model); 
+  $errors = form_get_errors();  if (count($errors)) {
+    // Deal with any errors generated by drupal_execute()
+    drupal_set_message("Error saving model version: \n". $errors);
   }
-  $modelnid = $model->nid;
 
-
+  if ($action == 'add')  
+    $modelnid = $new_state['nid']; // drupal_execute stores the nid of the new node here in the form array
 
   //Now we need to process the version data and add a new version if necessary
   $version = new stdClass();
@@ -1074,6 +1100,8 @@ function _model_add_form_submit($form, &$form_state) {
   $new_state['values']['field_modelversion_license'] = $form_state['storage']['values']['field_modelversion_license'];
   $new_state['values']['field_modelversion_review'] = $form_state['storage']['values']['field_modelversion_review'];
   $new_state['values']['field_modelversion_runconditions'][0]['value'] = $form_state['storage']['values']['runconditions'];
+  $new_state['values']['csm_create_msg_en'] = '';
+  $new_state['values']['csm_update_msg_en'] = '';
   $new_state['values']['op'] = t('Save');  // This seems to be a required value
 
 //watchdog('modellibrary', 'modellibrary.module (995): runconditions: '. $form_state['storage']['values']['runconditions']);
@@ -1120,8 +1148,8 @@ function _model_add_form_submit($form, &$form_state) {
   $version->field_modelversion_addfiles = $form_state['storage']['values']['field_modelversion_addfiles']; 
 
   //clear the storage and rebuild so the form doesn't rebuild and #redirect works
-  $form_state['rebuild'] = '';
-  unset($form_state['storage']);
+  //$form_state['rebuild'] = '';
+  //unset($form_state['storage']);
 
   drupal_execute('modelversion_node_form', $new_state, (object) $version); 
   $errors = form_get_errors();
@@ -1131,23 +1159,7 @@ function _model_add_form_submit($form, &$form_state) {
     drupal_set_message("Error saving model version: \n". $errors);
   }
 
-/*  $node = node_load($modelnid);
-  $version = _load_modelversion($modelnid);
 
-  // Now we need to determine whether this model meets publication standard
-  // If not, then the published (status) and Enabled flags are turned off.
-  // If so, then the Published flag is turned on.  The model owner is only allowed to
-  // Enable the model once it is Published.
-  if (($node->field_model_replicated[0]['value'] == 1 && $node->field_model_reference[0]['value'] == "") || $version->field_modelversion_license[0]['value'] == '' ) {
-    $node->status = 0;
-    $node->field_model_enabled[0]['value'] = 0;
-  } 
-  else {
-    $node->status = 1;
-  }
-  //$node = node_submit($node);
-  //node_save($node);
-*/
   drupal_goto('model/'. $modelnid);
 }
 
