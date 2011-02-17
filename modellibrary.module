@@ -84,9 +84,15 @@ function modellibrary_theme($existing) {
       'original hook' => 'views_view_fields',
       'path' => drupal_get_path('module', 'modellibrary') .'/tpl',
     ),
-    'views_view_table__model' => array(
+    'views_view_table__model__page_1' => array(
       'arguments' => array('view' => NULL, 'options' => NULL, 'rows' => NULL, 'title' => NULL),
-      'template' => 'views-view-table--model',
+      'template' => 'views-view-table--model--page-1',
+      'original hook' => 'views_view_table',
+      'path' => drupal_get_path('module', 'modellibrary') .'/tpl',
+    ),
+    'views_view_table__model__page_2' => array(
+      'arguments' => array('view' => NULL, 'options' => NULL, 'rows' => NULL, 'title' => NULL),
+      'template' => 'views-view-table--model--page-2',
       'original hook' => 'views_view_table',
       'path' => drupal_get_path('module', 'modellibrary') .'/tpl',
     ),

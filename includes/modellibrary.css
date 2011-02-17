@@ -78,39 +78,105 @@
     color: #F6FF97;
   }
 
-  table#striped td.active {
-    background-color: #969696;
-    color: #F6FF97;
+  tr.modellibrary.even, tr.modellibrary.odd /* Some tables have rows marked even or odd. */ 
+  { 
+    background-color: #FFF; 
+    border-bottom: 0; 
+  } 
+ 
+  tr.modellibrary.r1 
+  { 
+  } 
+ 
+  tr.modellibrary.r2 
+  { 
+    border-bottom: 1px solid #CCC; 
+  } 
+ 
+  tr.modellibrary.r1 td 
+  { 
+    padding: 10px 0 5px 0; 
+  } 
+ 
+  tr.modellibrary.r2 td 
+  { 
+    padding: 5px 0 10px 0; 
+  } 
+
+  tr.modellibrary.r2 td.modellibrary.views-field-field-model-teaser-value
+  {
+    padding-right: 10px;
+    vertical-align: top;
   }
 
-  td.views-field-field-model-image-fid
+  tr.modellibrary.r2 td.views-field-created
   {
-    width: 50px;
-    padding: 0;
+    padding: 5px 0 0 5px;
+    vertical-align: top;
   }
 
-  td.views-field-title
+  tr.modellibrary td.views-field-name
   {
+    width: 100px;
+    border-left: 1px dotted #EEE;
   }
 
-  td.views-field-field-fullname-value
+  tr.modellibrary td.views-field-created
   {
-    width: 150px;
+    width: 100px;
   }
 
-  td.views-field-created
+  th.modellibrary.views-field
   {
-    width: 90px;
+    border-bottom: 3px solid #CCC;
   }
 
-  td.views-field-field-model-teaser-value
+  th.active img, div.active img
   {
+    padding: 0 0 0 5px;
   }
 
-  td.views-field-field-modelversion-number-value
+  td.modellibrary.active
   {
-    width: 30px;
-    text-align: center;
+    background-color: #FFF;
+  }
+
+  td.modellibrary.views-field-title
+  {
+    font-size: 1.2em;
+    line-height: 1.4em;
+  }
+
+  td.modellibrary.views-field-title a
+  {
+    color: #336633;
+    font-weight: bold;
+  }
+
+  td.modellibrary.views-field-title a:hover
+  {
+    text-decoration: underline;
+  }
+
+  tr.modellibrary.r2 td.modellibrary.views-field-field-model-teaser-value
+  {
+    padding-right: 10px;
+    vertical-align: top;
+  }
+
+  div.modellibrary.views-field-name
+  {
+    padding: 0 0 5px 10px;
+  }
+
+  div.modellibrary.views-field-created
+  {
+    padding: 0 0 0 10px;
+  }
+
+  td.modellibrary.views-field-created
+  {
+    border-left: 1px dotted #EEE;
   }
 
   a.tag 
