@@ -98,7 +98,7 @@
       $tags_view->execute();
       
       foreach ($tags_view->result as $id => $result) {
-        print '<a class="tag" href="#">'. $tags_view->render_field('field_model_tags_value', $id) .'</a>';
+        print '<a class="tag" href="/models/'. $tags_view->render_field('field_model_tags_value', $id) .'/tag">'. $tags_view->render_field('field_model_tags_value', $id) .'</a>';
       }
     ?>
       </div>
@@ -184,7 +184,7 @@
         <div class="model-video">
           <?php 
           if ($model_view->render_field('field_model_video_fid', 0) != "") {
-            print '<a href="http://www.openabm.org/'. $model_view->render_field('field_model_video_fid', 0) .'" rel="shadowbox;width=480;height=320"><img width="250" height="150" src="/files/video_thumbnail.png" /></a>';
+            print '<a href="/'. $model_view->render_field('field_model_video_fid', 0) .'" rel="shadowbox;width=480;height=320"><img width="250" height="150" src="/files/video_thumbnail.png" /></a>';
           }
           ?>
         </div>

@@ -28,8 +28,7 @@
   .model-tags
   {
     float: left;
-    padding-left: 0;
-    padding-right: 6px;
+    padding: 0;
   }
 
   div.modelstatus
@@ -179,29 +178,32 @@
     border-left: 1px dotted #EEE;
   }
 
-  a.tag 
-  { 
-    display: block; 
-    float: left; 
-    padding: 3px 2px; 
-    margin: 0 3px; 
-    font: 100% Verdana, Arial, sans-serif; 
-    text-transform: lowercase; 
-    background: #E6E6E6; 
-    color: #342F65; 
-    text-decoration:none; 
-    text-align:center 
-  } 
+  a.tag
+  {
+    display: block;
+    float: left;
+    padding: 3px 4px;
+    margin: 10px 2px 3px 2px;
+    font: 100% Verdana, Arial, sans-serif;
+    text-transform: lowercase;
+    background: #E6E6E6;
+    color: #342F65;
+    text-decoration:none;
+    text-align:center
+  }
  
-  a.tag:link 
-  { 
-    text-decoration: none; 
-  } 
+  a.tag:link
+  {
+    text-decoration: none;
+    font-size: 0.83em;
+  }
  
-  a.tag:hover 
-  { 
-    text-decoration: underline; 
-  } 
+  a.tag:hover
+  {
+    text-decoration: none;
+    background: #666;
+    color: #FFF;
+  }
  
   a.button 
   { 

@@ -96,6 +96,12 @@ function modellibrary_theme($existing) {
       'original hook' => 'views_view_table',
       'path' => drupal_get_path('module', 'modellibrary') .'/tpl',
     ),
+    'views_view_table__model__page_5' => array(
+      'arguments' => array('view' => NULL, 'options' => NULL, 'rows' => NULL, 'title' => NULL),
+      'template' => 'views-view-table--model--page-5',
+      'original hook' => 'views_view_table',
+      'path' => drupal_get_path('module', 'modellibrary') .'/tpl',
+    ),
     'views_view_table__modelversion' => array(
       'arguments' => array('view' => NULL, 'options' => NULL, 'rows' => NULL, 'title' => NULL),
       'template' => 'views-view-table--modelversion',
@@ -410,9 +416,6 @@ function modellibrary_perm() {
  * Implementation of hook_access().
  */
 function model_edit_access($op, $node, $account) {
-//watchdog('modellibrary', 'modellibrary.module (398): $op: '. $op, NULL, WACHDOG_INFO);
-//watchdog('modellibrary', 'modellibrary.module (399): $node: '. arg($node[0]), NULL, WACHDOG_INFO);
-//watchdog('modellibrary', 'modellibrary.module (400): $account: '. $account, NULL, WACHDOG_INFO);
   global $user;
 
   $view_args = array(arg($node[0])); // The display we are using takes an argument
@@ -669,7 +672,7 @@ function _model_add_form($form_state) {
         '#title' => t('Title'),
         '#description' => t('This is the name of the model. [REQUIRED]'),
         '#size' => 60,
-        '#maxlength' => 60,
+        '#maxlength' => 128,
         '#default_value' => isset($default_value['title']) ? $default_value['title'] : $edit_value['title'],
         //'#weight' => -5,
         '#required' => TRUE,
@@ -1034,9 +1037,6 @@ function _model_add_form_submit($form, &$form_state) {
   $new_state['values']['language'] = 'en';
   if ($action == 'add') {
     $new_state['values']['name'] =  $user->name;
-  }
-  else {
-    $new_state['values']['name'] =  $user->name; // TODO: figure out how to retain the original user when editing
   }
 
   $new_state['values']['field_model_uri'][0]['value'] = $form_state['storage']['values']['field_model_uri'];
