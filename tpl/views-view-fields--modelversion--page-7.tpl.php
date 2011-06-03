@@ -166,8 +166,13 @@
               $issuecount++;
             }
            
-            if ($version->field_modelversion_language == 7 && $version->field_modelversion_otherlang == "") {
-              print "<li>\"Other\" language category is selected but not specified.";
+            if (($version->field_modelversion_language == 7 || $version->field_modelversion_language == '') && $version->field_modelversion_otherlang == "") {
+              print "<li>No language selected or \"Other\" category is selected but not specified.";
+              $issuecount++;
+            }
+
+            if ($version->field_modelversion_os == '') {
+              print "<li>No OS selected.";
               $issuecount++;
             }
 

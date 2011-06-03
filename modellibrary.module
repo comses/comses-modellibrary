@@ -108,6 +108,18 @@ function modellibrary_theme($existing) {
       'original hook' => 'views_view_table',
       'path' => drupal_get_path('module', 'modellibrary') .'/tpl',
     ),
+    'views_view__model__block_1' => array(
+      'arguments' => array('view' => NULL),
+      'template' => 'views-view--model--block-1',
+      'original hook' => 'views_view',
+      'path' => drupal_get_path('module', 'modellibrary') .'/tpl',
+    ),
+    'views_view_fields__model__block_1' => array(
+      'arguments' => array('view' => NULL, 'options' => NULL, 'row' => NULL),
+      'template' => 'views-view-fields--model--block-1',
+      'original hook' => 'views_view_fields',
+      'path' => drupal_get_path('module', 'modellibrary') .'/tpl',
+    ),
   );
 }
 
@@ -238,6 +250,17 @@ function modellibrary_menu() {
   // This item provides a default menu URL that redirects to the latest
   // model version.  
   $items['model/%'] = array(
+    'title' => 'View Model',
+    'description' => "",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_model_redirect_view', array(1)),
+    //'access callback' => TRUE,    
+    //'access callback' => 'modellibrary_access',
+    'access arguments' => array('view model'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['model-archive/%'] = array(
     'title' => 'View Model',
     'description' => "",
     'page callback' => 'drupal_get_form',
@@ -442,16 +465,12 @@ function _enable_model() {
   // If not, then the published (status) and Enabled flags are turned off.
   // If so, then the Published flag is turned on.  The model owner is only allowed to
   // Enable the model once it is Published.
-  if (
-       ($model->field_model_replicated[0]['value'] == 0 || $model->field_model_reference[0]['value'] > "") &&
-       ($version->field_modelversion_language[0]['value'] > '' || $version->field_modelversion_otherlang[0]['value'] > '') &&
-       $version->field_modelversion_os[0]['value'] > '' &&
-       $version->field_modelversion_platform[0]['value'] > '' &&
+  if ( (($model->field_model_replicated[0]['value'] == 0 || $model->field_model_replicated[0]['value'] == '') xor $model->field_model_reference[0]['value'] > '') &&
        $version->field_modelversion_license[0]['value'] > '' ) {
     $model->field_model_enabled[0]['value'] = 1;
+    $model = node_submit($model);
+    node_save($model);
   } 
-  $model = node_submit($model);
-  node_save($model);
 
   drupal_goto('model/'. $modelnid);
 }
@@ -526,7 +545,7 @@ function _model_redirect_view() {
     // from within the View result, but for most purposes we don't want that
     // because that data hasn't been preprocessed, filtered, and doesn't provide
     // any widget functionality.
-    drupal_goto('model/'. $arg .'/version/'. $view->render_field('field_modelversion_number_value', 0) .'/view');
+    drupal_goto('model/'. $arg .'/version/'. $view->render_field('field_modelversion_number_value', 0) .'/view', NULL, NULL, 301);
   } 
 
   else {
