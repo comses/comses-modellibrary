@@ -370,7 +370,7 @@ function modellibrary_menu() {
     'weight' => 0,
   );
 
-  $items['models/mymodels'] = array(
+/*  $items['models/mymodels'] = array(
     'title' => 'My Models',
     'description' => 'Click to view your models.',
     'type' => MENU_LOCAL_TASK,
@@ -378,7 +378,7 @@ function modellibrary_menu() {
     'page arguments' => array('user/'. $user->uid .'/models'),
     'access callback' => 'user_is_logged_in',
     'weight' => 1,
-  ); 
+  ); */
 
   $items['models/search'] = array(
     'title' => 'Search',
@@ -448,7 +448,7 @@ function model_edit_access($op, $node, $account) {
   $view->set_display($display_id);  // and tell it which display we are accessing
   $view->pre_execute(); // run any preprocessing
   $view->execute(); // then execute the view
-  
+
   // Grant access if the user is the root user, if the user has 'edit any model' access, or
   // has 'edit own model' access AND is the model's owner.
   return (($user->uid == 1) || user_access('edit any model') || (user_access('edit own model') && $user->uid == $view->render_field('uid', 0)));
@@ -465,8 +465,10 @@ function _enable_model() {
   // If not, then the published (status) and Enabled flags are turned off.
   // If so, then the Published flag is turned on.  The model owner is only allowed to
   // Enable the model once it is Published.
-  if ( (($model->field_model_replicated[0]['value'] == 0 || $model->field_model_replicated[0]['value'] == '') xor $model->field_model_reference[0]['value'] > '') &&
-       $version->field_modelversion_license[0]['value'] > '' ) {
+
+  // 10/25/2011: Logic got squirrely on ensuring if and only if Replicated? = True, then Reference must also have text.  So temporarily removed until
+  // Biblio tie-in is finished.
+  if $version->field_modelversion_license[0]['value'] > '' {
     $model->field_model_enabled[0]['value'] = 1;
     $model = node_submit($model);
     node_save($model);
@@ -546,7 +548,7 @@ function _model_redirect_view() {
     // because that data hasn't been preprocessed, filtered, and doesn't provide
     // any widget functionality.
     drupal_goto('model/'. $arg .'/version/'. $view->render_field('field_modelversion_number_value', 0) .'/view', NULL, NULL, 301);
-  } 
+  }
 
   else {
     // The model argument is a text URI
@@ -557,7 +559,7 @@ function _model_redirect_view() {
     $view->set_display($display_id);  // and tell it which display we are accessing
     $view->pre_execute(); // run any preprocessing
     $view->execute(); // then execute the view
-    
+
     drupal_goto('model/'. $view->render_field('field_modelversion_modelnid_value', 0) .'/version/'. $view->render_field('field_modelversion_number_value', 0) .'/view');
   }
 }
@@ -640,6 +642,7 @@ function _model_add_form($form_state) {
     $edit_value['field_model_replicated'] = $node->field_model_replicated[0]['value'];
     //watchdog('modellibrary', 'modellibrary.module (532): replicated: '. $default_value['field_model_replicated'], NULL, WACHDOG_INFO);
     $edit_value['field_model_reference'] = $node->field_model_reference[0]['value'];
+    $edit_value['field_model_publication_text'] = $node->field_model_publication_text[0]['value'];
     //watchdog('modellibrary', 'modellibrary.module (534): reference: '. $default_value['field_model_reference'], NULL, WACHDOG_INFO);
     //$default_value['field_model_enabled'] = $node->field_model_enabled[0]['value'];
     $edit_value['field_model_image'] = $node->field_model_image;
@@ -746,6 +749,16 @@ function _model_add_form($form_state) {
 
     case 2: // page 2
 
+      $form['field_model_publication_text'] = array(
+        '#type' => 'textarea',
+        '#title' => t('Model Reference'),
+        '#description' => t('If this model has been published, you should provide the bibliographic reference to that publication.'),
+        '#cols' => 50,
+        '#rows' => 5,
+        //'#weight' => 8,
+        '#default_value' => isset($default_value['field_model_publication_text']) ? $default_value['field_model_publication_text'] : $edit_value['field_model_publication_text'],
+      ); 
+
       $form['replication'] = array(
         '#type' => 'fieldset',
         '#title' => t('Model Replication Info'),
@@ -761,7 +774,7 @@ function _model_add_form($form_state) {
       );
       $form['replication']['field_model_reference'] = array(
         '#type' => 'textarea',
-        '#title' => t('Model Reference'),
+        '#title' => t('Replication Reference'),
         '#description' => t('If this model is a replication of another model, you must provide the bibliographic reference for the original model implementation.'),
         '#cols' => 50,
         '#rows' => 5,
@@ -809,7 +822,7 @@ function _model_add_form($form_state) {
         $form['#field_info'][$name] = $field;
         $form_state['values'][$name] = isset($default_value[$name]) ? $default_value[$name] : $edit_value[$name];
         $element = (array)content_field_form($form, $form_state, $field);
-        $form += $element;                    
+        $form += $element;
       }
       break;
 
@@ -835,7 +848,7 @@ function _model_add_form($form_state) {
         '#value' => '<div class="setoff"><p>Select a software license that you wish to apply to your model.  Each license establishes a set of permissions and restrictions under which you allow others to use your code.  These licenses range from quite liberal (Creative Commons Attribution 3.0) to relatively restrictive.   (This help information is incomplete and requires additional work.)</p></div>',
         '#weight' => -20,
       );
-      
+
       // CCK Fields
       $fields = array('field_modelversion_license');
       foreach ($fields as $name) {
@@ -845,7 +858,7 @@ function _model_add_form($form_state) {
         $element = (array)content_field_form($form, $form_state, $field);
         $form += $element; 
       }
-      
+
       $form['runconditions'] = array(
         '#type' => 'textarea',
         '#title' => t('Operating Instructions'),
@@ -860,10 +873,10 @@ function _model_add_form($form_state) {
 
     case 6: // page 6
       $form['help'] = array(
-        '#value' => '<div class="setoff"><h3>Save Model.</h3><p>You may now save your model by clicking "Submit" or return to previous pages by clicking "Previous" to review your data entry and make changes.</div>',
+        '#value' => '<div class="setoff"><h3>Save Model.</h3><p>You may now save your model by clicking "Submit" or return to previous pages by clicking "Previous" to review your data entry and make changes.</p><p>This model will not be automatically visible to the public.  First, the Model Library will scan your model for any incomplete fields you may have overlooked.  If for any reason, the model is not ready to be published, the Model viewing page will display a notice for you, informing you of the reasons the model is not ready to be enabled.</p><p>Second, if there are no issues with the model itself, you must choose to enable the model in order to make it publicly viewable and searchable.  You may choose to keep a model disabled, if for example it is associated with a publication under review, and you do not wish to make the model public until the paper has been published.</p><h3>Sharing your model with editors and reviewers.</h3><p>While a model is disabled, it will not appear in the Model Library listings nor in search results, but you can share your model with specific individuals by clicking on the "Share" button on your model\'s page, which will give you the web address that directly links to your model.  You may email that information or include it in your article submission material so reviewers can include your model in their review process, if necessary.</p><p>Click "Submit" to save your model now and go to your new model.</p></div>',
         '#weight' => -20,
       );
-      
+
       break;
   }
 
@@ -1036,6 +1049,7 @@ function _model_add_form_submit($form, &$form_state) {
   //$new_state['values']['field_model_uri'][0]['value'] = $form_state['storage']['values']['field_model_uri'];
   $new_state['values']['field_model_teaser'][0]['value'] = $form_state['storage']['values']['field_model_teaser'];  $new_state['values']['field_model_public'][0]['value'] = $form_state['storage']['values']['field_model_public'];
   $new_state['values']['field_model_featured'][0]['value'] = $form_state['storage']['values']['field_model_featured'];
+  $new_state['values']['field_model_publication_text'][0]['value'] = $form_state['storage']['values']['field_model_publication_text'];
   $new_state['values']['field_model_replicated'][0]['value'] = $form_state['storage']['values']['field_model_replicated'];
   $new_state['values']['field_model_reference'][0]['value'] = $form_state['storage']['values']['field_model_reference'];
   if ($action == 'add') {
@@ -1066,7 +1080,7 @@ function _model_add_form_submit($form, &$form_state) {
     drupal_set_message("Error saving model version: \n". $errors);
   }
 
-  if ($action == 'add')  
+  if ($action == 'add')
     $modelnid = $new_state['nid']; // drupal_execute stores the nid of the new node here in the form array
 
   //Now we need to process the version data and add a new version if necessary
