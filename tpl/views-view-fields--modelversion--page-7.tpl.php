@@ -96,7 +96,7 @@
       $tags_view->set_display($display_id);
       $tags_view->pre_execute();
       $tags_view->execute();
-      
+
       foreach ($tags_view->result as $id => $result) {
         print '<a class="tag" href="/models/'. $tags_view->render_field('field_model_tags_value', $id) .'/tag">'. $tags_view->render_field('field_model_tags_value', $id) .'</a>';
       }
@@ -117,6 +117,23 @@
         </div>
       </div>
       <div class="model-region2">
+        <div class="model-pub">
+          <?php
+
+          $view_args = array($model_view->render_field('field_model_publication_value', 0));
+          $display_id = 'page_1';
+          $biblio_view = views_get_view('biblio');
+          $biblio_view->set_arguments($view_args);
+          $biblio_view->set_display($display_id);
+          $biblio_view->pre_execute();
+          $biblio_view->execute();
+
+          if ($model_view->render_field("field_model_publication_text_value", 0))
+            print "<p><strong>This model is associated with a publication:</strong></p>";
+            //print "<p>". $biblio_view->render_field("citation", 0) ."</p>";
+            print "<p>". $model_view->render_field("field_model_publication_text_value", 0) ."</p>";
+          ?>
+        </div>
         <div class="model-repl">
           <?php if ($model_view->render_field("field_model_replicated_value", 0) == "Replicated") 
             print "<p><strong>This is a replication of a previously published model:</strong></p>"; 
@@ -157,7 +174,7 @@
           }
           elseif ($model_view->render_field('status', 0) == "False") {
             print "<h3>This model is currently disabled. To enable it, the following issues must be resolved:</h3>";
-            
+
             print "<ol>";
             $issuecount = 0;
 
