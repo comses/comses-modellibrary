@@ -404,6 +404,19 @@ function modellibrary_menu() {
     'weight' => 3,
   );
 
+  /*
+  $items['models/add/biblio'] = array(
+    'title' => 'Add Biblio Reference',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'drupal_goto',
+    'page arguments' => array('model/add'),
+    //'access callback' => TRUE,    
+    //'access callback' => 'user_access',
+    'access arguments' => array('create model'),
+    'weight' => 3,
+  );
+   */
+
 /*  $items['admin/models/clean'] = array( 
     'title' => 'Clean Models', 
     'description' => "", 
@@ -468,7 +481,7 @@ function _enable_model() {
 
   // 10/25/2011: Logic got squirrely on ensuring if and only if Replicated? = True, then Reference must also have text.  So temporarily removed until
   // Biblio tie-in is finished.
-  if $version->field_modelversion_license[0]['value'] > '' {
+  if ($version->field_modelversion_license[0]['value'] > '') {
     $model->field_model_enabled[0]['value'] = 1;
     $model = node_submit($model);
     node_save($model);
