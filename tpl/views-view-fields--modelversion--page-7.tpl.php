@@ -235,7 +235,7 @@
     </td>
   </tr>
 </table>
-<hr />
+<div class="hrline" style="margin: 5px 0 0 0;"></div>
 <table style="margin: 0;" border="0" width="100%">
   <tr>
     <td>

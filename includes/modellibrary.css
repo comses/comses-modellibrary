@@ -293,6 +293,7 @@
 
   div.model-dl span.content
   {
+    margin-left: 5px;
   }
 
   div.model-files div.filefield-file
@@ -308,5 +309,5 @@
 
   div.model-files span.content
   {
-    margin: left;
+    margin-left: 5px;
   }
