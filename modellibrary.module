@@ -370,15 +370,15 @@ function modellibrary_menu() {
     'weight' => 0,
   );
 
-/*  $items['models/mymodels'] = array(
+  $items['models/mymodels'] = array(
     'title' => 'My Models',
     'description' => 'Click to view your models.',
     'type' => MENU_LOCAL_TASK,
-    'page callback' => 'drupal_goto',
-    'page arguments' => array('user/'. $user->uid .'/models'),
+    'page callback' => '_redirect_to_user_models',
+    //'page arguments' => array('user/'. $user->uid .'/models'),
     'access callback' => 'user_is_logged_in',
     'weight' => 1,
-  ); */
+  );
 
   $items['models/search'] = array(
     'title' => 'Search',
@@ -471,7 +471,11 @@ function model_edit_access($op, $node, $account) {
   return (($user->uid == 1) || user_access('edit any model') || (user_access('edit own model') && $user->uid == $view->render_field('uid', 0)));
 }
 
+function _redirect_to_user_models() {
+  global $user;
 
+  drupal_goto('user/'. $user->uid .'/models');
+}
 
 function _enable_model() {
   $modelnid = arg(1);
