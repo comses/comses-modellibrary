@@ -141,28 +141,7 @@
           ?>
         </div>
 
-
-      </div>
-    </td>
-    <td width=250>
-      <div class="model-region3">
-        <div class="model-image">
-          <?php print $model_view->render_field('field_model_image_fid', 0); ?>
-        </div>
-      </div>
-      <div class="model-video">
-        <?php 
-        if ($model_view->render_field('field_model_video_fid', 0) != "") {
-          print '<a href="/'. $model_view->render_field('field_model_video_fid', 0) .'" rel="shadowbox;width=480;height=320"><img width="250" height="150" src="/files/video_thumbnail.png" /></a>';
-        }
-        ?>
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td>
       <?php
-
 //watchdog('modellibrary', 'views-view-fields-modelversion-page-7.tpl.php (125): enabled: '. $model_view->render_field('field_model_enabled_value', 0));
         if ($model_view->render_field('field_model_featured_value', 0) == "Featured" || $model_view->render_field('status', 0) == "False" || $model_view->render_field('field_model_enabled_value', 0) != "Enabled" || $fields['field_modelversion_number_value']->content != helper_get_max_versionnum($modelnid)) {
           echo '<div class="modelstatus">';
@@ -211,28 +190,52 @@
           echo '</div>';
         }
       ?>
+      </div>
     </td>
-    <td>
+    <td width=250>
+      <div class="model-region3">
+        <div class="model-image">
+          <?php print $model_view->render_field('field_model_image_fid', 0); ?>
+        </div>
+      </div>
+      <div class="model-video">
+        <?php 
+        if ($model_view->render_field('field_model_video_fid', 0) != "") {
+          print '<a href="/'. $model_view->render_field('field_model_video_fid', 0) .'" rel="shadowbox;width=480;height=320"><img width="250" height="150" src="/files/video_thumbnail.png" /></a>';
+        }
+        ?>
+      </div>
       <?php $result = db_query("SELECT code, docs, dataset, sensitivity, other FROM (SELECT SUM(downloads) AS code FROM (SELECT COUNT(dc.fid) AS downloads FROM files files LEFT JOIN download_count dc ON files.fid = dc.fid WHERE dc.fid = files.fid AND (files.fid IN (SELECT DISTINCT n_mv.field_modelversion_code_fid AS code_fid FROM node n LEFT JOIN content_type_modelversion n_mv ON n.vid = n_mv.vid WHERE (n.type in ('modelversion')) AND (n.status = 1) AND (n_mv.field_modelversion_modelnid_value = %d )))) dl) code JOIN (SELECT SUM(downloads) AS docs FROM (SELECT COUNT(dc.fid) AS downloads FROM files files LEFT JOIN download_count dc ON files.fid = dc.fid WHERE dc.fid = files.fid AND (files.fid IN (SELECT DISTINCT n_mv.field_modelversion_documentation_fid AS doc_fid FROM node n LEFT JOIN content_type_modelversion n_mv ON n.vid = n_mv.vid WHERE (n.type in ('modelversion')) AND (n.status = 1) AND (n_mv.field_modelversion_modelnid_value = %d )))) dl) docs JOIN (SELECT SUM(downloads) AS dataset FROM (SELECT COUNT(dc.fid) AS downloads FROM files files LEFT JOIN download_count dc ON files.fid = dc.fid WHERE dc.fid = files.fid AND (files.fid IN (SELECT DISTINCT n_mv.field_modelversion_dataset_fid AS dataset_fid FROM node n LEFT JOIN content_type_modelversion n_mv ON n.vid = n_mv.vid WHERE (n.type in ('modelversion')) AND (n.status = 1) AND (n_mv.field_modelversion_modelnid_value = %d )))) dl) dataset JOIN (SELECT SUM(downloads) AS sensitivity FROM (SELECT COUNT(dc.fid) AS downloads FROM files files LEFT JOIN download_count dc ON files.fid = dc.fid WHERE dc.fid = files.fid AND (files.fid IN (SELECT DISTINCT n_mv.field_modelversion_sensitivity_fid AS sensitivity_fid FROM node n LEFT JOIN content_type_modelversion n_mv ON n.vid = n_mv.vid WHERE (n.type in ('modelversion')) AND (n.status = 1) AND (n_mv.field_modelversion_modelnid_value = %d )))) dl) sensitivity JOIN (SELECT SUM(downloads) AS other FROM (SELECT COUNT(dc.fid) AS downloads FROM files files LEFT JOIN download_count dc ON files.fid = dc.fid WHERE dc.fid = files.fid AND (files.fid IN (SELECT DISTINCT n_mv.field_modelversion_addfiles_fid AS other_fid FROM node n LEFT JOIN content_type_modelversion n_mv ON n.vid = n_mv.vid WHERE (n.type in ('modelversion')) AND (n.status = 1) AND (n_mv.field_modelversion_modelnid_value = %d )))) dl) other", $modelnid, $modelnid, $modelnid, $modelnid, $modelnid);
 
       $row = db_fetch_object($result); ?>
 
       <div class="model-dl">
         <h2>Download Counts</h2>
-        <div><span class='label model-dl-code-label'>Code:</span>
-        <span class='model-dl-code'><?php print $row->code ?></span></div>
-        <div><span class='label model-dl-docs-label'>Documentation:</span>
-        <span class='model-dl-docs'><?php print $row->docs ?></span></div>
-        <div><span class='label model-dl-dataset-label'>Dataset:</span>
-        <span class='model-dl-dataset'><?php print $row->dataset ?></span></div>
-        <div><span class='label model-dl-sensitivity-label'>Sensitivity Analysis:</span>
-        <span class='model-dl-sensitivity'><?php print $row->sensitivity ?></span></div>
-        <div><span class='label model-dl-other-label'>Other Files:</span>
-        <span class='model-dl-other'><?php print $row->other ?></span></div>
+        <?php
+          print "<div><span class='label model-dl-code-label'>Code:</span>";
+          print "<span class='content model-dl-code'>". $row->code ."</span></div>";
+        ?>
+        <?php
+          print "<div><span class='label model-dl-docs-label'>Documentation:</span>";
+          print "<span class='content model-dl-docs'>". $row->docs ."</span></div>";
+        ?>
+        <?php if ($row->dataset > 0) {
+          print "<div><span class='label model-dl-dataset-label'>Dataset:</span>";
+          print "<span class='content model-dl-dataset'>". $row->dataset ."</span></div>";
+        } ?>
+        <?php if ($row->sensitivity > 0) {
+          print "<div><span class='label model-dl-sensitivity-label'>Sensitivity Analysis:</span>";
+          print "<span class='content model-dl-sensitivity'>". $row->sensitivity ."</span></div>";
+        } ?>
+        <?php if ($row->other > 0) {
+          print "<div><span class='label model-dl-other-label'>Other Files:</span>";
+          print "<span class='content model-dl-other'>". $row->other ."</span></div>";
+        } ?>
       </div>
     </td>
   </tr>
 </table>
+<hr />
 <table style="margin: 0;" border="0" width="100%">
   <tr>
     <td>
@@ -251,24 +254,32 @@
         else
           print $fields["field_modelversion_runconditions_value"]->content;
       ?></p>
-    </td>
-    <td width="255px">
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <h2>Download Files</h2>
-      <div>
-      <?php  
-        print $fields['field_modelversion_code_fid']->content;
-        print $fields['field_modelversion_documentation_fid']->content;
-        print $fields['field_modelversion_dataset_fid']->content;
-        print $fields['field_modelversion_sensitivity_fid']->content;
-        print $fields['field_modelversion_addfiles_fid']->content;
-      ?>
+
+      <div class='model-files'>
+        <h2>Download Files</h2>
+        <?php if ($fields['field_modelversion_code_fid']->content > "") {
+          print "<div><span class='label'>Code:</span>";
+          print "<span class='content'>". $fields['field_modelversion_code_fid']->content ."</span></div>";
+        } ?>
+        <?php if ($fields['field_modelversion_documentation_fid']->content > "") {
+          print "<div><span class='label'>Docs:</span>";
+          print "<span class='content'>". $fields['field_modelversion_documentation_fid']->content ."</span></div>";
+        } ?>
+        <?php if ($fields['field_modelversion_dataset_fid']->content > "") {
+          print "<div><span class='label'>Dataset:</span>";
+          print "<span class='content'>". $fields['field_modelversion_dataset_fid']->content ."</span></div>";
+        } ?>
+        <?php if ($fields['field_modelversion_sensitivity_fid']->content > "") {
+          print "<div><span class='label'>Sensitivity Analysis:</span>";
+          print "<span class='content'>". $fields['field_modelversion_sensitivity_fid']->content ."</span></div>";
+        } ?>
+        <?php if ($fields['field_modelversion_addfiles_fid']->content > "") {
+          print "<div><span class='label'>Other Files:</span>";
+          print "<span class='content'>". $fields['field_modelversion_addfiles_fid']->content ."</span></div>";
+        } ?>
       </div>
     </td>
-    <td>
+    <td width="255px">
       <h2>Version Details</h2>
       <?php
         switch ($fields['field_modelversion_platform_value']->content) {

@@ -291,7 +291,22 @@
     font-weight: bold;
   }
 
-  div.model-dl span.value
+  div.model-dl span.content
+  {
+  }
+
+  div.model-files div.filefield-file
+  {
+    display: inline;
+  }
+
+  div.model-files span.label
   {
     margin-left: 10px;
+    font-weight: bold;
+  }
+
+  div.model-files span.content
+  {
+    margin: left;
   }
