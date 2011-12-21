@@ -275,3 +275,23 @@
     cursor: pointer;
   }
 
+  div.model-dl
+  {
+    border: 1px solid;
+  }
+
+  div.model-dl h2
+  {
+    margin-top: 0;
+  }
+
+  div.model-dl span.label
+  {
+    margin-left: 10px;
+    font-weight: bold;
+  }
+
+  div.model-dl span.value
+  {
+    margin-left: 10px;
+  }

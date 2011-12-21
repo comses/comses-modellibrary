@@ -140,6 +140,8 @@
             print "<p>". $model_view->render_field("field_model_reference_value", 0) ."</p>";
           ?>
         </div>
+
+
       </div>
     </td>
     <td width=250>
@@ -148,11 +150,19 @@
           <?php print $model_view->render_field('field_model_image_fid', 0); ?>
         </div>
       </div>
+      <div class="model-video">
+        <?php 
+        if ($model_view->render_field('field_model_video_fid', 0) != "") {
+          print '<a href="/'. $model_view->render_field('field_model_video_fid', 0) .'" rel="shadowbox;width=480;height=320"><img width="250" height="150" src="/files/video_thumbnail.png" /></a>';
+        }
+        ?>
+      </div>
     </td>
   </tr>
   <tr>
     <td>
       <?php
+
 //watchdog('modellibrary', 'views-view-fields-modelversion-page-7.tpl.php (125): enabled: '. $model_view->render_field('field_model_enabled_value', 0));
         if ($model_view->render_field('field_model_featured_value', 0) == "Featured" || $model_view->render_field('status', 0) == "False" || $model_view->render_field('field_model_enabled_value', 0) != "Enabled" || $fields['field_modelversion_number_value']->content != helper_get_max_versionnum($modelnid)) {
           echo '<div class="modelstatus">';
@@ -182,7 +192,7 @@
               print "<li>Model is flagged as a replication, but no reference is given for the original model.";
               $issuecount++;
             }
-           
+
             if (($version->field_modelversion_language == 7 || $version->field_modelversion_language == '') && $version->field_modelversion_otherlang == "") {
               print "<li>No language selected or \"Other\" category is selected but not specified.";
               $issuecount++;
@@ -203,13 +213,23 @@
       ?>
     </td>
     <td>
-        <div class="model-video">
-          <?php 
-          if ($model_view->render_field('field_model_video_fid', 0) != "") {
-            print '<a href="/'. $model_view->render_field('field_model_video_fid', 0) .'" rel="shadowbox;width=480;height=320"><img width="250" height="150" src="/files/video_thumbnail.png" /></a>';
-          }
-          ?>
-        </div>
+      <?php $result = db_query("SELECT code, docs, dataset, sensitivity, other FROM (SELECT SUM(downloads) AS code FROM (SELECT files.fid AS fid, COUNT(dc.fid) AS downloads FROM files files LEFT JOIN download_count dc ON files.fid = dc.fid WHERE dc.fid = files.fid AND (files.fid IN (SELECT DISTINCT n_mv.field_modelversion_code_fid AS code_fid FROM node n LEFT JOIN content_type_modelversion n_mv ON n.vid = n_mv.vid WHERE (n.type in ('modelversion')) AND (n.status = 1) AND (n_mv.field_modelversion_modelnid_value = %d )))) dl) code JOIN (SELECT SUM(downloads) AS docs FROM (SELECT files.fid AS fid, COUNT(dc.fid) AS downloads FROM files files LEFT JOIN download_count dc ON files.fid = dc.fid WHERE dc.fid = files.fid AND (files.fid IN (SELECT DISTINCT n_mv.field_modelversion_documentation_fid AS doc_fid FROM node n LEFT JOIN content_type_modelversion n_mv ON n.vid = n_mv.vid WHERE (n.type in ('modelversion')) AND (n.status = 1) AND (n_mv.field_modelversion_modelnid_value = %d )))) dl) docs JOIN (SELECT SUM(downloads) AS dataset FROM (SELECT files.fid AS fid, COUNT(dc.fid) AS downloads FROM files files LEFT JOIN download_count dc ON files.fid = dc.fid WHERE dc.fid = files.fid AND (files.fid IN (SELECT DISTINCT n_mv.field_modelversion_dataset_fid AS dataset_fid FROM node n LEFT JOIN content_type_modelversion n_mv ON n.vid = n_mv.vid WHERE (n.type in ('modelversion')) AND (n.status = 1) AND (n_mv.field_modelversion_modelnid_value = %d )))) dl) dataset JOIN (SELECT SUM(downloads) AS sensitivity FROM (SELECT files.fid AS fid, COUNT(dc.fid) AS downloads FROM files files LEFT JOIN download_count dc ON files.fid = dc.fid WHERE dc.fid = files.fid AND (files.fid IN (SELECT DISTINCT n_mv.field_modelversion_sensitivity_fid AS sensitivity_fid FROM node n LEFT JOIN content_type_modelversion n_mv ON n.vid = n_mv.vid WHERE (n.type in ('modelversion')) AND (n.status = 1) AND (n_mv.field_modelversion_modelnid_value = %d )))) dl) sensitivity JOIN (SELECT SUM(downloads) AS other FROM (SELECT files.fid AS fid, COUNT(dc.fid) AS downloads FROM files files LEFT JOIN download_count dc ON files.fid = dc.fid WHERE dc.fid = files.fid AND (files.fid IN (SELECT DISTINCT n_mv.field_modelversion_addfiles_fid AS other_fid FROM node n LEFT JOIN content_type_modelversion n_mv ON n.vid = n_mv.vid WHERE (n.type in ('modelversion')) AND (n.status = 1) AND (n_mv.field_modelversion_modelnid_value = %d )))) dl) other", $modelnid, $modelnid, $modelnid, $modelnid, $modelnid);
+
+      $row = db_fetch_object($result); ?>
+
+      <div class="model-dl">
+        <h2>Download Counts</h2>
+        <div><span class='label model-dl-code-label'>Code:</span>
+        <span class='model-dl-code'><?php print $row->code ?></span></div>
+        <div><span class='label model-dl-docs-label'>Documentation:</span>
+        <span class='model-dl-docs'><?php print $row->docs ?></span></div>
+        <div><span class='label model-dl-dataset-label'>Dataset:</span>
+        <span class='model-dl-dataset'><?php print $row->dataset ?></span></div>
+        <div><span class='label model-dl-sensitivity-label'>Sensitivity Analysis:</span>
+        <span class='model-dl-sensitivity'><?php print $row->sensitivity ?></span></div>
+        <div><span class='label model-dl-other-label'>Other Files:</span>
+        <span class='model-dl-other'><?php print $row->other ?></span></div>
+      </div>
     </td>
   </tr>
 </table>
