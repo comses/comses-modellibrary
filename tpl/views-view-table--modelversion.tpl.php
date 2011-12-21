@@ -16,7 +16,7 @@
  * @ingroup views_templates
  */
 ?>
-<table width="100%" id="striped" class="<?php print $class; ?>">
+<table width="100%" id="striped" class="model-vers <?php print $class; ?>">
   <?php if (!empty($title)) : ?>
     <caption><?php print $title; ?></caption>
   <?php endif; ?>
@@ -36,18 +36,25 @@
     <?php foreach ($rows as $count => $row): ?>
       <tr class="<?php print $count; echo ' '; $row_class = implode(' ', $row_classes[$count]); print $row_class; ?>">
         <?php
-        foreach ($row as $field => $content): 
+        foreach ($row as $field => $content):
           if ($fields[$field] == 'field-modelversion-modelnid-value') {
             $modelnid = $content;
           }
           elseif ($fields[$field] == 'field-modelversion-number-value') {
-            print '<td onclick="DoNav(\'/model/'. $modelnid .'/version/1'.'view\');" class="views-field views-field-'. $fields[$field] .'">';
-            print $content;
-            print '</td>';
             $vnum = $content;
           }
+        endforeach;
+
+        foreach ($row as $field => $content):
+          if ($fields[$field] == 'field-modelversion-modelnid-value') {
+          }
+          elseif ($fields[$field] == 'field-modelversion-number-value') {
+            print '<td width="70px" onclick="DoNav(\'/model/'. $modelnid .'/version/'. $vnum .'/view\');" class="views-field views-field-'. $fields[$field] .'">';
+            print $content;
+            print '</td>';
+          }
           else {
-            print '<td onclick="DoNav(\'/model/'. $modelnid .'/version/1'.'view\');" class="views-field views-field-'. $fields[$field] .'">';
+            print '<td onclick="DoNav(\'/model/'. $modelnid .'/version/'. $vnum .'/view\');" class="views-field views-field-'. $fields[$field] .'">';
             print $content;
             print '</td>';
           }

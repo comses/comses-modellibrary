@@ -311,3 +311,15 @@
   {
     margin-left: 5px;
   }
+
+  table.model-vers td {
+    vertical-align: middle;
+  }
+
+  table.model-vers td.views-field-field-modelversion-number-value {
+    padding-left: 20px;
+  }
+
+  table.model-vers td.views-field-body {
+    padding-left: 10px;
+  }
