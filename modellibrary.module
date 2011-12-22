@@ -396,11 +396,11 @@ function modellibrary_menu() {
     'title' => 'Add',
     'description' => 'Click to add a new model.',
     'type' => MENU_LOCAL_TASK,
-    'page callback' => 'drupal_goto',
-    'page arguments' => array('model/add'),
-    //'access callback' => TRUE,    
+    'page callback' => '_add_model_if_permitted',
+    //'page arguments' => array('model/add'),
+    'access callback' => TRUE,
     //'access callback' => 'user_access',
-    'access arguments' => array('create model'),
+    //'access arguments' => array('create model'),
     'weight' => 3,
   );
 
@@ -469,6 +469,18 @@ function model_edit_access($op, $node, $account) {
   // Grant access if the user is the root user, if the user has 'edit any model' access, or
   // has 'edit own model' access AND is the model's owner.
   return (($user->uid == 1) || user_access('edit any model') || (user_access('edit own model') && $user->uid == $view->render_field('uid', 0)));
+}
+
+function _add_model_if_permitted() {
+  global $user;
+
+  if ($user->uid == 1 || user_access('create_model')) {
+    drupal_goto('model/add');
+  }
+  else {
+    drupal_set_message('Please <a style="font-weight: bold;" href="/user">log in</a> to add a new model.');
+    drupal_goto('models/browse');
+  }
 }
 
 function _redirect_to_user_models() {
