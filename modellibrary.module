@@ -361,6 +361,7 @@ function modellibrary_menu() {
     'type' => MENU_LOCAL_TASK,
     'page callback' => 'drupal_goto',
     'page arguments' => array('search/luceneapi_node/', 'type[model]=model'),
+    'access callback' => TRUE,
     'weight' => 2,
   );
 
