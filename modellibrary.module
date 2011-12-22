@@ -124,16 +124,6 @@ function modellibrary_theme($existing) {
 }
 
 /**
- * Implementation of phptemplate_preprocessor_hook()
- *
- * This preprocessor function corresponds to the main Views template used in
- * viewing a model.  We are inserting a javascript function for BeautyTips to
- * display a popup balloon when the Share button is clicked on a model.
- */
-//function modellibrary_preprocessor_views_view_fields__modelversion__page_7(&$vars) {
-//}
-
-/**
  * Implementation of hook_imagecache_default_presets().
  *
  * Autoinstall the two imagecache presets used by modellibrary.
@@ -248,14 +238,12 @@ function modellibrary_menu() {
   global $user;
 
   // This item provides a default menu URL that redirects to the latest
-  // model version.  
+  // model version.
   $items['model/%'] = array(
     'title' => 'View Model',
     'description' => "",
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_model_redirect_view', array(1)),
-    //'access callback' => TRUE,    
-    //'access callback' => 'modellibrary_access',
     'access arguments' => array('view model'),
     'type' => MENU_CALLBACK,
   );
@@ -265,20 +253,16 @@ function modellibrary_menu() {
     'description' => "",
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_model_redirect_view', array(1)),
-    //'access callback' => TRUE,    
-    //'access callback' => 'modellibrary_access',
     'access arguments' => array('view model'),
     'type' => MENU_CALLBACK,
   );
-  
+
   // This is the link for adding a new model
   $items['model/add'] = array(
     'title' => 'Add Model',
     'description' => "",
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_model_add_form', array(1)),
-    //'access callback' => TRUE,    
-    //'access callback' => 'user_access',
     'access arguments' => array('create model'),
     'type' => MENU_CALLBACK,
   );
@@ -289,7 +273,6 @@ function modellibrary_menu() {
     'description' => "",
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_model_add_form', array(1, 2)),
-    //'access callback' => TRUE,    
     'access callback' => 'model_edit_access',
     'access arguments' => array('edit', array(1), 'edit own model'),
     'type' => MENU_CALLBACK,
@@ -301,7 +284,6 @@ function modellibrary_menu() {
     'description' => "",
     'page callback' => '_enable_model',
     'page arguments' => array(array(1)),
-    //'access callback' => TRUE,    
     'access callback' => 'model_edit_access',
     'access arguments' => array('edit', array(1), 'edit own model'),
     'type' => MENU_CALLBACK,
@@ -313,7 +295,6 @@ function modellibrary_menu() {
     'description' => "",
     'page callback' => '_disable_model',
     'page arguments' => array(array(1)),
-    //'access callback' => TRUE,    
     'access callback' => 'model_edit_access',
     'access arguments' => array('edit', array(1), 'edit own model'),
     'type' => MENU_CALLBACK,
@@ -325,8 +306,6 @@ function modellibrary_menu() {
     'title' => 'View',
     'description' => "",
     'type' => MENU_DEFAULT_LOCAL_TASK,
-    //'access callback' => TRUE,    
-    //'access callback' => 'user_access',
     'access arguments' => array('view model'),
     'weight' => -5,
   );
@@ -342,7 +321,6 @@ function modellibrary_menu() {
     'description' => "",
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_model_redirect_edit', array(1, 3)),
-    //'access callback' => TRUE,    
     'access callback' => 'model_edit_access',
     'access arguments' => array('edit', array(1), 'edit own model'),
     'type' => MENU_LOCAL_TASK,
@@ -364,9 +342,7 @@ function modellibrary_menu() {
     'title' => 'Browse',
     'description' => 'Click to browse the model archive.',
     'type' => MENU_DEFAULT_LOCAL_TASK,
-    'access callback' => TRUE,    
-    //'access callback' => 'user_access',
-    //'access arguments' => array('view model'),
+    'access callback' => TRUE,
     'weight' => 0,
   );
 
@@ -375,7 +351,6 @@ function modellibrary_menu() {
     'description' => 'Click to view your models.',
     'type' => MENU_LOCAL_TASK,
     'page callback' => '_redirect_to_user_models',
-    //'page arguments' => array('user/'. $user->uid .'/models'),
     'access callback' => 'user_is_logged_in',
     'weight' => 1,
   );
@@ -386,9 +361,6 @@ function modellibrary_menu() {
     'type' => MENU_LOCAL_TASK,
     'page callback' => 'drupal_goto',
     'page arguments' => array('search/luceneapi_node/', 'type[model]=model'),
-    //'access callback' => TRUE,    
-    //'access callback' => 'user_access',
-    'access arguments' => array('view model'),
     'weight' => 2,
   );
 
@@ -397,10 +369,7 @@ function modellibrary_menu() {
     'description' => 'Click to add a new model.',
     'type' => MENU_LOCAL_TASK,
     'page callback' => '_add_model_if_permitted',
-    //'page arguments' => array('model/add'),
     'access callback' => TRUE,
-    //'access callback' => 'user_access',
-    //'access arguments' => array('create model'),
     'weight' => 3,
   );
 
@@ -417,14 +386,6 @@ function modellibrary_menu() {
   );
    */
 
-/*  $items['admin/models/clean'] = array( 
-    'title' => 'Clean Models', 
-    'description' => "", 
-    'page callback' => '_cleanmodels', 
-    'access arguments' => array('view model'), 
-    'type' => MENU_CALLBACK, 
-  ); */
-
   return $items;
 }
 
@@ -436,7 +397,6 @@ function modellibrary_menu_alter(&$items) {
 
   $items['download_count']['file'] = 'download_count.pages.inc';
   $items['download_count']['file path'] = drupal_get_path('module', 'modellibrary') .'/includes';
-  #$items['download_count']['page callback'] = 'modellibrary_download_count_view_page';
 }
 
 /**
@@ -473,8 +433,9 @@ function model_edit_access($op, $node, $account) {
 
 function _add_model_if_permitted() {
   global $user;
+  $item = menu_get_item('model/add');
 
-  if ($user->uid == 1 || user_access('create_model')) {
+  if ($user->uid == 1 || $item['access']) {
     drupal_goto('model/add');
   }
   else {
@@ -532,7 +493,7 @@ function _cleanmodels() {
     $version = _load_modelversion($modelnid);
 
 watchdog('modellibrary', 'modellibrary.module (472): code_fid: '. $version->field_modelversion_code_fid, NULL, WACHDOG_INFO);
-    
+
     if (($model->field_model_replicated[0]['value'] == 1 && $model->field_model_reference[0]['value'] == "") || $version->field_modelversion_license[0]['value'] == '' || $version->field_modelversion_code_fid == '' || $version->field_modelversion_documentation_fid == '') {
       $model->status = 0;
       $model->field_model_enabled[0]['value'] = 0;
