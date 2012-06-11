@@ -1,6 +1,25 @@
 <?php
-// $Id: $
-  /**
+/*
+    CoMSES Computational Model Library
+    Copyright (C) 2012. Nathan D. Rollins, Research Network for Computational
+        Modeling for the SocioEcological Sciences (CoMSES Net)
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
+
+/**
    * @file
    * This is the new NSF Model Library module for OpenABM.org. This 
    * implementation stores models as nodes within Drupal's node system. 
@@ -20,7 +39,7 @@
    * deploying to the live server to make sure no changes are needed in
    * Model Library first.
    *
-   * THeming for the pages used by this module, including the Views displays
+   * Theming for the pages used by this module, including the Views displays
    * used here, are covered by a CSS file and templates.  The CSS is located
    * in modellibrary/includes/ and the templates are in modellibrary/tpl/.
    * These files are registered below with the Drupal Theming Engine and
