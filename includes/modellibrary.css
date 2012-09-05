@@ -205,7 +205,7 @@
     color: #FFF;
   }
  
-  a.button 
+  a.model-button 
   { 
     display:block; 
     float: right; 
@@ -216,23 +216,28 @@
     background: #7F9E56; 
     color: #F6FF97; 
     text-decoration:none; 
-    text-align:center 
+    text-align:center;
+    border-radius: 4px;
+    border-image: initial;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    cursor: pointer;
   } 
  
-  a.button:hover 
+  a.model-button:hover 
   { 
     background: #CADCA7; 
     color:#718B4B 
   } 
 
-  ul.button, ul.button li 
+  ul.model-button, ul.model-button li 
   { 
     margin:0; 
     padding:0; 
     list-style-type:none 
   } 
  
-  ul.button li 
+  ul.model-button li 
   { 
     float:left; 
     width: 9em; 
@@ -240,7 +245,7 @@
     margin-right: 5px 
   } 
  
-  ul.button a 
+  ul.model-button a 
   { 
     display:block; 
     width:9em; 
@@ -253,7 +258,7 @@
     text-align:center 
   } 
  
-  ul.button a:hover 
+  ul.model-button a:hover 
   { 
     background: #CADCA7; 
     color:#718B4B 
