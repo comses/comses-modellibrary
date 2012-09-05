@@ -44,7 +44,7 @@
           print $model_view->render_field('field_fullname_value', 0); 
         else
           print $model_view->render_field('name', 0);
-        if (in_array('comses member', array_values($user->roles)) || in_array('administrator', array_values($user->roles))) print ' ('. $model_view->render_field('name', 0) .')'; ?></span>
+        if (in_array('comses member', array_values($user->roles)) || in_array('administrator', array_values($user->roles))) print ' ('. l($model_view->render_field('name', 0), 'user/'. $model_view->render_field('uid', 0)) .')'; ?></span>
       <div class="model-updated">Last Update: <?php print $model_view->render_field('last_updated', 0); ?></div>
     </td>
     <td>
