@@ -321,13 +321,13 @@ function modellibrary_menu() {
 
   // This is the base menu link for the model/%nid/version/%num menu tabs.
   // It forwards to the latest model version at: model/%nid/version/%num/view
-  $items['model/%/version/%/view'] = array(
+/*  $items['model/%/version/%/view'] = array(
     'title' => 'View',
     'description' => "",
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'access arguments' => array('view model'),
     'weight' => -5,
-  );
+  ); */
 
   /*
    * Menu: model/%nid/version/%num/view
@@ -371,7 +371,7 @@ function modellibrary_menu() {
     'type' => MENU_LOCAL_TASK,
     'page callback' => '_redirect_to_user_models',
     'access callback' => 'user_is_logged_in',
-    'weight' => 1,
+    'weight' => 2,
   );
 
   $items['models/search'] = array(
@@ -381,7 +381,7 @@ function modellibrary_menu() {
     'page callback' => 'drupal_goto',
     'page arguments' => array('search/luceneapi_node/', 'type[model]=model'),
     'access callback' => TRUE,
-    'weight' => 2,
+    'weight' => 3,
   );
 
   $items['models/add'] = array(
@@ -390,7 +390,7 @@ function modellibrary_menu() {
     'type' => MENU_LOCAL_TASK,
     'page callback' => '_add_model_if_permitted',
     'access callback' => TRUE,
-    'weight' => 3,
+    'weight' => 1,
   );
 
   /*
