@@ -71,11 +71,11 @@
         </div>
         <?php 
           if ($model_view->render_field('status', 0) == "False" && $model_view->render_field('field_model_enabled_value', 0) == "Enabled" && (in_array('administrator', array_values($user->roles)) || $user->uid == $model_view->render_field('uid', 0))) {
-            echo '<a class="button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://www.openabm.org/model/'. $modelnid .'/enable">Enable</a>';
+            echo '<a class="model-button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://www.openabm.org/model/'. $modelnid .'/enable">Enable</a>';
           }
 
           if ($model_view->render_field('status', 0) == "True" && (in_array('administrator', array_values($user->roles)) || $user->uid == $model_view->render_field('uid', 0))) {
-            echo '<a class="button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://www.openabm.org/model/'. $modelnid .'/disable">Disable</a>';
+            echo '<a class="model-button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://www.openabm.org/model/'. $modelnid .'/disable">Disable</a>';
           }
 
           if ($fields['field_modelversion_number_value']->content != helper_get_max_versionnum($modelnid)) {
