@@ -483,7 +483,7 @@ function _enable_model() {
   // 10/25/2011: Logic got squirrely on ensuring if and only if Replicated? = True, then Reference must also have text.  So temporarily removed until
   // Biblio tie-in is finished.
   if ($version->field_modelversion_license[0]['value'] > '') {
-    $model->field_model_enabled[0]['value'] = 1;
+    $model->status = 1;
     $model = node_submit($model);
     node_save($model);
   } 
@@ -495,7 +495,7 @@ function _disable_model() {
   $modelnid = arg(1);
   $model = node_load($modelnid);
 
-  $model->field_model_enabled[0]['value'] = 0;
+  $model->status = 0;
   $model = node_submit($model);
   node_save($model);
 
@@ -1051,24 +1051,22 @@ function _model_add_form_submit($form, &$form_state) {
   $new_state['values']['type'] = 'model';
   $new_state['values']['revision'] = 0;
   $new_state['values']['revision_moderation'] = 0;
-  $new_state['values']['status'] = 1;
   $new_state['values']['promote'] = 0;
   $new_state['values']['sticky'] = 0;
   $new_state['values']['format'] = 1;
   $new_state['values']['language'] = 'en';
   if ($action == 'add') {
     $new_state['values']['name'] =  $user->name;
+    $new_state['values']['status'] = 0;
+    $new_state['values']['field_model_enabled'][0]['value'] = 1;
   }
 
-  //$new_state['values']['field_model_uri'][0]['value'] = $form_state['storage']['values']['field_model_uri'];
-  $new_state['values']['field_model_teaser'][0]['value'] = $form_state['storage']['values']['field_model_teaser'];  $new_state['values']['field_model_public'][0]['value'] = $form_state['storage']['values']['field_model_public'];
+  $new_state['values']['field_model_teaser'][0]['value'] = $form_state['storage']['values']['field_model_teaser'];
+  $new_state['values']['field_model_public'][0]['value'] = $form_state['storage']['values']['field_model_public'];
   $new_state['values']['field_model_featured'][0]['value'] = $form_state['storage']['values']['field_model_featured'];
   $new_state['values']['field_model_publication_text'][0]['value'] = $form_state['storage']['values']['field_model_publication_text'];
   $new_state['values']['field_model_replicated'][0]['value'] = $form_state['storage']['values']['field_model_replicated'];
   $new_state['values']['field_model_reference'][0]['value'] = $form_state['storage']['values']['field_model_reference'];
-  if ($action == 'add') {
-    $new_state['values']['field_model_enabled'][0]['value'] = 0;
-  }
 
   $new_state['values']['field_model_tags'] = $form_state['storage']['values']['field_model_tags'];
 
