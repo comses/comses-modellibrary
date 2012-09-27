@@ -70,12 +70,12 @@
           <img src='img/basic/x.png' alt='' />
         </div>
         <?php 
-          if ($model_view->render_field('status', 0) == "True" && $model_view->render_field('field_model_enabled_value', 0) != "Enabled" && (in_array('administrator', array_values($user->roles)) || $user->uid == $model_view->render_field('uid', 0))) {
-            echo '<a class="model-button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://www.openabm.org/model/'. $modelnid .'/enable">Enable</a>';
+          if ($model_view->render_field('status', 0) == "False" && $model_view->render_field('field_model_enabled_value', 0) == "Enabled" && (in_array('administrator', array_values($user->roles)) || $user->uid == $model_view->render_field('uid', 0))) {
+            echo '<a class="button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://www.openabm.org/model/'. $modelnid .'/enable">Enable</a>';
           }
 
-          if ($model_view->render_field('field_model_enabled_value', 0) == "Enabled" && (in_array('administrator', array_values($user->roles)) || $user->uid == $model_view->render_field('uid', 0))) {
-            echo '<a class="model-button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://www.openabm.org/model/'. $modelnid .'/disable">Disable</a>';
+          if ($model_view->render_field('status', 0) == "True" && (in_array('administrator', array_values($user->roles)) || $user->uid == $model_view->render_field('uid', 0))) {
+            echo '<a class="button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://www.openabm.org/model/'. $modelnid .'/disable">Disable</a>';
           }
 
           if ($fields['field_modelversion_number_value']->content != helper_get_max_versionnum($modelnid)) {
@@ -154,14 +154,14 @@
             print "<h3>You are viewing an old version of this model with out-of-date file downloads.  To view the latest model version, click the \"Latest\" button above.<h3>";
           }
 
-          if ($model_view->render_field('status', 0) == "True" && $model_view->render_field('field_model_enabled_value', 0) != "Enabled") {
+          if ($model_view->render_field('status', 0) == "False" && $model_view->render_field('field_model_enabled_value', 0) == "Enabled") {
             print "<h3>This model is currently disabled.";
             if (in_array('administrator', array_values($user->roles)) || $user->uid == $model_view->render_field('uid', 0)) {
               print "To enable it, click the Enable button.";
             }
             print "</h3>";
           }
-          elseif ($model_view->render_field('status', 0) == "False") {
+          elseif ($model_view->render_field('field_model_enabled_value', 0) != "Enabled") {
             print "<h3>This model is currently disabled. To enable it, the following issues must be resolved:</h3>";
 
             print "<ol>";
