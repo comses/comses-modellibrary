@@ -61,8 +61,8 @@
           <h3>How To Cite This Model</h3>
           <p>To share this model with others, use one of the following blocks of text.  Because this model may change over time, it is important, particularly in citation usage, that this link is clearly annotated to be associated with the specific version that exists at this time.</p>
           <p>Sharing Text:</p>
-          <p><code><?php if ($model_view->render_field('field_fullname_value', 0) > "") print $model_view->render_field('field_fullname_value', 0); else print $model_view->render_field('name', 0);?>. (<?php print $fields['created']->content; ?>). "<?php print $model_view->render_field('title', 0); ?>" (Version <?php print $fields['field_modelversion_number_value']->content; ?>). Retrieved from OpenABM: http://www.openabm.org/model/<?php print $modelnid; ?>/version/<?php print $fields['field_modelversion_number_value']->content; ?></code></p>
-          <p><code>http://www.openabm.org/model/<?php print $modelnid; ?>/version/<?php print $fields['field_modelversion_number_value']->content; ?></code></p>
+          <p><code><?php if ($model_view->render_field('field_fullname_value', 0) > "") print $model_view->render_field('field_fullname_value', 0); else print $model_view->render_field('name', 0);?>. (<?php print $fields['created']->content; ?>). "<?php print $model_view->render_field('title', 0); ?>" (Version <?php print $fields['field_modelversion_number_value']->content; ?>). Retrieved from OpenABM: <?php if ($model_view->render_field('field_model_handle_value', 0) > "") { print $model_view->render_field('field_model_handle_value', 0); } else { print 'http://www.openabm.org/model/'. $modelnid .'/version/'. $fields['field_modelversion_number_value']->content; } ?></code></p>
+          <p><code><?php if ($model_view->render_field('field_model_handle_value', 0) > "") { print $model_view->render_field('field_model_handle_value', 0); } else { print 'http://www.openabm.org/model/'. $modelnid .'/version/'. $fields['field_modelversion_number_value']->content; } ?></code></p>
         </div>
 
         <!-- preload the images -->
