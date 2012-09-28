@@ -48,7 +48,7 @@ function _model_add_form($form_state) {
   } 
   else {
     $action_text = "Add New";
-    $versionnum = helper_get_max_versionnum($modelnid);
+    $versionnum = modellibrary_helper_get_max_versionnum($modelnid);
   }
 
   if (!isset($form_state['storage']['step'])) {
@@ -372,7 +372,7 @@ function _model_add_form_validate($form, &$form_state) {
 
   if($form_state['clicked_button']['#value'] != 'Cancel') { // we don't want to process any validation, if the user clicked Cancel
     if ($form_state['storage']['step'] == 1) { 
-      if ($action == 'add' && helper_check_if_cck_fieldvalue_exists('field_model_uri', $form_state['values']['field_model_uri'])) {
+      if ($action == 'add' && modellibrary_helper_check_if_cck_fieldvalue_exists('field_model_uri', $form_state['values']['field_model_uri'])) {
         form_set_error('', t('That URI is already in use.  Please select a different value.'));
       }
     }
@@ -521,7 +521,7 @@ function _model_add_form_submit($form, &$form_state) {
   // Setup form_state array for the drupal_execute function.
   $new_state = array();  
  
-  $new_state['values']['title'] = $form_state['storage']['values']['title'] ." - Version ". helper_get_max_versionnum($modelnid);
+  $new_state['values']['title'] = $form_state['storage']['values']['title'] ." - Version ". modellibrary_helper_get_max_versionnum($modelnid);
   $new_state['values']['body'] = $form_state['storage']['values']['notes'];
   $new_state['values']['type'] = 'modelversion';  // drupal_execute() will use these values for generating the new node
   $new_state['values']['status'] = 1;
@@ -579,8 +579,8 @@ function _model_add_form_submit($form, &$form_state) {
   if ($new_version) {
     $version = new stdClass();
     $version->type = 'modelversion';
-    $new_state['values']['title'] = $form_state['storage']['values']['title'] ." - Version ". helper_get_next_versionnum($model->nid);
-    $new_state['values']['field_modelversion_number'][0]['value'] = helper_get_next_versionnum($model->nid);
+    $new_state['values']['title'] = $form_state['storage']['values']['title'] ." - Version ". modellibrary_helper_get_next_versionnum($model->nid);
+    $new_state['values']['field_modelversion_number'][0]['value'] = modellibrary_helper_get_next_versionnum($model->nid);
     $new_state['values']['field_modelversion_uri'][0]['value'] = $form_state['storage']['values']['field_model_uri'];
   }
 

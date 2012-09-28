@@ -25,9 +25,9 @@ function _load_modelversion($model_nid) {
  * @return
  * Boolean indicating whether submitted value is already in use.
  */
-function helper_get_max_versionnum($modelnid) {
-  $table_versionnum = helper_cck_field_sql('field_modelversion_number', 'table');
-  $column_versionnum = helper_cck_field_sql('field_modelversion_number', 'column');
+function modellibrary_helper_get_max_versionnum($modelnid) {
+  $table_versionnum = modellibrary_helper_cck_field_sql('field_modelversion_number', 'table');
+  $column_versionnum = modellibrary_helper_cck_field_sql('field_modelversion_number', 'column');
 
   return db_result(db_query("SELECT MAX(t.%s) FROM {%s} t WHERE t.field_modelversion_modelnid_value = %d", $column_versionnum, $table_versionnum, $modelnid));
 }
@@ -42,9 +42,9 @@ function helper_get_max_versionnum($modelnid) {
  * @return
  * Boolean indicating whether submitted value is already in use.
  */
-function helper_get_next_versionnum($modelnid) {
-  $table_versionnum = helper_cck_field_sql('field_modelversion_number', 'table');
-  $column_versionnum = helper_cck_field_sql('field_modelversion_number', 'column');
+function modellibrary_helper_get_next_versionnum($modelnid) {
+  $table_versionnum = modellibrary_helper_cck_field_sql('field_modelversion_number', 'table');
+  $column_versionnum = modellibrary_helper_cck_field_sql('field_modelversion_number', 'column');
 
   return db_result(db_query("SELECT MAX(t.%s) FROM {%s} t WHERE t.field_modelversion_modelnid_value = %d", $column_versionnum, $table_versionnum, $modelnid)) + 1;
 }
@@ -58,9 +58,9 @@ function helper_get_next_versionnum($modelnid) {
  * @return
  * Boolean indicating whether submitted value is already in use.
  */
-function helper_check_if_cck_fieldvalue_exists($field, $value) {
-  $table = helper_cck_field_sql($field, 'table');
-  $column = helper_cck_field_sql($field, 'column');
+function modellibrary_helper_check_if_cck_fieldvalue_exists($field, $value) {
+  $table = modellibrary_helper_cck_field_sql($field, 'table');
+  $column = modellibrary_helper_cck_field_sql($field, 'column');
 
   if (db_result(db_query("SELECT COUNT(t.%s) FROM {%s} t WHERE LOWER(t.%s) = LOWER('%s')", $column, $table, $column, $value)) > 0) {
     return TRUE;
@@ -81,7 +81,7 @@ function helper_check_if_cck_fieldvalue_exists($field, $value) {
  * @param $type 'table' or 'column' *
  * to get both table and column, run function twice with each $type
  */
-function helper_cck_field_sql($field_name, $type) {
+function modellibrary_helper_cck_field_sql($field_name, $type) {
   $field = content_fields($field_name);
   $db_info = content_database_info($field);
 

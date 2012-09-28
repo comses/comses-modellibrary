@@ -47,8 +47,8 @@
    */
 
 /* Load module include files */
-module_load_include('inc', 'modellibrary', 'modellibrary.add_form');
-module_load_include('inc', 'modellibrary', 'modellibrary.helper.functions');
+//module_load_include('inc', 'modellibrary', 'modellibrary.add_form');
+module_load_include('inc', 'modellibrary', 'includes/modellibrary.helper.functions');
 
 
 /**
@@ -288,6 +288,7 @@ function modellibrary_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_model_add_form', array(1)),
     'access arguments' => array('create model'),
+    'file' => 'includes/modellibrary.add_form.inc',
     'type' => MENU_CALLBACK,
   );
 
@@ -299,6 +300,7 @@ function modellibrary_menu() {
     'page arguments' => array('_model_add_form', array(1, 2)),
     'access callback' => 'model_edit_access',
     'access arguments' => array('edit', array(1), 'edit own model'),
+    'file' => 'includes/modellibrary.add_form.inc',
     'type' => MENU_CALLBACK,
   );
 
@@ -508,7 +510,12 @@ function _enable_model() {
     $model = node_submit($model);
     node_save($model);
   } 
-  modellibrary_post_twitter($model);
+
+  // Make sure this isn't occurring on the Dev server, before we post to Twitter
+  global $base_root;
+  if ($base_root != 'http://dev.comses.asu.edu') {
+    modellibrary_post_twitter($model);
+  }
   drupal_goto('model/'. $modelnid);
 }
 
@@ -532,7 +539,7 @@ function modellibrary_post_twitter($node) {
   $openabm_twitter = 437897011; // uid for the openabm_comses Twitter account
   $twitter_account = twitter_account_load($openabm_twitter);
 
-  $status = 'New Model posted: '. $node->title .' '. twitter_shorten_url(url('model/'. $node->nid, array('absolute' => TRUE)));
+  $status = 'New Model: '. $node->title .' '. twitter_shorten_url(url('model/'. $node->nid, array('absolute' => TRUE)));
 
   try {
     $result = twitter_set_status($twitter_account, $status);

@@ -20,6 +20,9 @@
  * @ingroup views_templates
  */
 
+  /* Load module include files */
+  //module_load_include('inc', 'modellibrary', 'modellibrary.helper.functions');
+
   global $user;
 
   $modelnid = arg(1);
@@ -61,8 +64,8 @@
           <h3>How To Cite This Model</h3>
           <p>To share this model with others, use one of the following blocks of text.  Because this model may change over time, it is important, particularly in citation usage, that this link is clearly annotated to be associated with the specific version that exists at this time.</p>
           <p>Sharing Text:</p>
-          <p><code><?php if ($model_view->render_field('field_fullname_value', 0) > "") print $model_view->render_field('field_fullname_value', 0); else print $model_view->render_field('name', 0);?>. (<?php print $fields['created']->content; ?>). "<?php print $model_view->render_field('title', 0); ?>" (Version <?php print $fields['field_modelversion_number_value']->content; ?>). Retrieved from OpenABM: <?php if ($model_view->render_field('field_model_handle_value', 0) > "") { print $model_view->render_field('field_model_handle_value', 0); } else { print 'http://www.openabm.org/model/'. $modelnid .'/version/'. $fields['field_modelversion_number_value']->content; } ?></code></p>
-          <p><code><?php if ($model_view->render_field('field_model_handle_value', 0) > "") { print $model_view->render_field('field_model_handle_value', 0); } else { print 'http://www.openabm.org/model/'. $modelnid .'/version/'. $fields['field_modelversion_number_value']->content; } ?></code></p>
+          <p><code><?php if ($model_view->render_field('field_fullname_value', 0) > "") print $model_view->render_field('field_fullname_value', 0); else print $model_view->render_field('name', 0);?>. (<?php print $fields['created']->content; ?>). "<?php print $model_view->render_field('title', 0); ?>" (Version <?php print $fields['field_modelversion_number_value']->content; ?>). Retrieved from OpenABM: <?php if ($model_view->render_field('field_model_handle_value', 0) > "") { print $model_view->render_field('field_model_handle_value', 0); } else { print url('model/'. $modelnid .'/version/'. $fields['field_modelversion_number_value']->content); } ?></code></p>
+          <p><code><?php if ($model_view->render_field('field_model_handle_value', 0) > "") { print $model_view->render_field('field_model_handle_value', 0); } else { print url('model/'. $modelnid .'/version/'. $fields['field_modelversion_number_value']->content); } ?></code></p>
         </div>
 
         <!-- preload the images -->
@@ -71,15 +74,15 @@
         </div>
         <?php 
           if ($model_view->render_field('status', 0) == "False" && $model_view->render_field('field_model_enabled_value', 0) == "Enabled" && (in_array('administrator', array_values($user->roles)) || $user->uid == $model_view->render_field('uid', 0))) {
-            echo '<a class="model-button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://www.openabm.org/model/'. $modelnid .'/enable">Enable</a>';
+            echo '<a class="model-button" style="float: left; margin-left: 10px; margin-top: 5px;" href="'. url('model/'. $modelnid .'/enable') .'">Enable</a>';
           }
 
           if ($model_view->render_field('status', 0) == "True" && (in_array('administrator', array_values($user->roles)) || $user->uid == $model_view->render_field('uid', 0))) {
-            echo '<a class="model-button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://www.openabm.org/model/'. $modelnid .'/disable">Disable</a>';
+            echo '<a class="model-button" style="float: left; margin-left: 10px; margin-top: 5px;" href="'. url('model/'. $modelnid .'/disable') .'">Disable</a>';
           }
 
-          if ($fields['field_modelversion_number_value']->content != helper_get_max_versionnum($modelnid)) {
-            print '<a class="model-button" style="float: left; margin-left: 10px; margin-top: 5px;" href="http://www.openabm.org/model/'. $modelnid .'">Latest</a>';
+          if ($fields['field_modelversion_number_value']->content != modellibrary_helper_get_max_versionnum($modelnid)) {
+            print '<a class="model-button" style="float: left; margin-left: 10px; margin-top: 5px;" href="'. url('model/'. $modelnid) .'">Latest</a>';
           }
         ?>
       </div>
@@ -143,14 +146,14 @@
 
       <?php
 //watchdog('modellibrary', 'views-view-fields-modelversion-page-7.tpl.php (125): enabled: '. $model_view->render_field('field_model_enabled_value', 0));
-        if ($model_view->render_field('field_model_featured_value', 0) == "Featured" || $model_view->render_field('status', 0) == "False" || $model_view->render_field('field_model_enabled_value', 0) != "Enabled" || $fields['field_modelversion_number_value']->content != helper_get_max_versionnum($modelnid)) {
+        if ($model_view->render_field('field_model_featured_value', 0) == "Featured" || $model_view->render_field('status', 0) == "False" || $model_view->render_field('field_model_enabled_value', 0) != "Enabled" || $fields['field_modelversion_number_value']->content != modellibrary_helper_get_max_versionnum($modelnid)) {
           echo '<div class="modelstatus">';
           echo '<h2>Model Status</h2>';
           if ($model_view->render_field('field_model_featured_value', 0) == "Featured") {
             print "<p>This is an OpenABM Featured Model.</p>";
           }
 
-          if ($fields['field_modelversion_number_value']->content != helper_get_max_versionnum($modelnid)) {
+          if ($fields['field_modelversion_number_value']->content != modellibrary_helper_get_max_versionnum($modelnid)) {
             print "<h3>You are viewing an old version of this model with out-of-date file downloads.  To view the latest model version, click the \"Latest\" button above.<h3>";
           }
 
@@ -241,7 +244,7 @@
     <td>
       <h2>Model Version: 
         <?php print $fields['field_modelversion_number_value']->content; 
-          if ($fields['field_modelversion_number_value']->content == helper_get_max_versionnum($model_view->render_field('nid', 0))) {
+          if ($fields['field_modelversion_number_value']->content == modellibrary_helper_get_max_versionnum($model_view->render_field('nid', 0))) {
             print '  [Latest]';
           }
         ?>
@@ -397,7 +400,7 @@
     </td>
   </tr>
 </table>
-<?php if (helper_get_max_versionnum($model_view->render_field('nid', 0)) > 1) {
+<?php if (modellibrary_helper_get_max_versionnum($model_view->render_field('nid', 0)) > 1) {
   print '<div class="versions-list">';
   $view_args = array($modelnid);
   $display_id = 'page_3';
