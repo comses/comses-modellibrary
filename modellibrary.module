@@ -503,7 +503,7 @@ function _enable_model() {
     $model = node_submit($model);
     node_save($model);
   } 
-
+  modellibrary_post_twitter($model);
   drupal_goto('model/'. $modelnid);
 }
 
@@ -516,6 +516,27 @@ function _disable_model() {
   node_save($model);
 
   drupal_goto('model/'. $modelnid);
+}
+
+/*
+ * Function for posting models to OpenABM-CoMSES Twitter account.
+ * This code is adapted from the Twitter Post module
+ */
+function modellibrary_post_twitter($node) {
+  module_load_include('inc', 'twitter');
+  $openabm_twitter = 437897011; // uid for the openabm_comses Twitter account
+  $twitter_account = twitter_account_load($openabm_twitter);
+
+  $status = 'New Model posted: '. $node->title .' '. twitter_shorten_url(url('model/'. $node->nid, array('absolute' => TRUE)));
+
+  try {
+    $result = twitter_set_status($twitter_account, $status);
+    drupal_set_message(t('Successfully posted to Twitter'));
+  }
+  catch (TwitterException $e) {
+    drupal_set_message(t('An error occurred when posting to twitter: %code %error',
+      array('%code' => $result->code, '%error' => $result->error)), 'warning');
+  }
 }
 
 function _cleanmodels() {
