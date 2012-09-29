@@ -150,15 +150,81 @@ function modellibrary_theme($existing) {
 /**
  * Implementation of hook_imagecache_default_presets().
  *
- * Autoinstall the two imagecache presets used by modellibrary.
+ * Autoinstall the two imagecache presets used by modellibrary. 
+ * Technically, there will probably be some errors when trying to install
+ * this module in a clean system, because the 'Preview' and 'Thumbnail'
+ * presets each pass off to their Landscape and Portrait variants by their
+ * ImageCache ids (e.g. 'portrait' => '3'), which will probably be incorrect
+ * if any other presets have previosuly been created. In that case, the
+ * preset ids should be offset by the appropriate amount. (Current ids are
+ * calculated assuming 'Thumbnail' is the first preset in the system = 1.) 
  */
 function modellibrary_imagecache_default_presets() {
   $presets = array();
-  $presets['Icon'] = array (
-    'presetname' => 'Icon',
+  $presets['Thumbnail'] = array (
+    'presetname' => 'Thumbnail',
     'actions' => 
     array (
       0 => 
+      array (
+        'weight' => '0',
+        'module' => 'imagecache_canvasactions',
+        'action' => 'canvasactions_aspect',
+        'data' => 
+        array (
+          'portrait' => '3',
+          'landscape' => '2',
+          'ratio_adjustment' => '1',
+        ),
+      ),
+    ),
+  );
+
+  $presets['Thumbnail-Landscape'] = array (
+    'presetname' => 'Thumbnail-Landscape',
+    'actions' => 
+    array (
+      0 => 
+      array (
+        'weight' => '0',
+        'module' => 'imagecache',
+        'action' => 'imagecache_scale',
+        'data' => 
+        array (
+          'width' => '100',
+          'height' => '',
+          'upscale' => 0,
+        ),
+      ),
+      1 => 
+      array (
+        'weight' => '0',
+        'module' => 'imagecache_canvasactions',
+        'action' => 'canvasactions_definecanvas',
+        'data' => 
+        array (
+          'RGB' => 
+          array (
+            'HEX' => 'DDDDDD',
+          ),
+          'under' => 1,
+          'exact' => 
+          array (
+            'width' => '100',
+            'height' => '100',
+            'xpos' => 'center',
+            'ypos' => 'center',
+          ),
+          'relative' => 
+          array (
+            'leftdiff' => '',
+            'rightdiff' => '',
+            'topdiff' => '',
+            'bottomdiff' => '',
+          ),
+        ),
+      ),
+      2 => 
       array (
         'weight' => '0',
         'module' => 'imagecache_coloractions',
@@ -168,25 +234,92 @@ function modellibrary_imagecache_default_presets() {
           'format' => 'image/png',
         ),
       ),
-      1 => 
-      array (
-        'weight' => '0',
-        'module' => 'imagecache',
-        'action' => 'imagecache_scale_and_crop',
-        'data' => 
-        array (
-          'width' => '50',
-          'height' => '50',
-        ),
-      ),
-      2 => 
+      3 => 
       array (
         'weight' => '0',
         'module' => 'imagecache_canvasactions',
         'action' => 'canvasactions_roundedcorners',
         'data' => 
         array (
-          'radius' => '10',
+          'radius' => '16',
+          'independent_corners_set' => 
+          array (
+            'independent_corners' => 0,
+            'radii' => 
+            array (
+              'tl' => '',
+              'tr' => '',
+              'bl' => '',
+              'br' => '',
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  $presets['Thumbnail-Portrait'] = array (
+    'presetname' => 'Thumbnail-Portrait',
+    'actions' => 
+    array (
+      0 => 
+      array (
+        'weight' => '-10',
+        'module' => 'imagecache',
+        'action' => 'imagecache_scale',
+        'data' => 
+        array (
+          'width' => '',
+          'height' => '100',
+          'upscale' => 0,
+        ),
+      ),
+      1 => 
+      array (
+        'weight' => '-9',
+        'module' => 'imagecache_canvasactions',
+        'action' => 'canvasactions_definecanvas',
+        'data' => 
+        array (
+          'RGB' => 
+          array (
+            'HEX' => 'DDDDDD',
+          ),
+          'under' => 1,
+          'exact' => 
+          array (
+            'width' => '100',
+            'height' => '100',
+            'xpos' => 'center',
+            'ypos' => 'center',
+          ),
+          'relative' => 
+          array (
+            'leftdiff' => '',
+            'rightdiff' => '',
+            'topdiff' => '',
+            'bottomdiff' => '',
+          ),
+        ),
+      ),
+      2 => 
+      array (
+        'weight' => '-8',
+        'module' => 'imagecache_coloractions',
+        'action' => 'imagecache_convert',
+        'data' => 
+        array (
+          'format' => 'image/png',
+        ),
+      ),
+      3 => 
+      array (
+        'weight' => '-7',
+        'module' => 'imagecache_canvasactions',
+        'action' => 'canvasactions_roundedcorners',
+        'data' => 
+        array (
+          'radius' => '16',
           'independent_corners_set' => 
           array (
             'independent_corners' => 0,
@@ -210,15 +343,63 @@ function modellibrary_imagecache_default_presets() {
       0 => 
       array (
         'weight' => '0',
+        'module' => 'imagecache_canvasactions',
+        'action' => 'canvasactions_aspect',
+        'data' => 
+        array (
+          'portrait' => '6',
+          'landscape' => '5',
+          'ratio_adjustment' => '1',
+        ),
+      ),
+    ),
+  );
+
+  $presets['Preview-Landscape'] = array (
+    'presetname' => 'Preview-Landscape',
+    'actions' => 
+    array (
+      0 => 
+      array (
+        'weight' => '0',
         'module' => 'imagecache',
-        'action' => 'imagecache_scale_and_crop',
+        'action' => 'imagecache_scale',
         'data' => 
         array (
           'width' => '250',
-          'height' => '250',
+          'height' => '',
+          'upscale' => 0,
         ),
       ),
       1 => 
+      array (
+        'weight' => '0',
+        'module' => 'imagecache_canvasactions',
+        'action' => 'canvasactions_definecanvas',
+        'data' => 
+        array (
+          'RGB' => 
+          array (
+            'HEX' => 'DDDDDD',
+          ),
+          'under' => 1,
+          'exact' => 
+          array (
+            'width' => '250',
+            'height' => '250',
+            'xpos' => 'center',
+            'ypos' => 'center',
+          ),
+          'relative' => 
+          array (
+            'leftdiff' => '',
+            'rightdiff' => '',
+            'topdiff' => '',
+            'bottomdiff' => '',
+          ),
+        ),
+      ),
+      2 => 
       array (
         'weight' => '0',
         'module' => 'imagecache_coloractions',
@@ -228,14 +409,92 @@ function modellibrary_imagecache_default_presets() {
           'format' => 'image/png',
         ),
       ),
-      2 => 
+      3 => 
       array (
         'weight' => '0',
         'module' => 'imagecache_canvasactions',
         'action' => 'canvasactions_roundedcorners',
         'data' => 
         array (
-          'radius' => '15',
+          'radius' => '16',
+          'independent_corners_set' => 
+          array (
+            'independent_corners' => 0,
+            'radii' => 
+            array (
+              'tl' => '',
+              'tr' => '',
+              'bl' => '',
+              'br' => '',
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  $presets['Preview-Portrait'] = array (
+    'presetname' => 'Preview-Portrait',
+    'actions' => 
+    array (
+      0 => 
+      array (
+        'weight' => '0',
+        'module' => 'imagecache',
+        'action' => 'imagecache_scale',
+        'data' => 
+        array (
+          'width' => '',
+          'height' => '250',
+          'upscale' => 1,
+        ),
+      ),
+      1 => 
+      array (
+        'weight' => '0',
+        'module' => 'imagecache_canvasactions',
+        'action' => 'canvasactions_definecanvas',
+        'data' => 
+        array (
+          'RGB' => 
+          array (
+            'HEX' => 'DDDDDD',
+          ),
+          'under' => 1,
+          'exact' => 
+          array (
+            'width' => '250',
+            'height' => '250',
+            'xpos' => 'center',
+            'ypos' => 'center',
+          ),
+          'relative' => 
+          array (
+            'leftdiff' => '',
+            'rightdiff' => '',
+            'topdiff' => '',
+            'bottomdiff' => '',
+          ),
+        ),
+      ),
+      2 => 
+      array (
+        'weight' => '0',
+        'module' => 'imagecache_coloractions',
+        'action' => 'imagecache_convert',
+        'data' => 
+        array (
+          'format' => 'image/png',
+        ),
+      ),
+      3 => 
+      array (
+        'weight' => '0',
+        'module' => 'imagecache_canvasactions',
+        'action' => 'canvasactions_roundedcorners',
+        'data' => 
+        array (
+          'radius' => '16',
           'independent_corners_set' => 
           array (
             'independent_corners' => 0,
