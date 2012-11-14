@@ -77,6 +77,9 @@ function _model_add_form($form_state) {
     $edit_value['field_model_author4first'] = $node->field_model_author4first[0]['value'];
     $edit_value['field_model_author4middle'] = $node->field_model_author4middle[0]['value'];
     $edit_value['field_model_author4last'] = $node->field_model_author4last[0]['value'];
+    $edit_value['field_model_author5first'] = $node->field_model_author5first[0]['value'];
+    $edit_value['field_model_author5middle'] = $node->field_model_author5middle[0]['value'];
+    $edit_value['field_model_author5last'] = $node->field_model_author5last[0]['value'];
     $edit_value['title'] = $node->title;
     $edit_value['description'] = $node->body;
     $edit_value['field_model_uri'] = $node->field_model_uri[0]['value'];
@@ -262,7 +265,7 @@ function _model_add_form($form_state) {
       $form['author4']['field_model_author4first'] = array(
         '#type' => 'textfield',
         '#title' => t('First Name or Initial'),
-        '#description' => t('The first name of the model\'s third author.'),
+        '#description' => t('The first name of the model\'s fourth author.'),
         '#size' => 60,
         '#maxlength' => 60,
         '#default_value' => isset($default_value['field_model_author4first']) ? $default_value['field_model_author4first'] : $edit_value['field_model_author4first'],
@@ -272,7 +275,7 @@ function _model_add_form($form_state) {
       $form['author4']['field_model_author4middle'] = array(
         '#type' => 'textfield',
         '#title' => t('Middle Name or Initial'),
-        '#description' => t('The middle name or initial of the model\' third author.'),
+        '#description' => t('The middle name or initial of the model\' fourth author.'),
         '#size' => 60,
         '#maxlength' => 60,
         '#default_value' => isset($default_value['field_model_author4middle']) ? $default_value['field_model_author4middle'] : $edit_value['field_model_author4middle'],
@@ -282,10 +285,47 @@ function _model_add_form($form_state) {
       $form['author4']['field_model_author4last'] = array(
         '#type' => 'textfield',
         '#title' => t('Last Name'),
-        '#description' => t('The last name (surname) of the model\'s third author.'),
+        '#description' => t('The last name (surname) of the model\'s fourth author.'),
         '#size' => 60,
         '#maxlength' => 60,
         '#default_value' => isset($default_value['field_model_author4last']) ? $default_value['field_model_author4last'] : $edit_value['field_model_author4last'],
+        '#required' => FALSE,
+      );
+
+      $form['author5'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Author 5'),
+        '#collapsible' => TRUE, 
+        '#collapsed' => TRUE,
+      );
+
+      $form['author5']['field_model_author5first'] = array(
+        '#type' => 'textfield',
+        '#title' => t('First Name or Initial'),
+        '#description' => t('The first name of the model\'s fifth author.'),
+        '#size' => 60,
+        '#maxlength' => 60,
+        '#default_value' => isset($default_value['field_model_author5first']) ? $default_value['field_model_author5first'] : $edit_value['field_model_author5first'],
+        '#required' => FALSE,
+      );
+
+      $form['author5']['field_model_author5middle'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Middle Name or Initial'),
+        '#description' => t('The middle name or initial of the model\' fifth author.'),
+        '#size' => 60,
+        '#maxlength' => 60,
+        '#default_value' => isset($default_value['field_model_author5middle']) ? $default_value['field_model_author5middle'] : $edit_value['field_model_author5middle'],
+        '#required' => FALSE,
+      );
+
+      $form['author5']['field_model_author5last'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Last Name'),
+        '#description' => t('The last name (surname) of the model\'s fifth author.'),
+        '#size' => 60,
+        '#maxlength' => 60,
+        '#default_value' => isset($default_value['field_model_author5last']) ? $default_value['field_model_author5last'] : $edit_value['field_model_author5last'],
         '#required' => FALSE,
       );
 

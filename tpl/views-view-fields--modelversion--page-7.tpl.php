@@ -24,6 +24,8 @@
   //module_load_include('inc', 'modellibrary', 'modellibrary.helper.functions');
 
   global $user;
+  global $base_url;
+  global $base_path;
 
   $modelnid = arg(1);
   $version = arg(3);
@@ -36,7 +38,6 @@
   $model_view->pre_execute();
   $model_view->execute();
 
-//watchdog('modellibrary', 'modelversion-page-7 (37): field ver num: '. $fields['field_modelversion_number_value']->content);
 ?>
 <table style="margin: 0;" border="0" width="100%">
   <tr>
@@ -49,6 +50,8 @@
       if ($model_view->render_field('field_model_author3last_value', 0) > "") print ', '. $model_view->render_field('field_model_author3first_value', 0) ." ". $model_view->render_field('field_model_author3middle_value', 0) ." ". $model_view->render_field('field_model_author3last_value', 0);
        
       if ($model_view->render_field('field_model_author4last_value', 0) > "") print ', '. $model_view->render_field('field_model_author4first_value', 0) ." ". $model_view->render_field('field_model_author4middle_value', 0) ." ". $model_view->render_field('field_model_author4last_value', 0);
+
+      if ($model_view->render_field('field_model_author5last_value', 0) > "") print ', '. $model_view->render_field('field_model_author5first_value', 0) ." ". $model_view->render_field('field_model_author5middle_value', 0) ." ". $model_view->render_field('field_model_author5last_value', 0);
        
 ?>
       </div>
@@ -67,10 +70,19 @@
       <div class="model-date">Submitted: <?php print $model_view->render_field('created', 0); ?></div>
       <div class="model-date model-updated-date">Last Updated: <?php print $model_view->render_field('last_updated', 0); ?></div>
 
-      <?php $result = db_query("SELECT code, docs, dataset, sensitivity, other FROM (SELECT SUM(downloads) AS code FROM (SELECT COUNT(dc.fid) AS downloads FROM files files LEFT JOIN download_count dc ON files.fid = dc.fid WHERE dc.fid = files.fid AND (files.fid IN (SELECT DISTINCT n_mv.field_modelversion_code_fid AS code_fid FROM node n LEFT JOIN content_type_modelversion n_mv ON n.vid = n_mv.vid WHERE (n.type in ('modelversion')) AND (n.status = 1) AND (n_mv.field_modelversion_modelnid_value = %d )))) dl) code JOIN (SELECT SUM(downloads) AS docs FROM (SELECT COUNT(dc.fid) AS downloads FROM files files LEFT JOIN download_count dc ON files.fid = dc.fid WHERE dc.fid = files.fid AND (files.fid IN (SELECT DISTINCT n_mv.field_modelversion_documentation_fid AS doc_fid FROM node n LEFT JOIN content_type_modelversion n_mv ON n.vid = n_mv.vid WHERE (n.type in ('modelversion')) AND (n.status = 1) AND (n_mv.field_modelversion_modelnid_value = %d )))) dl) docs JOIN (SELECT SUM(downloads) AS dataset FROM (SELECT COUNT(dc.fid) AS downloads FROM files files LEFT JOIN download_count dc ON files.fid = dc.fid WHERE dc.fid = files.fid AND (files.fid IN (SELECT DISTINCT n_mv.field_modelversion_dataset_fid AS dataset_fid FROM node n LEFT JOIN content_type_modelversion n_mv ON n.vid = n_mv.vid WHERE (n.type in ('modelversion')) AND (n.status = 1) AND (n_mv.field_modelversion_modelnid_value = %d )))) dl) dataset JOIN (SELECT SUM(downloads) AS sensitivity FROM (SELECT COUNT(dc.fid) AS downloads FROM files files LEFT JOIN download_count dc ON files.fid = dc.fid WHERE dc.fid = files.fid AND (files.fid IN (SELECT DISTINCT n_mv.field_modelversion_sensitivity_fid AS sensitivity_fid FROM node n LEFT JOIN content_type_modelversion n_mv ON n.vid = n_mv.vid WHERE (n.type in ('modelversion')) AND (n.status = 1) AND (n_mv.field_modelversion_modelnid_value = %d )))) dl) sensitivity JOIN (SELECT SUM(downloads) AS other FROM (SELECT COUNT(dc.fid) AS downloads FROM files files LEFT JOIN download_count dc ON files.fid = dc.fid WHERE dc.fid = files.fid AND (files.fid IN (SELECT DISTINCT n_mv.field_modelversion_addfiles_fid AS other_fid FROM node n LEFT JOIN content_type_modelversion n_mv ON n.vid = n_mv.vid WHERE (n.type in ('modelversion')) AND (n.status = 1) AND (n_mv.field_modelversion_modelnid_value = %d )))) dl) other", $modelnid, $modelnid, $modelnid, $modelnid, $modelnid);
+<?php
+      // Code file download count, all-time
+      $sql = "SELECT SUM(downloads) AS downloads FROM (SELECT COUNT(dc.fid) AS downloads FROM files files LEFT JOIN download_count dc ON files.fid = dc.fid WHERE dc.fid = files.fid AND (files.fid IN (SELECT DISTINCT n_mv.field_modelversion_code_fid AS code_fid FROM node n LEFT JOIN content_type_modelversion n_mv ON n.vid = n_mv.vid WHERE (n.type in ('modelversion')) AND (n.status = 1) AND (n_mv.field_modelversion_modelnid_value = %d )))) dl";
+      $result = db_query($sql, $modelnid);
+      $all_dls = db_fetch_object($result); 
 
-      $row = db_fetch_object($result); ?>
-      <div class="model-downloads"><?php print ($row->code + $row->docs + $row->dataset + $row->sensitivity + $row->other); ?> Downloads</div>
+      // Code download count, last 3 months
+      $sql = "SELECT SUM(downloads) AS downloads FROM (SELECT COUNT(dc.fid) AS downloads FROM files files LEFT JOIN download_count dc ON files.fid = dc.fid WHERE dc.fid = files.fid AND (files.fid IN (SELECT DISTINCT n_mv.field_modelversion_code_fid AS code_fid FROM node n LEFT JOIN content_type_modelversion n_mv ON n.vid = n_mv.vid WHERE (n.type in ('modelversion')) AND (n.status = 1) AND (n_mv.field_modelversion_modelnid_value = %d ) AND (FROM_UNIXTIME(dc.timestamp) > (now() - INTERVAL 3 MONTH))))) dl";
+      $result = db_query($sql, $modelnid);
+      $month_dls = db_fetch_object($result); 
+
+?>
+    <div class="model-downloads"><?php print $all_dls->downloads; if ($all_dls->downloads == 1) print ' Download ('; else print ' Downloads ('; print $month_dls-downloads; if ($month_dls-downloads == 1) print ' Download '; else print ' Downloads '; ?>in Last 3 Months)</div>
       </div>
     </td>
     <td>
@@ -82,7 +94,7 @@
     $row = db_fetch_object($result);
 
     if ($row->statusid == 6) {
-print '      <div class="model-badge"><img src="/files/certified-badge-big.png" /></div>';
+print '      <div class="model-badge"><img src="/files/images/certified-badge-big.png" /></div>';
     } ?>
     </td>
     <td>
@@ -160,7 +172,7 @@ print '      <div class="model-badge"><img src="/files/certified-badge-big.png" 
         <div class="model-block model-citation-block">
           <div class="model-block-title model-citation-title">Cite This Model:</div>
           <div class="model-citation-text"><p>
-            <?php if ($model_view->render_field('field_model_author1last_value', 0) > "") { print $model_view->render_field('field_model_author1last_value', 0) .', '. $model_view->render_field('field_model_author1first_value', 0); if ($model_view->render_field('field_model_author1middle_value', 0) > "") print ' '. $model_view->render_field('field_model_author1middle_value', 0); } else print $model_view->render_field('name', 0); if ($model_view->render_field('field_model_author2last_value', 0) > "") { print ', '. $model_view->render_field('field_model_author2last_value', 0) .', '. $model_view->render_field('field_model_author2first_value', 0); if ($model_view->render_field('field_model_author2middle_value', 0) > "") print ' '. $model_view->render_field('field_model_author2middle_value', 0); } if ($model_view->render_field('field_model_author3last_value', 0) > "") { print ', '. $model_view->render_field('field_model_author3last_value', 0) .', '. $model_view->render_field('field_model_author3first_value', 0); if ($model_view->render_field('field_model_author3middle_value', 0) > "") print ' '. $model_view->render_field('field_model_author3middle_value', 0); } if ($model_view->render_field('field_model_author4last_value', 0) > "") { print ', '. $model_view->render_field('field_model_author4last_value', 0) .', '. $model_view->render_field('field_model_author4first_value', 0); if ($model_view->render_field('field_model_author4middle_value', 0) > "") print ' '. $model_view->render_field('field_model_author4middle_value', 0); } ?> (<?php print $fields['created']->content; ?>). "<?php print $model_view->render_field('title', 0); ?>" (Version <?php print $fields['field_modelversion_number_value']->content; ?>). Retrieved from OpenABM: <?php if ($model_view->render_field('field_model_handle_value', 0) > "") { print $model_view->render_field('field_model_handle_value', 0); } else { global $base_url; global $base_path; print $base_url . $base_path .'model/'. $modelnid .'/version/'. $fields['field_modelversion_number_value']->content; } ?>
+            <?php if ($model_view->render_field('field_model_author1last_value', 0) > "") { print $model_view->render_field('field_model_author1last_value', 0) .', '. $model_view->render_field('field_model_author1first_value', 0); if ($model_view->render_field('field_model_author1middle_value', 0) > "") print ' '. $model_view->render_field('field_model_author1middle_value', 0); } else print $model_view->render_field('name', 0); if ($model_view->render_field('field_model_author2last_value', 0) > "") { print ', '. $model_view->render_field('field_model_author2last_value', 0) .', '. $model_view->render_field('field_model_author2first_value', 0); if ($model_view->render_field('field_model_author2middle_value', 0) > "") print ' '. $model_view->render_field('field_model_author2middle_value', 0); } if ($model_view->render_field('field_model_author3last_value', 0) > "") { print ', '. $model_view->render_field('field_model_author3last_value', 0) .', '. $model_view->render_field('field_model_author3first_value', 0); if ($model_view->render_field('field_model_author3middle_value', 0) > "") print ' '. $model_view->render_field('field_model_author3middle_value', 0); } if ($model_view->render_field('field_model_author4last_value', 0) > "") { print ', '. $model_view->render_field('field_model_author4last_value', 0) .', '. $model_view->render_field('field_model_author4first_value', 0); if ($model_view->render_field('field_model_author4middle_value', 0) > "") print ' '. $model_view->render_field('field_model_author4middle_value', 0); } ?> (<?php print $fields['created']->content; ?>). "<?php print $model_view->render_field('title', 0); ?>" (Version <?php print $fields['field_modelversion_number_value']->content; ?>). Retrieved from OpenABM: <?php if ($model_view->render_field('field_model_handle_value', 0) > "") { print $model_view->render_field('field_model_handle_value', 0); } else { print $base_url . $base_path .'model/'. $modelnid .'/version/'. $fields['field_modelversion_number_value']->content; } ?>
           </p></div>
         </div>
       </div>
@@ -173,7 +185,7 @@ print '      <div class="model-badge"><img src="/files/certified-badge-big.png" 
         <div class="model-video">
           <?php 
           if ($model_view->render_field('field_model_video_fid', 0) != "") {
-            print '<a href="/'. $model_view->render_field('field_model_video_fid', 0) .'" rel="shadowbox;width=480;height=320"><img width="175" src="/files/video_thumbnail.png" /></a>';
+            print '<a href="/'. $model_view->render_field('field_model_video_fid', 0) .'" rel="shadowbox;width=480;height=320"><img width="175" src="/files/images/video_thumbnail.png" /></a>';
           }
           ?>&nbsp;
         </div>

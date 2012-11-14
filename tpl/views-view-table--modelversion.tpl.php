@@ -63,7 +63,7 @@
           elseif ($fields[$field] == 'field-modelversion-number-value') {
             print '<td width="100px" onclick="DoNav(\'/model/'. $modelnid .'/version/'. $vnum .'/view\');" class="views-field views-field-'. $fields[$field] .'">';
             print $content;
-            if ($datarow->version_num == $content) print ' <img src="/files/certified-badge-small.png" />';
+            if ($datarow->version_num == $content) print ' <img src="/files/images/certified-badge-small.png" />';
             print '</td>';
           }
           elseif ($fields[$field] == 'created') {
