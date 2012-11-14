@@ -1,5 +1,25 @@
 /* ;Id$ */
 
+  .model-submit-button {
+    font-size: 1.2em;
+    color: black !important;
+    background: silver;
+    border: 1px solid #C4C4C4;
+    border-bottom-color: #707070;
+    padding: 0 9px !important;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+    -moz-text-shadow: white 0 1px 0;
+    -webkit-text-shadow: white 0 1px 0;
+    text-shadow: white 0 1px 0;
+    margin: 15px 5px 15px 0;
+    cursor: pointer;
+    text-align: center;
+    white-space: nowrap;
+    text-justify: none;
+  }
+
   .views-field-field-model-image-fid
   {
     height: 50px;
@@ -7,28 +27,81 @@
 
   .model-region1
   {
-    float: left;
+    padding-right: 30px;
+    text-align: justify;
+    text-justify: auto;
   }
 
   .model-region2
   {
-    float: right;
   }
 
   .model-region3
   {
-    float: left;
+    padding-right: 30px;
+    text-align: justify;
+    text-justify: auto;
   }
 
   .model-region4
   {
-    float: right;
   }
 
-  .model-tags
+  div.model-section-title {
+    font-size: 1.6em;
+    font-height: 1.8em;
+    font-weight: bold;
+    margin: 20px 0;
+  }
+
+  div.model-block {
+    clear: both;
+    margin-bottom: 15px;
+  }
+
+  .model-block-title {
+    font-weight: bold;
+  }
+
+  .model-updated-date {
+    margin-bottom: 10px;
+  }
+
+  .model-body {
+    margin-top: 15px;
+  }
+
+  div.model-tags-block {
+    margin: 20px 0px 50px 0px;
+  }
+
+  div.model-tags
   {
-    float: left;
     padding: 0;
+  }
+
+  span.tag {
+    text-align: left;
+  }
+
+
+  div.model-citation-block {
+    text-align: left;
+    padding: 10px;
+    border: 1px solid black;
+    border-radius: 10px;
+    border-image: initial;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -khtml-border-radius: 10px;
+  }
+
+  div.model-citation-title {
+    font-weight: bold;
+  }
+
+  div.model-video, div.model-image {
+    margin-top: 20px;
   }
 
   div.modelstatus
@@ -38,18 +111,28 @@
 
   div.versions-list
   {
-    background: #CADCA7;
   }
 
   div.versions-list table
   {
-    margin: 0;
+    margin: 0 0 20px 0;
+  }
+
+  div.model-authors {
+    font-size: 1.33em;
+    font-height: 1.6em;
+    font-weight: bold;
+    margin-top: 20px;
+    margin-bottom: 10px;
   }
 
   div.model-author h3
   {
     margin-top: 0;
     margin-bottom: 0;
+  }
+
+  div.model-body {
   }
 
   .model-pane-1 
@@ -207,14 +290,15 @@
  
   a.model-button 
   { 
+    border: 1px solid gray;
     display:block; 
     float: right; 
     width:9em; 
     padding:5px 0; 
     font: bold 100% Verdana,Arial,sans-serif; 
+    background: #CADCA7; 
+    color: #505050; 
     text-transform:uppercase; 
-    background: #7F9E56; 
-    color: #F6FF97; 
     text-decoration:none; 
     text-align:center;
     border-radius: 4px;
@@ -226,8 +310,8 @@
  
   a.model-button:hover 
   { 
-    background: #CADCA7; 
-    color:#718B4B 
+    background: #7F9E56; 
+    color: #F6FF97; 
   } 
 
   ul.model-button, ul.model-button li 
@@ -271,12 +355,12 @@
 
   table#striped tr.odd
   {
-    background-color: #CADCA7; /* Drupal core uses a #eee background */
+    background-color: #FFFFFF; /* Drupal core uses a #eee background */
   }
 
   table#striped tr.highlight /* To allow row highlighting for mouseovers */
   {
-    background-color: #FFF; /* Drupal core uses a #eee background */
+    background-color: #DDD; /* Drupal core uses a #eee background */
     cursor: pointer;
   }
 

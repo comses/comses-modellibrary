@@ -65,15 +65,25 @@ function _model_add_form($form_state) {
   if ($action == 'edit') {
     $node = node_load($modelnid);
     $edit_value = array();
+    $edit_value['field_model_author1first'] = $node->field_model_author1first[0]['value'];
+    $edit_value['field_model_author1middle'] = $node->field_model_author1middle[0]['value'];
+    $edit_value['field_model_author1last'] = $node->field_model_author1last[0]['value'];
+    $edit_value['field_model_author2first'] = $node->field_model_author2first[0]['value'];
+    $edit_value['field_model_author2middle'] = $node->field_model_author2middle[0]['value'];
+    $edit_value['field_model_author2last'] = $node->field_model_author2last[0]['value'];
+    $edit_value['field_model_author3first'] = $node->field_model_author3first[0]['value'];
+    $edit_value['field_model_author3middle'] = $node->field_model_author3middle[0]['value'];
+    $edit_value['field_model_author3last'] = $node->field_model_author3last[0]['value'];
+    $edit_value['field_model_author4first'] = $node->field_model_author4first[0]['value'];
+    $edit_value['field_model_author4middle'] = $node->field_model_author4middle[0]['value'];
+    $edit_value['field_model_author4last'] = $node->field_model_author4last[0]['value'];
     $edit_value['title'] = $node->title;
     $edit_value['description'] = $node->body;
     $edit_value['field_model_uri'] = $node->field_model_uri[0]['value'];
     $edit_value['field_model_teaser'] = $node->field_model_teaser[0]['value'];
     $edit_value['field_model_replicated'] = $node->field_model_replicated[0]['value'];
-    //watchdog('modellibrary', 'modellibrary.module (532): replicated: '. $default_value['field_model_replicated'], NULL, WACHDOG_INFO);
     $edit_value['field_model_reference'] = $node->field_model_reference[0]['value'];
     $edit_value['field_model_publication_text'] = $node->field_model_publication_text[0]['value'];
-    //watchdog('modellibrary', 'modellibrary.module (534): reference: '. $default_value['field_model_reference'], NULL, WACHDOG_INFO);
     //$default_value['field_model_enabled'] = $node->field_model_enabled[0]['value'];
     $edit_value['field_model_image'] = $node->field_model_image;
     $edit_value['field_model_video'] = $node->field_model_video;
@@ -129,6 +139,154 @@ function _model_add_form($form_state) {
         //'#weight' => -5,
         '#required' => TRUE,
         //'#element_validate' => array('_model_add_element_validate'),
+      );
+
+      $form['author1'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Author 1'),
+        '#collapsible' => FALSE, 
+        '#collapsed' => FALSE,
+      );
+
+      $form['author1']['field_model_author1first'] = array(
+        '#type' => 'textfield',
+        '#title' => t('First Name or Initial'),
+        '#description' => t('The first name of the model\'s first author. [REQUIRED]'),
+        '#size' => 60,
+        '#maxlength' => 60,
+        '#default_value' => isset($default_value['field_model_author1first']) ? $default_value['field_model_author1first'] : $edit_value['field_model_author1first'],
+        '#required' => TRUE,
+      );
+
+      $form['author1']['field_model_author1middle'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Middle Name or Initial'),
+        '#description' => t('The middle name or initial of the model\' first author.'),
+        '#size' => 60,
+        '#maxlength' => 60,
+        '#default_value' => isset($default_value['field_model_author1middle']) ? $default_value['field_model_author1middle'] : $edit_value['field_model_author1middle'],
+        '#required' => FALSE,
+      );
+
+      $form['author1']['field_model_author1last'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Last Name'),
+        '#description' => t('The last name (surname) of the model\'s first author. [REQUIRED]'),
+        '#size' => 60,
+        '#maxlength' => 60,
+        '#default_value' => isset($default_value['field_model_author1last']) ? $default_value['field_model_author1last'] : $edit_value['field_model_author1last'],
+        '#required' => TRUE,
+      );
+
+      $form['author2'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Author 2'),
+        '#collapsible' => TRUE, 
+        '#collapsed' => TRUE,
+      );
+
+      $form['author2']['field_model_author2first'] = array(
+        '#type' => 'textfield',
+        '#title' => t('First Name or Initial'),
+        '#description' => t('The first name of the model\'s second author.'),
+        '#size' => 60,
+        '#maxlength' => 60,
+        '#default_value' => isset($default_value['field_model_author2first']) ? $default_value['field_model_author2first'] : $edit_value['field_model_author2first'],
+        '#required' => FALSE,
+      );
+
+      $form['author2']['field_model_author2middle'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Middle Name or Initial'),
+        '#description' => t('The middle name or initial of the model\' second author.'),
+        '#size' => 60,
+        '#maxlength' => 60,
+        '#default_value' => isset($default_value['field_model_author2middle']) ? $default_value['field_model_author2middle'] : $edit_value['field_model_author2middle'],
+        '#required' => FALSE,
+      );
+
+      $form['author2']['field_model_author2last'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Last Name'),
+        '#description' => t('The last name (surname) of the model\'s second author.'),
+        '#size' => 60,
+        '#maxlength' => 60,
+        '#default_value' => isset($default_value['field_model_author2last']) ? $default_value['field_model_author2last'] : $edit_value['field_model_author2last'],
+        '#required' => FALSE,
+      );
+
+      $form['author3'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Author 3'),
+        '#collapsible' => TRUE, 
+        '#collapsed' => TRUE,
+      );
+
+      $form['author3']['field_model_author3first'] = array(
+        '#type' => 'textfield',
+        '#title' => t('First Name or Initial'),
+        '#description' => t('The first name of the model\'s third author.'),
+        '#size' => 60,
+        '#maxlength' => 60,
+        '#default_value' => isset($default_value['field_model_author3first']) ? $default_value['field_model_author3first'] : $edit_value['field_model_author3first'],
+        '#required' => FALSE,
+      );
+
+      $form['author3']['field_model_author3middle'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Middle Name or Initial'),
+        '#description' => t('The middle name or initial of the model\' third author.'),
+        '#size' => 60,
+        '#maxlength' => 60,
+        '#default_value' => isset($default_value['field_model_author3middle']) ? $default_value['field_model_author3middle'] : $edit_value['field_model_author3middle'],
+        '#required' => FALSE,
+      );
+
+      $form['author3']['field_model_author3last'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Last Name'),
+        '#description' => t('The last name (surname) of the model\'s third author.'),
+        '#size' => 60,
+        '#maxlength' => 60,
+        '#default_value' => isset($default_value['field_model_author3last']) ? $default_value['field_model_author3last'] : $edit_value['field_model_author3last'],
+        '#required' => FALSE,
+      );
+
+      $form['author4'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Author 4'),
+        '#collapsible' => TRUE, 
+        '#collapsed' => TRUE,
+      );
+
+      $form['author4']['field_model_author4first'] = array(
+        '#type' => 'textfield',
+        '#title' => t('First Name or Initial'),
+        '#description' => t('The first name of the model\'s third author.'),
+        '#size' => 60,
+        '#maxlength' => 60,
+        '#default_value' => isset($default_value['field_model_author4first']) ? $default_value['field_model_author4first'] : $edit_value['field_model_author4first'],
+        '#required' => FALSE,
+      );
+
+      $form['author4']['field_model_author4middle'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Middle Name or Initial'),
+        '#description' => t('The middle name or initial of the model\' third author.'),
+        '#size' => 60,
+        '#maxlength' => 60,
+        '#default_value' => isset($default_value['field_model_author4middle']) ? $default_value['field_model_author4middle'] : $edit_value['field_model_author4middle'],
+        '#required' => FALSE,
+      );
+
+      $form['author4']['field_model_author4last'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Last Name'),
+        '#description' => t('The last name (surname) of the model\'s third author.'),
+        '#size' => 60,
+        '#maxlength' => 60,
+        '#default_value' => isset($default_value['field_model_author4last']) ? $default_value['field_model_author4last'] : $edit_value['field_model_author4last'],
+        '#required' => FALSE,
       );
 
       $form['field_model_teaser'] = array(
@@ -310,14 +468,14 @@ function _model_add_form($form_state) {
       break;
   }
 
-  // Back button
-  if ($form_state['storage']['step'] > 1) {
-    $form['back'] = array( //corresponds to 'edit-back' in form_submit
-      '#value' => '<< Previous',
-      '#type' => 'submit',
-      '#weight' => 20
-    );
-  }
+  // Back button - Currently disabled because data is getting lost when stepping back
+  #if ($form_state['storage']['step'] > 1) {
+  #  $form['back'] = array( //corresponds to 'edit-back' in form_submit
+  #    '#value' => '<< Previous',
+  #    '#type' => 'submit',
+  #    '#weight' => 20
+  #  );
+  #}
 
   // Cancel button
   $form['cancel'] = array(
@@ -476,6 +634,21 @@ function _model_add_form_submit($form, &$form_state) {
     $new_state['values']['status'] = 0;
     $new_state['values']['field_model_enabled'][0]['value'] = 1;
   }
+
+  $new_state['values']['field_model_author1first'][0]['value'] = $form_state['storage']['values']['field_model_author1first'];
+  $new_state['values']['field_model_author2first'][0]['value'] = $form_state['storage']['values']['field_model_author2first'];
+  $new_state['values']['field_model_author3first'][0]['value'] = $form_state['storage']['values']['field_model_author3first'];
+  $new_state['values']['field_model_author4first'][0]['value'] = $form_state['storage']['values']['field_model_author4first'];
+
+  $new_state['values']['field_model_author1middle'][0]['value'] = $form_state['storage']['values']['field_model_author1middle'];
+  $new_state['values']['field_model_author2middle'][0]['value'] = $form_state['storage']['values']['field_model_author2middle'];
+  $new_state['values']['field_model_author3middle'][0]['value'] = $form_state['storage']['values']['field_model_author3middle'];
+  $new_state['values']['field_model_author4middle'][0]['value'] = $form_state['storage']['values']['field_model_author4middle'];
+
+  $new_state['values']['field_model_author1last'][0]['value'] = $form_state['storage']['values']['field_model_author1last'];
+  $new_state['values']['field_model_author2last'][0]['value'] = $form_state['storage']['values']['field_model_author2last'];
+  $new_state['values']['field_model_author3last'][0]['value'] = $form_state['storage']['values']['field_model_author3last'];
+  $new_state['values']['field_model_author4last'][0]['value'] = $form_state['storage']['values']['field_model_author4last'];
 
   $new_state['values']['field_model_teaser'][0]['value'] = $form_state['storage']['values']['field_model_teaser'];
   $new_state['values']['field_model_public'][0]['value'] = $form_state['storage']['values']['field_model_public'];

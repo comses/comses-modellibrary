@@ -16,6 +16,18 @@
  * @ingroup views_templates
  */
 ?>
+
+<?php // Lookup Model Review info, check if this model is certified and which version was certified
+  $sql = "SELECT mr.model_nid, mra.rid, mra.sid, mra.statusid, ctmv.field_modelversion_number_value AS version_num "
+       . "FROM {modelreview} mr INNER JOIN {modelreview_action} mra ON mr.rid = mra.rid AND mra.statusid = 6 "
+       . "LEFT JOIN {content_type_modelversion} ctmv ON ctmv.nid = mra.modelversion_nid WHERE mr.model_nid = %d";
+  $queryresult = db_query($sql, arg(1));
+  $datarow = db_fetch_object($queryresult);
+
+  //drupal_set_message('is result null: '. is_null($row->model_nid));
+  //drupal_set_message('version num: '. $row->version_num);
+?>
+
 <table width="100%" id="striped" class="model-vers <?php print $class; ?>">
   <?php if (!empty($title)) : ?>
     <caption><?php print $title; ?></caption>
@@ -49,11 +61,17 @@
           if ($fields[$field] == 'field-modelversion-modelnid-value') {
           }
           elseif ($fields[$field] == 'field-modelversion-number-value') {
-            print '<td width="70px" onclick="DoNav(\'/model/'. $modelnid .'/version/'. $vnum .'/view\');" class="views-field views-field-'. $fields[$field] .'">';
+            print '<td width="100px" onclick="DoNav(\'/model/'. $modelnid .'/version/'. $vnum .'/view\');" class="views-field views-field-'. $fields[$field] .'">';
+            print $content;
+            if ($datarow->version_num == $content) print ' <img src="/files/certified-badge-small.png" />';
+            print '</td>';
+          }
+          elseif ($fields[$field] == 'created') {
+            print '<td width="100px" onclick="DoNav(\'/model/'. $modelnid .'/version/'. $vnum .'/view\');" class="views-field views-field-'. $fields[$field] .'">';
             print $content;
             print '</td>';
           }
-          else {
+          elseif ($fields[$field] == 'body') {
             print '<td onclick="DoNav(\'/model/'. $modelnid .'/version/'. $vnum .'/view\');" class="views-field views-field-'. $fields[$field] .'">';
             print $content;
             print '</td>';
