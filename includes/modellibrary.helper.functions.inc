@@ -3,7 +3,7 @@
 /*
  * Helper function to load the latest version of a model, given that model's NID
  */
-function _load_modelversion($model_nid) {
+function load_modelversion($model_nid) {
     $view_args = array($model_nid);
     $display_id = 'page_1'; // Model view
     $version_view = views_get_view('modelversion');

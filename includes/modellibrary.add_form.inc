@@ -1,6 +1,6 @@
 <?php
 
-define(MODEL_STEPS, 6);  // Number of steps in _model_add_form()
+define(MODEL_STEPS, 6);  // Number of steps in model_add_form()
 
 /* Implementation of Drupal Form API hook_form
  *
@@ -17,7 +17,7 @@ define(MODEL_STEPS, 6);  // Number of steps in _model_add_form()
  * merging Model and Version types into a single Model content type, which is
  * versioned as a single unit.
  */
-function _model_add_form($form_state) {
+function model_add_form($form_state) {
   module_load_include('inc', 'content', 'includes/content.node_form');  // Must have this in order to call content_field_form later.
 
   if (arg(2) == 'edit') {
@@ -92,7 +92,7 @@ function _model_add_form($form_state) {
     $edit_value['field_model_video'] = $node->field_model_video;
     $edit_value['field_model_tags'] = $node->field_model_tags;
 
-    $node = _load_modelversion($modelnid);
+    $node = load_modelversion($modelnid);
     $edit_value['notes'] = $node->body;
     $edit_value['field_modelversion_language'] = $node->field_modelversion_language;
     $edit_value['field_modelversion_otherlang'] = $node->field_modelversion_otherlang;
@@ -525,7 +525,7 @@ function _model_add_form($form_state) {
     '#executes_submit_callback' => TRUE,
     '#submit' => array('_model_add_cancel'),
   );
-  $form['#after_build'][] = '_model_add_form_after_build'; // Needed to disable form validation, so our cancel can be performed
+  $form['#after_build'][] = 'model_add_form_after_build'; // Needed to disable form validation, so our cancel can be performed
 
   //'Next' appears at every step except for the final page as 'Submit'
   if ($form_state['storage']['step'] < MODEL_STEPS) {
@@ -546,7 +546,7 @@ function _model_add_form($form_state) {
   return $form;
 }
 
-function _model_add_cancel() {
+function model_add_cancel() {
   if (arg(1) == 'add') {
     drupal_goto('models/browse');
   } else {
@@ -559,7 +559,7 @@ function _model_add_cancel() {
  * Implementation of hook_validate().
  *
  */
-function _model_add_form_validate($form, &$form_state) {
+function model_add_form_validate($form, &$form_state) {
   if (arg(2) == 'edit') {
     $action = 'edit';
     $modelnid = arg(1);
@@ -586,9 +586,9 @@ function _model_add_form_validate($form, &$form_state) {
  * Cancel button has been clicked. (Otherwise cancelling during a model Add, the cancel
  * will fail if required fields have not been filled in.)
  */
-function _model_add_form_after_build($form, &$form_state) {
+function model_add_form_after_build($form, &$form_state) {
   if($form_state['clicked_button']['#value'] == 'Cancel') {
-    _model_add_form_disable_validation($form);
+    model_add_form_disable_validation($form);
   }
   return $form;
 }
@@ -596,10 +596,10 @@ function _model_add_form_after_build($form, &$form_state) {
 /**
  * Recursively remove #required validation flags on fields in current form.
  */
-function _model_add_form_disable_validation(&$element) {
+function model_add_form_disable_validation(&$element) {
   unset($element['#needs_validation']);
   foreach(element_children($element) as $key) {
-    _model_add_form_disable_validation($element[$key]);
+    model_add_form_disable_validation($element[$key]);
   }
 }
 
@@ -607,7 +607,7 @@ function _model_add_form_disable_validation(&$element) {
  * Implementation of hook_submit().
  *
  */
-function _model_add_form_submit($form, &$form_state) {
+function model_add_form_submit($form, &$form_state) {
   //multistep processing. If this is the first page, we need to create the 
   // storage area for previous pages of the form
   if (!$form_state['storage']['values']) {
@@ -728,7 +728,7 @@ function _model_add_form_submit($form, &$form_state) {
   $version = new stdClass();
 
   if ($action == 'edit') {
-    $version = _load_modelversion($modelnid);  
+    $version = load_modelversion($modelnid);  
   } 
 
   // Setup form_state array for the drupal_execute function.

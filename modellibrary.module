@@ -47,7 +47,7 @@
    */
 
 /* Load module include files */
-//module_load_include('inc', 'modellibrary', 'modellibrary.add_form');
+module_load_include('inc', 'modellibrary', 'includes/modellibrary.add_form');
 module_load_include('inc', 'modellibrary', 'includes/modellibrary.helper.functions');
 
 
@@ -66,7 +66,6 @@ function modellibrary_help($path, $arg) {
  */
 function modellibrary_init() {
   drupal_add_css(drupal_get_path('module', 'modellibrary') .'/includes/modellibrary.css');
-//  drupal_add_js(drupal_get_path('module', 'modellibrary') .'/includes/modellibrary.js');
 }
 
 /**
@@ -526,7 +525,7 @@ function modellibrary_menu() {
     'title' => 'View Model',
     'description' => "",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('_model_redirect_view', array(1)),
+    'page arguments' => array('model_redirect_view', array(1)),
     'access arguments' => array('view model'),
     'type' => MENU_CALLBACK,
   );
@@ -535,7 +534,7 @@ function modellibrary_menu() {
     'title' => 'View Model',
     'description' => "",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('_model_redirect_view', array(1)),
+    'page arguments' => array('model_redirect_view', array(1)),
     'access arguments' => array('view model'),
     'type' => MENU_CALLBACK,
   );
@@ -545,9 +544,8 @@ function modellibrary_menu() {
     'title' => 'Add Model',
     'description' => "",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('_model_add_form', array(1)),
+    'page arguments' => array('model_add_form', array(1)),
     'access arguments' => array('create model'),
-    'file' => 'includes/modellibrary.add_form.inc',
     'type' => MENU_CALLBACK,
   );
 
@@ -556,10 +554,9 @@ function modellibrary_menu() {
     'title' => 'Edit',
     'description' => "",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('_model_add_form', array(1, 2)),
+    'page arguments' => array('model_add_form', array(1, 2)),
     'access callback' => 'model_edit_access',
     'access arguments' => array('edit', array(1), 'edit own model'),
-    'file' => 'includes/modellibrary.add_form.inc',
     'type' => MENU_CALLBACK,
   );
 
@@ -567,7 +564,7 @@ function modellibrary_menu() {
   $items['model/%/enable'] = array(
     'title' => 'Enable',
     'description' => "",
-    'page callback' => '_enable_model',
+    'page callback' => 'enable_model',
     'page arguments' => array(array(1)),
     'access callback' => 'model_edit_access',
     'access arguments' => array('edit', array(1), 'edit own model'),
@@ -578,7 +575,7 @@ function modellibrary_menu() {
   $items['model/%/disable'] = array(
     'title' => 'Disable',
     'description' => "",
-    'page callback' => '_disable_model',
+    'page callback' => 'disable_model',
     'page arguments' => array(array(1)),
     'access callback' => 'model_edit_access',
     'access arguments' => array('edit', array(1), 'edit own model'),
@@ -605,7 +602,7 @@ function modellibrary_menu() {
     'title' => 'Edit',
     'description' => "",
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('_model_redirect_edit', array(1, 3)),
+    'page arguments' => array('model_redirect_edit', array(1, 3)),
     'access callback' => 'model_edit_access',
     'access arguments' => array('edit', array(1), 'edit own model'),
     'type' => MENU_LOCAL_TASK,
@@ -635,7 +632,7 @@ function modellibrary_menu() {
     'title' => 'My Models',
     'description' => 'Click to view your models.',
     'type' => MENU_LOCAL_TASK,
-    'page callback' => '_redirect_to_user_models',
+    'page callback' => 'redirect_to_user_models',
     'access callback' => 'user_is_logged_in',
     'weight' => 2,
   );
@@ -654,7 +651,7 @@ function modellibrary_menu() {
     'title' => 'Add',
     'description' => 'Click to add a new model.',
     'type' => MENU_LOCAL_TASK,
-    'page callback' => '_add_model_if_permitted',
+    'page callback' => 'add_model_if_permitted',
     'access callback' => TRUE,
     'weight' => 1,
   );
@@ -733,7 +730,7 @@ function modellibrary_apachesolr_search_result_alter(&$doc) {
   return $doc;
 }
 
-function _add_model_if_permitted() {
+function add_model_if_permitted() {
   global $user;
   $item = menu_get_item('model/add');
 
@@ -746,16 +743,16 @@ function _add_model_if_permitted() {
   }
 }
 
-function _redirect_to_user_models() {
+function redirect_to_user_models() {
   global $user;
 
   drupal_goto('user/'. $user->uid .'/models');
 }
 
-function _enable_model() {
+function enable_model() {
   $modelnid = arg(1);
   $model = node_load($modelnid);
-  $version = _load_modelversion($modelnid);
+  $version = load_modelversion($modelnid);
 
   // Now we need to determine whether this model meets publication standard
   // If not, then the published (status) and Enabled flags are turned off.
@@ -778,7 +775,7 @@ function _enable_model() {
   drupal_goto('model/'. $modelnid);
 }
 
-function _disable_model() {
+function disable_model() {
   $modelnid = arg(1);
   $model = node_load($modelnid);
 
@@ -810,7 +807,7 @@ function modellibrary_post_twitter($node) {
   }
 }
 
-function _cleanmodels() {
+function cleanmodels() {
   $query = "SELECT n.nid FROM {node} n WHERE n.type = 'model' ORDER BY n.nid";
   $results = db_query($query);
 
@@ -818,7 +815,7 @@ function _cleanmodels() {
     $modelnid = $nid;
 
     $model = node_load($modelnid);
-    $version = _load_modelversion($modelnid);
+    $version = load_modelversion($modelnid);
 
 watchdog('modellibrary', 'modellibrary.module (472): code_fid: '. $version->field_modelversion_code_fid, NULL, WACHDOG_INFO);
 
@@ -837,7 +834,7 @@ watchdog('modellibrary', 'modellibrary.module (472): code_fid: '. $version->fiel
   drupal_goto('models/browse');
 }
 
-function _model_redirect_view() {
+function model_redirect_view() {
   // We need to parse the url arguments to check whether a text URI has been entered
   // or the model NID. For backwards compatibility, an old-style URL with the
   // model URI must be converted to the current NID-format URL.
@@ -886,7 +883,7 @@ function _model_redirect_view() {
   }
 }
 
-function _model_redirect_edit() {
+function model_redirect_edit() {
   $modelnid = arg(1);
   drupal_goto('model/'. $modelnid .'/edit');
 }
