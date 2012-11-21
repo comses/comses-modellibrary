@@ -82,7 +82,7 @@
       $month_dls = db_fetch_object($result); 
 
 ?>
-    <div class="model-downloads"><?php print $all_dls->downloads; if ($all_dls->downloads == 1) print ' Download ('; else print ' Downloads ('; print $month_dls-downloads; if ($month_dls-downloads == 1) print ' Download '; else print ' Downloads '; ?>in Last 3 Months)</div>
+    <div class="model-downloads"><?php print $all_dls->downloads; if ($all_dls->downloads == 1) print ' Download'; else print ' Downloads'; ?></div>
       </div>
     </td>
     <td>
@@ -93,7 +93,7 @@
     $result = db_query($sql, $modelnid);
     $row = db_fetch_object($result);
 
-    if ($row->statusid == 6) {
+    if ($row->statusid == 6 && (in_array('openabm manager', array_values($user->roles)) || in_array('administrator', array_values($user->roles)))) {
 print '      <div class="model-badge"><img src="/files/images/certified-badge-big.png" /></div>';
     } ?>
     </td>
@@ -214,7 +214,7 @@ print '      <div class="model-badge"><img src="/files/images/certified-badge-bi
         break;
 
       case 6:
-        $message = '<div class="model-certification-text"><p>This model has been Certified that it meets the CoMSES Guidelines for Modeling Best-Practices. Certification involves a review process by which a model is examined to ensure it has been coded and documented according to the community\'s best-practices. Click the "More Info" button below for more information on the Model Certification process.</p></div>';
+        $message = '<div class="model-certification-text"><p>This model has been Certified that it meets the CoMSES Guidelines for Modeling Best-Practices. Certification involves a review process by which a model is examined to ensure it has been coded and documented according to the community\'s best-practices.</p></div>';
         //$message .= '<div class="model-block"><a class="model-submit-button" href="'. $base_url . $base_path .'model/'. $modelnid .'/review/status">Review Status</a></div>';
         break;
 
@@ -222,8 +222,8 @@ print '      <div class="model-badge"><img src="/files/images/certified-badge-bi
         break;
 
       default:
-        $message = '<div class="model-certification-text"><p>This model can be reviewed for CoMSES Certification. Certification involves a review process by which a model is examined to ensure it has been coded and documented according to the community\'s best-practices. Click the "More Info" button below for more information on the Model Certification process.</p></div>';
-        $message .= '<div class="model-block"><a class="model-submit-button" href="'. $base_url . $base_path .'model/'. $modelnid .'/review/info">More Info</a></div>';
+        $message = '<div class="model-certification-text"><p>This model can be reviewed for CoMSES Certification. Certification involves a review process by which a model is examined to ensure it has been coded and documented according to the community\'s best-practices. Click the "Request Review" button below for more information on the Model Certification process.</p></div>';
+        $message .= '<div class="model-block"><a class="model-submit-button" href="'. $base_url . $base_path .'model/'. $modelnid .'/review/info">Request Review</a></div>';
 
     }
 
