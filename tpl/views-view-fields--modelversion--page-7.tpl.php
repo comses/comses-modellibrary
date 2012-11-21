@@ -93,7 +93,7 @@
     $result = db_query($sql, $modelnid);
     $row = db_fetch_object($result);
 
-    if ($row->statusid == 6 && (in_array('openabm manager', array_values($user->roles)) || in_array('administrator', array_values($user->roles)))) {
+    if ($row->statusid == 60 && (in_array('openabm manager', array_values($user->roles)) || in_array('administrator', array_values($user->roles)))) {
 print '      <div class="model-badge"><img src="/files/images/certified-badge-big.png" /></div>';
     } ?>
     </td>
@@ -203,22 +203,22 @@ print '      <div class="model-badge"><img src="/files/images/certified-badge-bi
     $row = db_fetch_object($result);
     
     switch ($row->statusid) {
-      case 1:
-      case 2:
-      case 3:
-      case 4:
-      case 5:
+      case 10:
+      case 20:
+      case 30:
+      case 40:
+      case 50:
 
         $message = '<div class="model-certification-text"><p>This model is currently under review. To view the review status page, click "Review Status" below.</p></div>';
         $message .= '<div class="model-block"><a class="model-submit-button" href="'. $base_url . $base_path .'model/'. $modelnid .'/review/status">Review Status</a></div>';
         break;
 
-      case 6:
+      case 60:
         $message = '<div class="model-certification-text"><p>This model has been Certified that it meets the CoMSES Guidelines for Modeling Best-Practices. Certification involves a review process by which a model is examined to ensure it has been coded and documented according to the community\'s best-practices.</p></div>';
         //$message .= '<div class="model-block"><a class="model-submit-button" href="'. $base_url . $base_path .'model/'. $modelnid .'/review/status">Review Status</a></div>';
         break;
 
-      case 7:
+      case 70:
         break;
 
       default:
