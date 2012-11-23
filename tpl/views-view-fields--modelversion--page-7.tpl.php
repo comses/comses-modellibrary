@@ -480,6 +480,6 @@ print '      </div>
   }
   print '</div>';
   }
-  drupal_set_title(check_plain($model_view->render_field('title', 0)));
+  drupal_set_title($model_view->render_field('title', 0));
 ?>
 
