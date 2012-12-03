@@ -88,7 +88,7 @@
               }
               elseif ($fields[$field] == 'statusid' || $fields[$field] == 'statusid active') {
                 print '<td class="modellibrary views-field views-field-'. $fields[$field] .'">';
-                if ($content == 60) {
+                if ($content == 60 && (in_array('openabm manager', array_values($user->roles)) || in_array('administrator', array_values($user->roles)))) {
                   print '<img src="sites/all/modules/comses-modelreview/images/certified-badge-small.png" />';
                 }
                 print '</td>';
