@@ -23,22 +23,27 @@
   <thead>
     <tr>
       <?php foreach ($header as $field => $label): 
-        if (substr($fields[$field], 0, 5) == 'title' || substr($fields[$field], 0, 4) == 'name' || substr($fields[$field], 0, 7) == 'created') {
+        if (substr($fields[$field], 0, 5) == 'title' || substr($fields[$field], 0, 4) == 'name' || substr($fields[$field], 0, 7) == 'created' || substr($fields[$field], 0, 8) == 'statusid') {
           if (substr($fields[$field], 0, 5) == 'title') {
             print '<th class="modellibrary views-field views-field-'. $fields[$field] .'">';
-              print $label;
+            print $label;
+            print '</th>';
+          }
+          elseif (substr($fields[$field], 0, 8) == 'statusid') {
+            print '<th class="modellibrary views-field views-field-'. $fields[$field] .'">';
+            print $label;
             print '</th>';
           }
           else {
             if (substr($fields[$field], 0, 4) == 'name') {
               print '<th class="modellibrary views-field views-field-created">';
               print '<div class="modellibrary views-field views-field-'. $fields[$field] .'">';
-                print $label;
+              print $label;
               print '</div>';
             }
             else {
               print '<div class="modellibrary views-field views-field-'. $fields[$field] .'">';
-                print $label;
+              print $label;
               print '</div>';
               print '</th>';
             }
@@ -76,7 +81,16 @@
             else {
               if ($fields[$field] == 'field-model-teaser-value') {
                 print '<td class="modellibrary views-field views-field-'. $fields[$field] .'">';
+                print '<span class="modellibrary views-field views-field-'. $fields[$field] .'">';
                 print $content;
+                print '</span>';
+                print '</td>';
+              }
+              elseif ($fields[$field] == 'statusid' || $fields[$field] == 'statusid active') {
+                print '<td class="modellibrary views-field views-field-'. $fields[$field] .'">';
+                if ($content == 60) {
+                  print '<img src="sites/all/modules/comses-modelreview/images/certified-badge-small.png" />';
+                }
                 print '</td>';
               }
               elseif ($fields[$field] == 'name' || $fields[$field] == 'name active') {
