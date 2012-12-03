@@ -246,6 +246,11 @@
     vertical-align: top;
   }
 
+  td.modellibrary.views-field-statusid img
+  {
+    margin: 0 10px;
+  }
+
   div.modellibrary.views-field-name
   {
     padding: 0 0 5px 10px;
