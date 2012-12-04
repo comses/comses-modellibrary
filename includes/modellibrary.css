@@ -160,6 +160,14 @@
     color: #F6FF97;
   }
 
+  div.modellibrary-results-count {
+    font-size: 1.2em;
+    line-height: 1.4em;
+    font-weight: bold;
+    color: #342F65;
+    margin: 10px 0 0 0;
+  }
+
   tr.modellibrary.even, tr.modellibrary.odd /* Some tables have rows marked even or odd. */ 
   { 
     background-color: #FFF; 

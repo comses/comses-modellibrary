@@ -16,6 +16,21 @@
  * @ingroup views_templates
  */
 ?>
+<?php
+$view = views_get_current_view(); 
+$from = ($view->pager['current_page'] * $view->pager['items_per_page']) + 1;
+$to = $from + count($view->result) - 1;
+$total = $view->total_rows;
+if ($total <= $to ) {
+  // no need to show where we are if everything fits on the first page
+  $out = "Showing " . $total . " models.";
+} else {
+  $out = "Showing " . $from . " - " . $to . " of " . $total . " models.";
+}
+
+print '<div class="modellibrary modellibrary-results-count">'. $out .'</div>';
+?>
+
 <table width="100%" class="modellibrary <?php print $class; ?>">
   <?php if (!empty($title)) : ?>
     <caption><?php print $title; ?></caption>
