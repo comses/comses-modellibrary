@@ -243,7 +243,7 @@ print '      <div class="model-badge"><img src="/files/images/certified-badge-bi
       print '  </tr>';
     }
   }
-  if ($model_view->render_field('status', 0) == "False" || $model_view->render_field('field_model_enabled_value', 0) != "Enabled" || $fields['field_modelversion_number_value']->content != modellibrary_helper_get_max_versionnum($modelnid)) {
+  if ($model_view->render_field('status', 0) == "False" || $fields['field_modelversion_number_value']->content != modellibrary_helper_get_max_versionnum($modelnid)) {
 print '  <tr>
     <td colspan=2>
       <div style="margin: 0;" class="hrline"/>
@@ -260,39 +260,40 @@ print '  <tr>
         } // if not latest version
 
         // if not published and model can be enabled
-        if ($model_view->render_field('status', 0) == "False" && $model_view->render_field('field_model_enabled_value', 0) == "Enabled") {
+        if ($model_view->render_field('status', 0) == "False") {
           print "<h3>This model is currently disabled.";
           if (in_array('administrator', array_values($user->roles)) || $user->uid == $model_view->render_field('uid', 0)) {
             print "To enable it, click the Enable button.";
           }
           print "</h3>";
-        } // if not published and model can be enabled
-        elseif ($model_view->render_field('field_model_enabled_value', 0) != "Enabled") {
-          print "<h3>This model is currently disabled. To enable it, the following issues must be resolved:</h3>";
+        } 
+        // if not published and model can be enabled
+        #elseif ($model_view->render_field('field_model_enabled_value', 0) != "Enabled") {
+        #  print "<h3>This model is currently disabled. To enable it, the following issues must be resolved:</h3>";
 
-          print "<ol>";
-          $issuecount = 0;
+        #  print "<ol>";
+        #  $issuecount = 0;
 
-          if ($model_view->render_field('field_model_replicated_value', 0) == "Replicated" && $model_view->render_field('field_model_reference_value', 0) == "") {
-            print "<li>Model is flagged as a replication, but no reference is given for the original model.";
-            $issuecount++;
-          }
+        #  if ($model_view->render_field('field_model_replicated_value', 0) == "Replicated" && $model_view->render_field('field_model_reference_value', 0) == "") {
+        #    print "<li>Model is flagged as a replication, but no reference is given for the original model.";
+        #    $issuecount++;
+        #  }
 
-          if (($version->field_modelversion_language == 7 || $version->field_modelversion_language == '') && $version->field_modelversion_otherlang == "") {
-            print "<li>No language selected or \"Other\" category is selected but not specified.";
-            $issuecount++;
-          }
+        #  if (($version->field_modelversion_language == 7 || $version->field_modelversion_language == '') && $version->field_modelversion_otherlang == "") {
+        #    print "<li>No language selected or \"Other\" category is selected but not specified.";
+        #    $issuecount++;
+        #  }
 
-          if ($version->field_modelversion_os == '') {
-            print "<li>No OS selected.";
-            $issuecount++;
-          }
+        #  if ($version->field_modelversion_os == '') {
+        #    print "<li>No OS selected.";
+        #    $issuecount++;
+        #  }
 
-          if ($issuecount == 0) {
-            print '<li>No issues prevent this model from being active. Click the "Enable" button when you are ready to publish it.';
-          }
-          print "</ol>";
-        } // elseif model is not ready to be enabled due to errors
+        #  if ($issuecount == 0) {
+        #    print '<li>No issues prevent this model from being active. Click the "Enable" button when you are ready to publish it.';
+        #  }
+        #  print "</ol>";
+        #} // elseif model is not ready to be enabled due to errors
 print '      </div>
     </td>
   </tr>';
