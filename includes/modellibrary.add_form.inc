@@ -501,7 +501,7 @@ function model_add_form($form_state) {
 
     case 6: // page 6
       $form['help'] = array(
-        '#value' => '<div class="setoff"><h3>Save Model.</h3><p>You may now save your model by clicking "Submit" or return to previous pages by clicking "Previous" to review your data entry and make changes.</p><p>This model will not be automatically visible to the public.  First, the Model Library will scan your model for any incomplete fields you may have overlooked.  If for any reason, the model is not ready to be published, the Model viewing page will display a notice for you, informing you of the reasons the model is not ready to be enabled.</p><p>Second, if there are no issues with the model itself, you must choose to enable the model in order to make it publicly viewable and searchable.  You may choose to keep a model disabled, if for example it is associated with a publication under review, and you do not wish to make the model public until the paper has been published.</p><h3>Sharing your model with editors and reviewers.</h3><p>While a model is disabled, it will not appear in the Model Library listings nor in search results, but you can share your model with specific individuals by clicking on the "Share" button on your model\'s page, which will give you the web address that directly links to your model.  You may email that information or include it in your article submission material so reviewers can include your model in their review process, if necessary.</p><p>Click "Submit" to save your model now and go to your new model.</p></div>',
+        '#value' => '<div class="setoff"><h3>Save Model.</h3><p>You may now save your model by clicking "Submit" or return to previous pages by clicking "Previous" to review your data entry and make changes.</p><p>This model will not be automatically visible to the public.  First, the Model Library will scan your model for any incomplete fields you may have overlooked.  If for any reason, the model is not ready to be published, the Model viewing page will display a notice for you, informing you of the reasons the model is not ready to be published.</p><p>Second, if there are no issues with the model itself, you must choose to Publish the model in order to make it publicly viewable and searchable.  You may choose to keep a model disabled, if for example it is associated with a publication under review, and you do not wish to make the model public until the paper has been published.</p><h3>Sharing your model with editors and reviewers.</h3><p>While a model is disabled, it will not appear in the Model Library listings nor in search results, but you can share your model with specific individuals by copying the URL on your model\'s page, and share that web address with others. You may email that information or include it in your article submission material so reviewers can include your model in their review process, if necessary.</p><p>Click "Submit" to save your model now and go to your new model.</p></div>',
         '#weight' => -20,
       );
 
@@ -673,6 +673,7 @@ function model_add_form_submit($form, &$form_state) {
     $new_state['values']['name'] =  $user->name;
     $new_state['values']['status'] = 0;
     $new_state['values']['field_model_enabled'][0]['value'] = 1;
+    $new_state['values']['field_model_featured'][0]['value'] = 0;
   }
 
   $new_state['values']['field_model_author1first'][0]['value'] = $form_state['storage']['values']['field_model_author1first'];
@@ -692,7 +693,7 @@ function model_add_form_submit($form, &$form_state) {
 
   $new_state['values']['field_model_teaser'][0]['value'] = $form_state['storage']['values']['field_model_teaser'];
   $new_state['values']['field_model_public'][0]['value'] = $form_state['storage']['values']['field_model_public'];
-  $new_state['values']['field_model_featured'][0]['value'] = $form_state['storage']['values']['field_model_featured'];
+  //$new_state['values']['field_model_featured'][0]['value'] = $form_state['storage']['values']['field_model_featured'];
   $new_state['values']['field_model_publication_text'][0]['value'] = $form_state['storage']['values']['field_model_publication_text'];
   $new_state['values']['field_model_replicated'][0]['value'] = $form_state['storage']['values']['field_model_replicated'];
   $new_state['values']['field_model_reference'][0]['value'] = $form_state['storage']['values']['field_model_reference'];
@@ -703,8 +704,6 @@ function model_add_form_submit($form, &$form_state) {
   $model->field_model_image = $form_state['storage']['values']['field_model_image'];
   // Like the imagefield, this field has to be loaded into the temp node variable in order for drupal_execute() to process it.
   $model->field_model_video = $form_state['storage']['values']['field_model_video'];
-  $new_state['values']['csm_create_msg_en'] = '';
-  $new_state['values']['csm_update_msg_en'] = '';
   $new_state['values']['op'] = t('Save');  // This seems to be a required value
 
   // There is an alternate method for saving nodes using node_save().  However,
@@ -769,21 +768,14 @@ function model_add_form_submit($form, &$form_state) {
   // the current version.  However, if any of the file upload fields have been changed
   // we are going to create a new version.
   if ($action == 'edit') {  
-    if ($version->field_modelversion_code[0]['fid'] != $form_state['storage']['values']['field_modelversion_code'][0]['fid']) {
+    if ($version->field_modelversion_code[0]['fid'] != $form_state['storage']['values']['field_modelversion_code'][0]['fid'] || 
+        $version->field_modelversion_documentation[0]['fid'] != $form_state['storage']['values']['field_modelversion_documentation'][0]['fid'] ||
+        $version->field_modelversion_sensitivity[0]['fid'] != $form_state['storage']['values']['field_modelversion_sensitivity'][0]['fid'] ||
+        $version->field_modelversion_dataset[0]['fid'] != $form_state['storage']['values']['field_modelversion_dataset'][0]['fid'] ||
+        $version->field_modelversion_addfiles[0]['fid'] != $form_state['storage']['values']['field_modelversion_addfiles'][0]['fid']
+    ) {
       $new_version = TRUE;
     } 
-    elseif ($version->field_modelversion_documentation[0]['fid'] != $form_state['storage']['values']['field_modelversion_documentation'][0]['fid']) {
-      $new_version = TRUE;
-    } 
-    elseif ($version->field_modelversion_sensitivity[0]['fid'] != $form_state['storage']['values']['field_modelversion_sensitivity'][0]['fid']) {
-      $new_version = TRUE;
-    } 
-    elseif ($version->field_modelversion_dataset[0]['fid'] != $form_state['storage']['values']['field_modelversion_dataset'][0]['fid']) {
-      $new_version = TRUE;
-    } 
-    elseif ($version->field_modelversion_addfiles[0]['fid'] != $form_state['storage']['values']['field_modelversion_addfiles'][0]['fid']) {
-      $new_version = TRUE;
-    }
   } 
   else {
     $new_version = TRUE;    

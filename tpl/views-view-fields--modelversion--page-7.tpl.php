@@ -99,12 +99,12 @@ print '      <div class="model-badge"><img src="/files/images/certified-badge-bi
     </td>
     <td>
       <?php 
-        if ($model_view->render_field('status', 0) == "False" && $model_view->render_field('field_model_enabled_value', 0) == "Enabled" && (in_array('administrator', array_values($user->roles)) || $user->uid == $model_view->render_field('uid', 0))) {
-          echo '<a class="model-button" href="'. url('model/'. $modelnid .'/enable') .'">Enable<br />Model</a>';
+        if ($model_view->render_field('status', 0) == "False" && (in_array('administrator', array_values($user->roles)) || $user->uid == $model_view->render_field('uid', 0))) {
+          echo '<a class="model-button" href="'. url('model/'. $modelnid .'/enable') .'">Publish<br />Model</a>';
         }
 
         if ($model_view->render_field('status', 0) == "True" && (in_array('administrator', array_values($user->roles)) || $user->uid == $model_view->render_field('uid', 0))) {
-          echo '<a class="model-button" href="'. url('model/'. $modelnid .'/disable') .'">Disable Model</a>';
+          echo '<a class="model-button" href="'. url('model/'. $modelnid .'/disable') .'">Unpublish</a>';
         }
 
         if ($fields['field_modelversion_number_value']->content != modellibrary_helper_get_max_versionnum($modelnid)) {
@@ -261,9 +261,9 @@ print '  <tr>
 
         // if not published and model can be enabled
         if ($model_view->render_field('status', 0) == "False") {
-          print "<h3>This model is currently disabled.";
+          print "<h3>This model is currently unpublished.";
           if (in_array('administrator', array_values($user->roles)) || $user->uid == $model_view->render_field('uid', 0)) {
-            print "To enable it, click the Enable button.";
+            print "To enable it, click the Publish button.";
           }
           print "</h3>";
         } 

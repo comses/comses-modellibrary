@@ -530,6 +530,7 @@ function modellibrary_menu() {
     'type' => MENU_CALLBACK,
   );
 
+  // Legacy url; redirect to correct url.
   $items['model-archive/%'] = array(
     'title' => 'View Model',
     'description' => "",
@@ -560,9 +561,9 @@ function modellibrary_menu() {
     'type' => MENU_CALLBACK,
   );
 
-  // This is the link for enabling a model.
+  // This is the link for enabling (publishing) a model.
   $items['model/%/enable'] = array(
-    'title' => 'Enable',
+    'title' => 'Publish',
     'description' => "",
     'page callback' => 'enable_model',
     'page arguments' => array(array(1)),
@@ -768,6 +769,7 @@ function enable_model() {
   } 
 
   // Make sure this isn't occurring on the Dev server, before we post to Twitter
+  // TODO: perhaps change to a system variable that we toggle, Enable/Disable Twitter
   global $base_root;
   if ($base_root != 'http://dev.comses.asu.edu') {
     modellibrary_post_twitter($model);
