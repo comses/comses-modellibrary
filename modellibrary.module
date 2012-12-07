@@ -203,19 +203,20 @@ function modellibrary_preprocess_page(&$variables) {
       $dublin_cite .= '<meta name="DC.Date" content="'. date('Y-m-d', $node->created) .'">'. "\n";
 
       $google_cite .= '<meta name="citation_journal_title" content="CoMSES Computational Model Library">'. "\n";
-      $dublin_cite .= '<meta name="DC.bibliographicCitation" content="CoMSES Computational Model Library. Retrieved from OpenABM: ';
-        if ($node->field_model_handle_value[0]['value'] > '') $dublin_cite .= $node->field_model_handle_value[0]['value'];
+      $dublin_cite .= '<meta name="DC.bibliographicCitation" content="CoMSES Computational Model Library. Retrieved from: ';
+        if ($node->field_model_handle[0]['value'] > '') $dublin_cite .= 'http://hdl.handle.net/'. $node->field_model_handle[0]['value'];
         else $dublin_cite .= 'http://www.openabm.org/model/'. $node->nid .'/version/'. arg(3) .'/view';
       $dublin_cite .= '">'. "\n";
 
       $google_cite .= '<meta name="citation_publisher" content="CoMSES Network">'. "\n";
       $dublin_cite .= '<meta name="DC.Publisher" content="CoMSES Network">'. "\n";
       $dublin_cite .= '<meta name="DC.Type" content="Software">'. "\n";
+      $dublin_cite .= '<meta name="DC.Type" content="ABM">'. "\n";
       $dublin_cite .= '<meta name="DC.Type" content="agent-based model">'. "\n";
       $dublin_cite .= '<meta name="DC.Description" content="'. check_plain($node->body) .'">'. "\n";
 
-      if ($node->field_model_handle_value[0]['value'] > '') {
-        $dublin_cite .= '<meta name="DC.Identifier" content="'. $node->field_model_handle_value[0]['value'] .'">'. "\n";
+      if ($node->field_model_handle[0]['value'] > '') {
+        $dublin_cite .= '<meta name="DC.Identifier" content="http://hdl.handle.net/'. $node->field_model_handle[0]['value'] .'">'. "\n";
       } else {
         $dublin_cite .= '<meta name="DC.Identifier" content="http://www.openabm.org/model/'. $node->nid .'/version/'. arg(3) .'/view">'. "\n";
       }
