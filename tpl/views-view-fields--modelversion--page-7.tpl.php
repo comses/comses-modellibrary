@@ -82,7 +82,7 @@
       $month_dls = db_fetch_object($result); 
 
 ?>
-    <div class="model-downloads"><?php print $all_dls->downloads; if ($all_dls->downloads == 1) print ' Download'; else print ' Downloads'; ?></div>
+    <div class="model-downloads"><?php print $all_dls->downloads; if ($all_dls->downloads == 1) print ' Download'; else print ' Downloads'; print ' ('. $month_dls->downloads; if ($month_dls->downloads == 1) print ' Download in the last 3 months)'; else print ' Downloads in the last 3 months)'; ?></div>
       </div>
     </td>
     <td>
