@@ -763,7 +763,34 @@ function modellibrary_menu_alter(&$items) {
 
   $items['download_count']['file'] = 'download_count.pages.inc';
   $items['download_count']['file path'] = drupal_get_path('module', 'modellibrary') .'/includes';
+
+  // alter 'model' and 'modelversion' nodes
+  $items['node/%node']['page callback'] = 'modellibrary_node_page_view';
+  
 }
+
+/**
+ * Redirect node views for 'model' and 'modelversion' nodes
+ *
+ * Only admins should be permitted to access the 'model' and 'modelversion' nodes. All other users
+ * need to be redirected to the proper Model view page.
+ */
+function modellibrary_node_page_view($node) {
+  global $user;
+
+  if (($node->type == 'model' || $node->type == 'modelversion') && !($user->uid == 1 || user_access('administer models'))) {
+    if ($node->type == 'model')
+      drupal_goto('model/'. $node->nid); // redirect to proper Model view page
+    else
+      drupal_goto('model/'. $node->field_modelversion_modelnid[0]['value']); // redirect to proper Model view page
+  } 
+  else {
+    // return core node view. This code is adapted from the core Node module, node_page_view function.
+    drupal_set_title(check_plain($node->title));
+    return node_show($node);
+  }
+}
+
 
 /**
  * Implementation of hook_perm().
@@ -808,6 +835,7 @@ function modellibrary_apachesolr_search_result_alter(&$doc) {
   if ($doc->type == 'model') {
     // replace default node path with Model Library model URL
     $doc->path = 'model/'. $doc->nid;
+    // field_modelversion_modelnid
   }
 
   return $doc;
