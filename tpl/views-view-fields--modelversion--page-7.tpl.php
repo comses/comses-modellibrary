@@ -435,6 +435,7 @@ print '      </div>
     <td width=50%>
       <div class="model-region4">
       <div class="model-section-title">Model Files</div>
+      <!--googleoff: all-->
       <div class='model-files'>
         <?php if ($fields['field_modelversion_code_fid']->content > "") {
           print "<div><span class='label'>Code:</span>";
@@ -457,6 +458,7 @@ print '      </div>
           print "<span class='content'>". $fields['field_modelversion_addfiles_fid']->content ."</span></div>";
         } ?>
       </div>
+      <!--googleon: all-->
       </div>
     </td>
   </tr>
