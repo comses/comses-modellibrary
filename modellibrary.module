@@ -167,8 +167,8 @@ function modellibrary_preprocess_page(&$variables) {
       $dublin_cite  = '<link rel="schema.DC" href="http://purl.org/DC/elements/1.0/" />'. "\n";
       $dublin_cite .= '<link rel="schema.DCTERMS" href="http://purl.org/DC/terms/" />'. "\n";
 
-      $google_cite  = '<meta name="citation_title" content="'. check_plain($node->title .' (Version '. arg(3) .')">'). "\n";
-      $dublin_cite .= '<meta name="DC.Title" content="'. check_plain($node->title .' (Version '. arg(3) .')">'). "\n"; 
+      $google_cite  = '<meta name="citation_title" content="'. check_plain($node->title .' (Version '. arg(3) .')') .'">'. "\n";
+      $dublin_cite .= '<meta name="DC.Title" content="'. check_plain($node->title .' (Version '. arg(3) .')') .'">'. "\n"; 
 
       if ($node->field_model_author1last[0]['value'] > '') {
         $google_cite .= '<meta name="citation_author" content="'. check_plain($node->field_model_author1last[0]['value']) .', '. check_plain($node->field_model_author1first[0]['value']) .' '. check_plain($node->field_model_author1middle[0]['value']) .'">'. "\n";
