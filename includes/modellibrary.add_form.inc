@@ -120,7 +120,7 @@ function model_add_form($form_state) {
   // We need to set the page title since executing the views earlier caused
   // those views to change the page title.  This line has to be after
   // all executed views.
-  drupal_set_title($action_text .' Model - Step '. $form_state['storage']['step'] . ' of '. MODEL_STEPS);
+  drupal_set_title($action_text . ' Model - Step ' . $form_state['storage']['step'] . ' of ' . MODEL_STEPS);
 
   switch ($form_state['storage']['step']) {
     /*case 1: // Page 1
@@ -549,8 +549,9 @@ function model_add_form($form_state) {
 function model_add_cancel() {
   if (arg(1) == 'add') {
     drupal_goto('models/browse');
-  } else {
-    drupal_goto('model/'. arg(1));
+  } 
+  else {
+    drupal_goto('model/' . arg(1));
   }
 }
 
@@ -568,7 +569,7 @@ function model_add_form_validate($form, &$form_state) {
     $action = 'add';
   }
 
-  if($form_state['clicked_button']['#value'] != 'Cancel') { // we don't want to process any validation, if the user clicked Cancel
+  if ($form_state['clicked_button']['#value'] != 'Cancel') { // we don't want to process any validation, if the user clicked Cancel
     if ($form_state['storage']['step'] == 1) { 
       if ($action == 'add' && modellibrary_helper_check_if_cck_fieldvalue_exists('field_model_uri', $form_state['values']['field_model_uri'])) {
         form_set_error('', t('That URI is already in use.  Please select a different value.'));
@@ -587,7 +588,7 @@ function model_add_form_validate($form, &$form_state) {
  * will fail if required fields have not been filled in.)
  */
 function model_add_form_after_build($form, &$form_state) {
-  if($form_state['clicked_button']['#value'] == 'Cancel') {
+  if ($form_state['clicked_button']['#value'] == 'Cancel') {
     model_add_form_disable_validation($form);
   }
   return $form;
@@ -598,7 +599,7 @@ function model_add_form_after_build($form, &$form_state) {
  */
 function model_add_form_disable_validation(&$element) {
   unset($element['#needs_validation']);
-  foreach(element_children($element) as $key) {
+  foreach (element_children($element) as $key) {
     model_add_form_disable_validation($element[$key]);
   }
 }
@@ -759,7 +760,7 @@ function model_add_form_submit($form, &$form_state) {
   $new_state['values']['csm_update_msg_en'] = '';
   $new_state['values']['op'] = t('Save');  // This seems to be a required value
 
-//watchdog('modellibrary', 'modellibrary.module (995): runconditions: '. $form_state['storage']['values']['runconditions']);
+//watchdog('modellibrary', 'modellibrary.module (995): runconditions: ' . $form_state['storage']['values']['runconditions']);
 
   $new_version = FALSE;  // flag to indicate a new version needs to be created.
 
@@ -808,5 +809,5 @@ function model_add_form_submit($form, &$form_state) {
   }
 
 
-  drupal_goto('model/'. $modelnid);
+  drupal_goto('model/' . $modelnid);
 }

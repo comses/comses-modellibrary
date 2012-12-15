@@ -3,7 +3,7 @@
 
 function _model_cck_export() {
 
-$content['type']  = array (
+$content['type']  = array(
   'name' => 'Model',
   'type' => 'model',
   'description' => '*DO NOT USE OUTSIDE OF THE MODEL ARCHIVE MODULE*  An agent- or individual-based model.',
@@ -12,27 +12,27 @@ $content['type']  = array (
   'min_word_count' => '0',
   'help' => '',
   'node_options' => 
-  array (
-    'status' => true,
-    'promote' => false,
-    'sticky' => false,
-    'revision' => false,
+  array(
+    'status' => TRUE,
+    'promote' => FALSE,
+    'sticky' => FALSE,
+    'revision' => FALSE,
   ),
   'language_content_type' => '0',
   'upload' => '0',
   'teaser_field' => 0,
   'ffp_upload' => 
-  array (
+  array(
     'file_path' => 'models/[nid]',
     'file_path_cleanup' => 
-    array (
+    array(
       'file_path_pathauto' => 0,
       'file_path_tolower' => 0,
       'file_path_transliterate' => 0,
     ),
     'file_name' => '[filefield-onlyname-original].[filefield-extension-original]',
     'file_name_cleanup' => 
-    array (
+    array(
       'file_name_pathauto' => 0,
       'file_name_tolower' => 0,
       'file_name_transliterate' => 0,
@@ -69,9 +69,9 @@ $content['type']  = array (
   'ant_pattern' => '',
   'ant_php' => '',
 );
-$content['fields']  = array (
+$content['fields']  = array(
   0 => 
-  array (
+  array(
     'label' => 'Locked?',
     'field_name' => 'field_model_locked',
     'type' => 'number_integer',
@@ -80,15 +80,15 @@ $content['fields']  = array (
     'weight' => '-9',
     'description' => '',
     'default_value' => 
-    array (
+    array(
       0 => 
-      array (
+      array(
         'value' => 0,
       ),
     ),
     'default_value_php' => '',
     'default_value_widget' => NULL,
-    'group' => false,
+    'group' => FALSE,
     'required' => 0,
     'multiple' => '0',
     'min' => '',
@@ -102,61 +102,61 @@ $content['fields']  = array (
     'module' => 'number',
     'widget_module' => 'optionwidgets',
     'columns' => 
-    array (
+    array(
       'value' => 
-      array (
+      array(
         'type' => 'int',
-        'not null' => false,
-        'sortable' => true,
+        'not null' => FALSE,
+        'sortable' => TRUE,
       ),
     ),
     'display_settings' => 
-    array (
+    array(
       'weight' => '-9',
       'parent' => '',
       2 => 
-      array (
+      array(
         'format' => 'hidden',
         'exclude' => 0,
       ),
       3 => 
-      array (
+      array(
         'format' => 'hidden',
         'exclude' => 0,
       ),
       'label' => 
-      array (
+      array(
         'format' => 'above',
       ),
       'teaser' => 
-      array (
+      array(
         'format' => 'hidden',
         'exclude' => 0,
       ),
       'full' => 
-      array (
+      array(
         'format' => 'hidden',
         'exclude' => 0,
       ),
       5 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       4 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       'token' => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
     ),
   ),
   1 => 
-  array (
+  array(
     'label' => 'URI',
     'field_name' => 'field_model_uri',
     'type' => 'text',
@@ -167,26 +167,26 @@ $content['fields']  = array (
     'size' => '60',
     'description' => '',
     'default_value' => 
-    array (
+    array(
       0 => 
-      array (
+      array(
         'value' => '',
         '_error_element' => 'default_value_widget][field_model_uri][0][value',
       ),
     ),
     'default_value_php' => '',
     'default_value_widget' => 
-    array (
+    array(
       'field_model_uri' => 
-      array (
+      array(
         0 => 
-        array (
+        array(
           'value' => '',
           '_error_element' => 'default_value_widget][field_model_uri][0][value',
         ),
       ),
     ),
-    'group' => false,
+    'group' => FALSE,
     'required' => 0,
     'multiple' => '0',
     'text_processing' => '0',
@@ -197,63 +197,63 @@ $content['fields']  = array (
     'module' => 'text',
     'widget_module' => 'text',
     'columns' => 
-    array (
+    array(
       'value' => 
-      array (
+      array(
         'type' => 'varchar',
         'length' => '50',
-        'not null' => false,
-        'sortable' => true,
-        'views' => true,
+        'not null' => FALSE,
+        'sortable' => TRUE,
+        'views' => TRUE,
       ),
     ),
     'display_settings' => 
-    array (
+    array(
       'weight' => '-7',
       'parent' => '',
       2 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       3 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       'label' => 
-      array (
+      array(
         'format' => 'above',
       ),
       'teaser' => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       'full' => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       5 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       4 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       'token' => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
     ),
   ),
   2 => 
-  array (
+  array(
     'label' => 'Teaser',
     'field_name' => 'field_model_teaser',
     'type' => 'text',
@@ -264,26 +264,26 @@ $content['fields']  = array (
     'size' => 60,
     'description' => '',
     'default_value' => 
-    array (
+    array(
       0 => 
-      array (
+      array(
         'value' => '',
         '_error_element' => 'default_value_widget][field_model_teaser][0][value',
       ),
     ),
     'default_value_php' => '',
     'default_value_widget' => 
-    array (
+    array(
       'field_model_teaser' => 
-      array (
+      array(
         0 => 
-        array (
+        array(
           'value' => '',
           '_error_element' => 'default_value_widget][field_model_teaser][0][value',
         ),
       ),
     ),
-    'group' => false,
+    'group' => FALSE,
     'required' => 1,
     'multiple' => '0',
     'text_processing' => '0',
@@ -294,63 +294,63 @@ $content['fields']  = array (
     'module' => 'text',
     'widget_module' => 'text',
     'columns' => 
-    array (
+    array(
       'value' => 
-      array (
+      array(
         'type' => 'text',
         'size' => 'big',
-        'not null' => false,
-        'sortable' => true,
-        'views' => true,
+        'not null' => FALSE,
+        'sortable' => TRUE,
+        'views' => TRUE,
       ),
     ),
     'display_settings' => 
-    array (
+    array(
       'weight' => '-6',
       'parent' => '',
       2 => 
-      array (
+      array(
         'format' => 'hidden',
         'exclude' => 0,
       ),
       3 => 
-      array (
+      array(
         'format' => 'hidden',
         'exclude' => 0,
       ),
       'label' => 
-      array (
+      array(
         'format' => 'above',
       ),
       'teaser' => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       'full' => 
-      array (
+      array(
         'format' => 'hidden',
         'exclude' => 0,
       ),
       5 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       4 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       'token' => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
     ),
   ),
   3 => 
-  array (
+  array(
     'label' => 'Image',
     'field_name' => 'field_model_image',
     'type' => 'filefield',
@@ -374,17 +374,17 @@ $content['fields']  = array (
     'default_image' => NULL,
     'description' => '',
     'ffp_field_model_image' => 
-    array (
+    array(
       'file_path' => 'models/[nid]',
       'file_path_cleanup' => 
-      array (
+      array(
         'file_path_pathauto' => 0,
         'file_path_tolower' => 0,
         'file_path_transliterate' => 0,
       ),
       'file_name' => '[filefield-onlyname-original].[filefield-extension-original]',
       'file_name_cleanup' => 
-      array (
+      array(
         'file_name_pathauto' => 0,
         'file_name_tolower' => 0,
         'file_name_transliterate' => 0,
@@ -393,7 +393,7 @@ $content['fields']  = array (
       'active_updating' => 0,
     ),
     'title_text' => '0',
-    'group' => false,
+    'group' => FALSE,
     'required' => 0,
     'multiple' => '0',
     'list_field' => '0',
@@ -403,74 +403,74 @@ $content['fields']  = array (
     'module' => 'filefield',
     'widget_module' => 'imagefield',
     'columns' => 
-    array (
+    array(
       'fid' => 
-      array (
+      array(
         'type' => 'int',
-        'not null' => false,
-        'views' => true,
+        'not null' => FALSE,
+        'views' => TRUE,
       ),
       'list' => 
-      array (
+      array(
         'type' => 'int',
         'size' => 'tiny',
-        'not null' => false,
-        'views' => true,
+        'not null' => FALSE,
+        'views' => TRUE,
       ),
       'data' => 
-      array (
+      array(
         'type' => 'text',
-        'serialize' => true,
-        'views' => true,
+        'serialize' => TRUE,
+        'views' => TRUE,
       ),
     ),
     'display_settings' => 
-    array (
+    array(
       'weight' => '-4',
       'parent' => '',
       2 => 
-      array (
+      array(
         'format' => 'image_plain',
         'exclude' => 0,
       ),
       3 => 
-      array (
+      array(
         'format' => 'image_plain',
         'exclude' => 0,
       ),
       'label' => 
-      array (
+      array(
         'format' => 'above',
       ),
       'teaser' => 
-      array (
+      array(
         'format' => 'image_plain',
         'exclude' => 0,
       ),
       'full' => 
-      array (
+      array(
         'format' => 'image_plain',
         'exclude' => 0,
       ),
       5 => 
-      array (
+      array(
         'format' => 'image_plain',
         'exclude' => 0,
       ),
       4 => 
-      array (
+      array(
         'format' => 'image_plain',
         'exclude' => 0,
       ),
       'token' => 
-      array (
+      array(
         'format' => 'image_plain',
         'exclude' => 0,
       ),
     ),
   ),
   4 => 
-  array (
+  array(
     'label' => 'Video',
     'field_name' => 'field_model_video',
     'type' => 'filefield',
@@ -488,7 +488,7 @@ $content['fields']  = array (
     'autothumbnail' => 'no',
     'default_video_thumb_upload' => '',
     'default_video_thumb' => 
-    array (
+    array(
       'filename' => 'video_thumbnail.png',
       'filepath' => 'files/video_thumbs/video_thumbnail.png',
       'filemime' => 'image/png',
@@ -503,17 +503,17 @@ $content['fields']  = array (
     ),
     'description' => '',
     'ffp_field_model_video' => 
-    array (
+    array(
       'file_path' => 'models/[nid]',
       'file_path_cleanup' => 
-      array (
+      array(
         'file_path_pathauto' => 0,
         'file_path_tolower' => 0,
         'file_path_transliterate' => 0,
       ),
       'file_name' => '[filefield-onlyname-original].[filefield-extension-original]',
       'file_name_cleanup' => 
-      array (
+      array(
         'file_name_pathauto' => 0,
         'file_name_tolower' => 0,
         'file_name_transliterate' => 0,
@@ -522,7 +522,7 @@ $content['fields']  = array (
       'active_updating' => 0,
     ),
     'title_text' => '0',
-    'group' => false,
+    'group' => FALSE,
     'required' => 0,
     'multiple' => '0',
     'list_field' => '0',
@@ -532,74 +532,74 @@ $content['fields']  = array (
     'module' => 'filefield',
     'widget_module' => 'uploadfield',
     'columns' => 
-    array (
+    array(
       'fid' => 
-      array (
+      array(
         'type' => 'int',
-        'not null' => false,
-        'views' => true,
+        'not null' => FALSE,
+        'views' => TRUE,
       ),
       'list' => 
-      array (
+      array(
         'type' => 'int',
         'size' => 'tiny',
-        'not null' => false,
-        'views' => true,
+        'not null' => FALSE,
+        'views' => TRUE,
       ),
       'data' => 
-      array (
+      array(
         'type' => 'text',
-        'serialize' => true,
-        'views' => true,
+        'serialize' => TRUE,
+        'views' => TRUE,
       ),
     ),
     'display_settings' => 
-    array (
+    array(
       'weight' => '-3',
       'parent' => '',
       2 => 
-      array (
+      array(
         'format' => 'video_plain',
         'exclude' => 0,
       ),
       3 => 
-      array (
+      array(
         'format' => 'video_plain',
         'exclude' => 0,
       ),
       'label' => 
-      array (
+      array(
         'format' => 'above',
       ),
       'teaser' => 
-      array (
+      array(
         'format' => 'Thumbnail__video_nodelink',
         'exclude' => 0,
       ),
       'full' => 
-      array (
+      array(
         'format' => 'swftools_no_file',
         'exclude' => 0,
       ),
       5 => 
-      array (
+      array(
         'format' => 'video_plain',
         'exclude' => 0,
       ),
       4 => 
-      array (
+      array(
         'format' => 'video_plain',
         'exclude' => 0,
       ),
       'token' => 
-      array (
+      array(
         'format' => 'video_plain',
         'exclude' => 0,
       ),
     ),
   ),
   5 => 
-  array (
+  array(
     'label' => 'Featured Model?',
     'field_name' => 'field_model_featured',
     'type' => 'number_integer',
@@ -608,21 +608,21 @@ $content['fields']  = array (
     'weight' => '-2',
     'description' => '',
     'default_value' => 
-    array (
+    array(
       0 => 
-      array (
+      array(
         'value' => NULL,
       ),
     ),
     'default_value_php' => '',
     'default_value_widget' => 
-    array (
+    array(
       'field_model_featured' => 
-      array (
-        'value' => false,
+      array(
+        'value' => FALSE,
       ),
     ),
-    'group' => false,
+    'group' => FALSE,
     'required' => 0,
     'multiple' => '0',
     'min' => '',
@@ -636,61 +636,61 @@ $content['fields']  = array (
     'module' => 'number',
     'widget_module' => 'optionwidgets',
     'columns' => 
-    array (
+    array(
       'value' => 
-      array (
+      array(
         'type' => 'int',
-        'not null' => false,
-        'sortable' => true,
+        'not null' => FALSE,
+        'sortable' => TRUE,
       ),
     ),
     'display_settings' => 
-    array (
+    array(
       'weight' => '-2',
       'parent' => '',
       2 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       3 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       'label' => 
-      array (
+      array(
         'format' => 'above',
       ),
       'teaser' => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       'full' => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       5 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       4 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       'token' => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
     ),
   ),
   6 => 
-  array (
+  array(
     'label' => 'Replicated Model?',
     'field_name' => 'field_model_replicated',
     'type' => 'number_integer',
@@ -699,21 +699,21 @@ $content['fields']  = array (
     'weight' => '1',
     'description' => '',
     'default_value' => 
-    array (
+    array(
       0 => 
-      array (
+      array(
         'value' => NULL,
       ),
     ),
     'default_value_php' => '',
     'default_value_widget' => 
-    array (
+    array(
       'field_model_replicated' => 
-      array (
-        'value' => false,
+      array(
+        'value' => FALSE,
       ),
     ),
-    'group' => false,
+    'group' => FALSE,
     'required' => 0,
     'multiple' => '0',
     'min' => '',
@@ -727,61 +727,61 @@ $content['fields']  = array (
     'module' => 'number',
     'widget_module' => 'optionwidgets',
     'columns' => 
-    array (
+    array(
       'value' => 
-      array (
+      array(
         'type' => 'int',
-        'not null' => false,
-        'sortable' => true,
+        'not null' => FALSE,
+        'sortable' => TRUE,
       ),
     ),
     'display_settings' => 
-    array (
+    array(
       'weight' => '1',
       'parent' => '',
       2 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       3 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       'label' => 
-      array (
+      array(
         'format' => 'above',
       ),
       'teaser' => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       'full' => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       5 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       4 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       'token' => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
     ),
   ),
   7 => 
-  array (
+  array(
     'label' => 'Reference',
     'field_name' => 'field_model_reference',
     'type' => 'text',
@@ -792,27 +792,27 @@ $content['fields']  = array (
     'size' => 60,
     'description' => '',
     'default_value' => 
-    array (
+    array(
       0 => 
-      array (
+      array(
         'value' => '',
         '_error_element' => 'default_value_widget][field_model_reference][0][value',
       ),
     ),
     'default_value_php' => '',
     'default_value_widget' => 
-    array (
+    array(
       'field_model_reference' => 
-      array (
+      array(
         0 => 
-        array (
+        array(
           'value' => '',
           '_error_element' => 'default_value_widget][field_model_reference][0][value',
           'format' => 1,
         ),
       ),
     ),
-    'group' => false,
+    'group' => FALSE,
     'required' => 0,
     'multiple' => '0',
     'text_processing' => '1',
@@ -823,70 +823,70 @@ $content['fields']  = array (
     'module' => 'text',
     'widget_module' => 'text',
     'columns' => 
-    array (
+    array(
       'value' => 
-      array (
+      array(
         'type' => 'text',
         'size' => 'big',
-        'not null' => false,
-        'sortable' => true,
-        'views' => true,
+        'not null' => FALSE,
+        'sortable' => TRUE,
+        'views' => TRUE,
       ),
       'format' => 
-      array (
+      array(
         'type' => 'int',
-        'unsigned' => true,
-        'not null' => false,
-        'views' => false,
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'views' => FALSE,
       ),
     ),
     'display_settings' => 
-    array (
+    array(
       'weight' => '2',
       'parent' => '',
       2 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       3 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       'label' => 
-      array (
+      array(
         'format' => 'above',
       ),
       'teaser' => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       'full' => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       5 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       4 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       'token' => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
     ),
   ),
   8 => 
-  array (
+  array(
     'label' => 'Categories',
     'field_name' => 'field_model_tags',
     'type' => 'content_taxonomy',
@@ -899,17 +899,17 @@ $content['fields']  = array (
     'active_tags' => 1,
     'description' => '<p>This field stores the category keywords you can associate with, or tag onto, the model.  Enter each tag one at a time.  As you type a tag, the field will suggest possible tags that are already in use.  If your tag is not already in use, then click "Add."  Once the tag has been added, you may then add another tag.</p><p>If you wish to use a multiword tag, such as "Evolution of cooperation", enter it without spaces: "evolutionofcooperation".</p>',
     'default_value' => 
-    array (
+    array(
     ),
     'default_value_php' => '',
     'default_value_widget' => 
-    array (
+    array(
       'field_model_tags' => 
-      array (
+      array(
         'value' => '',
       ),
     ),
-    'group' => false,
+    'group' => FALSE,
     'required' => 0,
     'multiple' => '1',
     'save_term_node' => 1,
@@ -921,61 +921,61 @@ $content['fields']  = array (
     'module' => 'content_taxonomy',
     'widget_module' => 'content_taxonomy_autocomplete',
     'columns' => 
-    array (
+    array(
       'value' => 
-      array (
+      array(
         'type' => 'int',
-        'not null' => false,
-        'sortable' => false,
+        'not null' => FALSE,
+        'sortable' => FALSE,
       ),
     ),
     'display_settings' => 
-    array (
+    array(
       'weight' => '3',
       'parent' => '',
       2 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       3 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       'label' => 
-      array (
+      array(
         'format' => 'above',
       ),
       'teaser' => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       'full' => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       5 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       4 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       'token' => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
     ),
   ),
   9 => 
-  array (
+  array(
     'label' => 'Enabled',
     'field_name' => 'field_model_enabled',
     'type' => 'number_integer',
@@ -984,21 +984,21 @@ $content['fields']  = array (
     'weight' => '4',
     'description' => '',
     'default_value' => 
-    array (
+    array(
       0 => 
-      array (
+      array(
         'value' => 0,
       ),
     ),
     'default_value_php' => '',
     'default_value_widget' => 
-    array (
+    array(
       'field_model_enabled' => 
-      array (
-        'value' => false,
+      array(
+        'value' => FALSE,
       ),
     ),
-    'group' => false,
+    'group' => FALSE,
     'required' => 0,
     'multiple' => '0',
     'min' => '0',
@@ -1012,61 +1012,61 @@ $content['fields']  = array (
     'module' => 'number',
     'widget_module' => 'optionwidgets',
     'columns' => 
-    array (
+    array(
       'value' => 
-      array (
+      array(
         'type' => 'int',
-        'not null' => false,
-        'sortable' => true,
+        'not null' => FALSE,
+        'sortable' => TRUE,
       ),
     ),
     'display_settings' => 
-    array (
+    array(
       'weight' => '4',
       'parent' => '',
       2 => 
-      array (
+      array(
         'format' => 'hidden',
         'exclude' => 0,
       ),
       3 => 
-      array (
+      array(
         'format' => 'hidden',
         'exclude' => 0,
       ),
       'label' => 
-      array (
+      array(
         'format' => 'above',
       ),
       'teaser' => 
-      array (
+      array(
         'format' => 'hidden',
         'exclude' => 0,
       ),
       'full' => 
-      array (
+      array(
         'format' => 'hidden',
         'exclude' => 0,
       ),
       5 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       4 => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
       'token' => 
-      array (
+      array(
         'format' => 'default',
         'exclude' => 0,
       ),
     ),
   ),
 );
-$content['extra']  = array (
+$content['extra']  = array(
   'title' => '-8',
   'body_field' => '-5',
   'revision_information' => '6',

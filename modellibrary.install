@@ -79,7 +79,7 @@ function _add_permissions($rid, $permissions) {
     $permissions = explode(', ', $permissions);
   }
   $current_perms = explode(', ', db_result(db_query("SELECT perm FROM {permission} WHERE rid=%d", $rid)));
-  foreach($permissions as $permission) {
+  foreach ($permissions as $permission) {
     if (!in_array($permission, $current_perms)) {
         $current_perms[] = $permission;
       }
@@ -99,8 +99,8 @@ function _modellibrary_save_cck_node() {
     // alternate_content_copy modules are just needed in order to install the
     // content type, so we just require them here (require_once prevent to
     // include it more than once in case it is already enabled)
-    require_once './' . drupal_get_path('module', 'content') .  '/modules/content_copy/content_copy.module';
-    require_once './' . drupal_get_path('module', 'alternate_content_copy') .  '/alternate_content_copy.module';
+    require_once './' . drupal_get_path('module', 'content') . '/modules/content_copy/content_copy.module';
+    require_once './' . drupal_get_path('module', 'alternate_content_copy') . '/alternate_content_copy.module';
     alternate_content_copy_import_content($content);
 
     $content = _modelversion_cck_export();
