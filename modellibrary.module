@@ -156,7 +156,7 @@ function modellibrary_theme($existing) {
  */
 function modellibrary_preprocess_page(&$variables) {
     //using path
-    if (arg(0) == 'model' && arg(4) == 'view'){
+    if (arg(0) == 'model' && arg(4) == 'view') {
 
       //load the node node
       $node = node_load(arg(1));
@@ -167,8 +167,8 @@ function modellibrary_preprocess_page(&$variables) {
       $dublin_cite  = '<link rel="schema.DC" href="http://purl.org/DC/elements/1.0/" />' . "\n";
       $dublin_cite .= '<link rel="schema.DCTERMS" href="http://purl.org/DC/terms/" />' . "\n";
 
-      $google_cite  = '<meta name="citation_title" content="' . check_plain($node->title . ' (Version ' . arg(3) . ')">'). "\n";
-      $dublin_cite .= '<meta name="DC.Title" content="' . check_plain($node->title . ' (Version ' . arg(3) . ')">'). "\n"; 
+      $google_cite  = '<meta name="citation_title" content="' . check_plain($node->title . ' (Version ' . arg(3) . ')">') . "\n";
+      $dublin_cite .= '<meta name="DC.Title" content="' . check_plain($node->title . ' (Version ' . arg(3) . ')">') . "\n"; 
 
       if ($node->field_model_author1last[0]['value'] > '') {
         $google_cite .= '<meta name="citation_author" content="' . check_plain($node->field_model_author1last[0]['value']) . ', ' . check_plain($node->field_model_author1first[0]['value']) . ' ' . check_plain($node->field_model_author1middle[0]['value']) . '">' . "\n";
@@ -223,8 +223,8 @@ function modellibrary_preprocess_page(&$variables) {
         $dublin_cite .= '<meta name="DC.Identifier" content="http://www.openabm.org/model/' . $node->nid . '/version/' . arg(3) . '/view">' . "\n";
       }
 
-      drupal_set_html_head($google_cite);
-      drupal_set_html_head($dublin_cite);
+      drupal_add_html_head($google_cite);
+      drupal_add_html_head($dublin_cite);
       $variables['head'] = drupal_get_html_head();
   }
 }
@@ -640,7 +640,7 @@ function modellibrary_menu() {
     'description' => "",
     'page callback' => 'drupal_get_form',
     'page arguments' => array('model_add_form', array(1, 2)),
-    'access callback' => 'model_edit_access',
+    'access callback' => 'model_editaccess',
     'access arguments' => array('edit', array(1), 'edit own model'),
     'type' => MENU_CALLBACK,
   );
@@ -651,7 +651,7 @@ function modellibrary_menu() {
     'description' => "",
     'page callback' => 'enable_model',
     'page arguments' => array(array(1)),
-    'access callback' => 'model_edit_access',
+    'access callback' => 'model_editaccess',
     'access arguments' => array('edit', array(1), 'edit own model'),
     'type' => MENU_CALLBACK,
   );
@@ -662,7 +662,7 @@ function modellibrary_menu() {
     'description' => "",
     'page callback' => 'disable_model',
     'page arguments' => array(array(1)),
-    'access callback' => 'model_edit_access',
+    'access callback' => 'model_editaccess',
     'access arguments' => array('edit', array(1), 'edit own model'),
     'type' => MENU_CALLBACK,
   );
@@ -688,7 +688,7 @@ function modellibrary_menu() {
     'description' => "",
     'page callback' => 'drupal_get_form',
     'page arguments' => array('model_redirect_edit', array(1, 3)),
-    'access callback' => 'model_edit_access',
+    'access callback' => 'model_editaccess',
     'access arguments' => array('edit', array(1), 'edit own model'),
     'type' => MENU_LOCAL_TASK,
   );
@@ -788,7 +788,7 @@ function modellibrary_node_page_view($node) {
   } 
   else {
     // return core node view. This code is adapted from the core Node module, node_page_view function.
-    drupal_set_title(check_plain($node->title));
+    drupal_set_title($node->title);
     return node_show($node, NULL);
   }
 }
@@ -810,7 +810,7 @@ function modellibrary_permission() {
 /**
  * Implementation of hook_access().
  */
-function model_edit_access($op, $node, $account) {
+function model_editaccess($op, $node, $account) {
   global $user;
 
   $view_args = array(arg($node[0])); // The display we are using takes an argument
