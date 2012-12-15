@@ -57,7 +57,7 @@ module_load_include('inc', 'modellibrary', 'includes/modellibrary.helper.functio
 function modellibrary_help($path, $arg) {
   if ($path == 'admin/help#modellibrary') {
     $txt = 'The NSF Model Library module provides an interface for accessing the OpenABM model library.';
-    return '<p>'. t($txt) .'</p>';
+    return '<p>' . t($txt) . '</p>';
   }
 }
 
@@ -65,7 +65,7 @@ function modellibrary_help($path, $arg) {
  * Implementation of hook_init()
  */
 function modellibrary_init() {
-  drupal_add_css(drupal_get_path('module', 'modellibrary') .'/includes/modellibrary.css');
+  drupal_add_css(drupal_get_path('module', 'modellibrary') . '/includes/modellibrary.css');
 }
 
 /**
@@ -105,43 +105,43 @@ function modellibrary_theme($existing) {
       'arguments' => array('view' => NULL, 'options' => NULL, 'row' => NULL),
       'template' => 'views-view-fields--modelversion--page-7',
       'original hook' => 'views_view_fields',
-      'path' => drupal_get_path('module', 'modellibrary') .'/tpl',
+      'path' => drupal_get_path('module', 'modellibrary') . '/tpl',
     ),
     'views_view_table__model__page_1' => array(
       'arguments' => array('view' => NULL, 'options' => NULL, 'rows' => NULL, 'title' => NULL),
       'template' => 'views-view-table--model--page-1',
       'original hook' => 'views_view_table',
-      'path' => drupal_get_path('module', 'modellibrary') .'/tpl',
+      'path' => drupal_get_path('module', 'modellibrary') . '/tpl',
     ),
     'views_view_table__model__page_2' => array(
       'arguments' => array('view' => NULL, 'options' => NULL, 'rows' => NULL, 'title' => NULL),
       'template' => 'views-view-table--model--page-2',
       'original hook' => 'views_view_table',
-      'path' => drupal_get_path('module', 'modellibrary') .'/tpl',
+      'path' => drupal_get_path('module', 'modellibrary') . '/tpl',
     ),
     'views_view_table__model__page_5' => array(
       'arguments' => array('view' => NULL, 'options' => NULL, 'rows' => NULL, 'title' => NULL),
       'template' => 'views-view-table--model--page-5',
       'original hook' => 'views_view_table',
-      'path' => drupal_get_path('module', 'modellibrary') .'/tpl',
+      'path' => drupal_get_path('module', 'modellibrary') . '/tpl',
     ),
     'views_view_table__modelversion' => array(
       'arguments' => array('view' => NULL, 'options' => NULL, 'rows' => NULL, 'title' => NULL),
       'template' => 'views-view-table--modelversion',
       'original hook' => 'views_view_table',
-      'path' => drupal_get_path('module', 'modellibrary') .'/tpl',
+      'path' => drupal_get_path('module', 'modellibrary') . '/tpl',
     ),
     'views_view__model__block_1' => array(
       'arguments' => array('view' => NULL),
       'template' => 'views-view--model--block-1',
       'original hook' => 'views_view',
-      'path' => drupal_get_path('module', 'modellibrary') .'/tpl',
+      'path' => drupal_get_path('module', 'modellibrary') . '/tpl',
     ),
     'views_view_fields__model__block_1' => array(
       'arguments' => array('view' => NULL, 'options' => NULL, 'row' => NULL),
       'template' => 'views-view-fields--model--block-1',
       'original hook' => 'views_view_fields',
-      'path' => drupal_get_path('module', 'modellibrary') .'/tpl',
+      'path' => drupal_get_path('module', 'modellibrary') . '/tpl',
     ),
   );
 }
@@ -156,7 +156,7 @@ function modellibrary_theme($existing) {
  */
 function modellibrary_preprocess_page(&$variables) {
     //using path
-    if(arg(0) == 'model' && arg(4) == 'view'){
+    if (arg(0) == 'model' && arg(4) == 'view'){
 
       //load the node node
       $node = node_load(arg(1));
@@ -164,61 +164,63 @@ function modellibrary_preprocess_page(&$variables) {
 
       // the meta content.
 
-      $dublin_cite  = '<link rel="schema.DC" href="http://purl.org/DC/elements/1.0/" />'. "\n";
-      $dublin_cite .= '<link rel="schema.DCTERMS" href="http://purl.org/DC/terms/" />'. "\n";
+      $dublin_cite  = '<link rel="schema.DC" href="http://purl.org/DC/elements/1.0/" />' . "\n";
+      $dublin_cite .= '<link rel="schema.DCTERMS" href="http://purl.org/DC/terms/" />' . "\n";
 
-      $google_cite  = '<meta name="citation_title" content="'. check_plain($node->title .' (Version '. arg(3) .')">'). "\n";
-      $dublin_cite .= '<meta name="DC.Title" content="'. check_plain($node->title .' (Version '. arg(3) .')">'). "\n"; 
+      $google_cite  = '<meta name="citation_title" content="' . check_plain($node->title . ' (Version ' . arg(3) . ')">'). "\n";
+      $dublin_cite .= '<meta name="DC.Title" content="' . check_plain($node->title . ' (Version ' . arg(3) . ')">'). "\n"; 
 
       if ($node->field_model_author1last[0]['value'] > '') {
-        $google_cite .= '<meta name="citation_author" content="'. check_plain($node->field_model_author1last[0]['value']) .', '. check_plain($node->field_model_author1first[0]['value']) .' '. check_plain($node->field_model_author1middle[0]['value']) .'">'. "\n";
-        $dublin_cite .= '<meta name="DC.Creator" content="'. check_plain($node->field_model_author1last[0]['value']) .', '. check_plain($node->field_model_author1first[0]['value']) .' '. check_plain($node->field_model_author1middle[0]['value']) .'">'. "\n";
-      } else {
+        $google_cite .= '<meta name="citation_author" content="' . check_plain($node->field_model_author1last[0]['value']) . ', ' . check_plain($node->field_model_author1first[0]['value']) . ' ' . check_plain($node->field_model_author1middle[0]['value']) . '">' . "\n";
+        $dublin_cite .= '<meta name="DC.Creator" content="' . check_plain($node->field_model_author1last[0]['value']) . ', ' . check_plain($node->field_model_author1first[0]['value']) . ' ' . check_plain($node->field_model_author1middle[0]['value']) . '">' . "\n";
+      } 
+      else {
         $sql = 'SELECT name FROM {node} INNER JOIN {users} ON node.uid = users.uid WHERE node.type = "model" AND node.nid = %d';
         $result = db_query($sql, arg(1));
         $username = db_result($result);
 
-        $google_cite .= '<meta name="citation_author" content="'. $username .'">'. "\n";
-        $dublin_cite .= '<meta name="DC.Creator" content="'. $username .'">'. "\n";
+        $google_cite .= '<meta name="citation_author" content="' . $username . '">' . "\n";
+        $dublin_cite .= '<meta name="DC.Creator" content="' . $username . '">' . "\n";
       }
       if ($node->field_model_author2last[0]['value'] > '') {
-        $google_cite .= '<meta name="citation_author" content="'. check_plain($node->field_model_author2last[0]['value']) .', '. check_plain($node->field_model_author2first[0]['value']) .' '. check_plain($node->field_model_author2middle[0]['value']) .'">'. "\n";
-        $dublin_cite .= '<meta name="DC.Creator" content="'. check_plain($node->field_model_author2last[0]['value']) .', '. check_plain($node->field_model_author2first[0]['value']) .' '. check_plain($node->field_model_author2middle[0]['value']) .'">'. "\n";
+        $google_cite .= '<meta name="citation_author" content="' . check_plain($node->field_model_author2last[0]['value']) . ', ' . check_plain($node->field_model_author2first[0]['value']) . ' ' . check_plain($node->field_model_author2middle[0]['value']) . '">' . "\n";
+        $dublin_cite .= '<meta name="DC.Creator" content="' . check_plain($node->field_model_author2last[0]['value']) . ', ' . check_plain($node->field_model_author2first[0]['value']) . ' ' . check_plain($node->field_model_author2middle[0]['value']) . '">' . "\n";
       } 
       if ($node->field_model_author3last[0]['value'] > '') {
-        $google_cite .= '<meta name="citation_author" content="'. check_plain($node->field_model_author3last[0]['value']) .', '. check_plain($node->field_model_author3first[0]['value']) .' '. check_plain($node->field_model_author3middle[0]['value']) .'">'. "\n";
-        $dublin_cite .= '<meta name="DC.Creator" content="'. check_plain($node->field_model_author3last[0]['value']) .', '. check_plain($node->field_model_author3first[0]['value']) .' '. check_plain($node->field_model_author3middle[0]['value']) .'">'. "\n";
+        $google_cite .= '<meta name="citation_author" content="' . check_plain($node->field_model_author3last[0]['value']) . ', ' . check_plain($node->field_model_author3first[0]['value']) . ' ' . check_plain($node->field_model_author3middle[0]['value']) . '">' . "\n";
+        $dublin_cite .= '<meta name="DC.Creator" content="' . check_plain($node->field_model_author3last[0]['value']) . ', ' . check_plain($node->field_model_author3first[0]['value']) . ' ' . check_plain($node->field_model_author3middle[0]['value']) . '">' . "\n";
       } 
       if ($node->field_model_author4last[0]['value'] > '') {
-        $google_cite .= '<meta name="citation_author" content="'. check_plain($node->field_model_author4last[0]['value']) .', '. check_plain($node->field_model_author4first[0]['value']) .' '. check_plain($node->field_model_author4middle[0]['value']) .'">'. "\n";
-        $dublin_cite .= '<meta name="DC.Creator" content="'. check_plain($node->field_model_author4last[0]['value']) .', '. check_plain($node->field_model_author4first[0]['value']) .' '. check_plain($node->field_model_author4middle[0]['value']) .'">'. "\n";
+        $google_cite .= '<meta name="citation_author" content="' . check_plain($node->field_model_author4last[0]['value']) . ', ' . check_plain($node->field_model_author4first[0]['value']) . ' ' . check_plain($node->field_model_author4middle[0]['value']) . '">' . "\n";
+        $dublin_cite .= '<meta name="DC.Creator" content="' . check_plain($node->field_model_author4last[0]['value']) . ', ' . check_plain($node->field_model_author4first[0]['value']) . ' ' . check_plain($node->field_model_author4middle[0]['value']) . '">' . "\n";
       } 
       if ($node->field_model_author5last[0]['value'] > '') {
-        $google_cite .= '<meta name="citation_author" content="'. check_plain($node->field_model_author5last[0]['value']) .', '. check_plain($node->field_model_author5first[0]['value']) .' '. check_plain($node->field_model_author5middle[0]['value']) .'">'. "\n";
-        $dublin_cite .= '<meta name="DC.Creator" content="'. check_plain($node->field_model_author5last[0]['value']) .', '. check_plain($node->field_model_author5first[0]['value']) .' '. check_plain($node->field_model_author5middle[0]['value']) .'">'. "\n";
+        $google_cite .= '<meta name="citation_author" content="' . check_plain($node->field_model_author5last[0]['value']) . ', ' . check_plain($node->field_model_author5first[0]['value']) . ' ' . check_plain($node->field_model_author5middle[0]['value']) . '">' . "\n";
+        $dublin_cite .= '<meta name="DC.Creator" content="' . check_plain($node->field_model_author5last[0]['value']) . ', ' . check_plain($node->field_model_author5first[0]['value']) . ' ' . check_plain($node->field_model_author5middle[0]['value']) . '">' . "\n";
       } 
 
-      //$google_cite .= '<meta name="citation_online_date" content="'. date('Y/m/d', $node->created) .'">'. "\n";
-      $google_cite .= '<meta name="citation_publication_date" content="'. date('Y/m/d', $node->created) .'">'. "\n";
-      $dublin_cite .= '<meta name="DC.Date" content="'. date('Y-m-d', $node->created) .'">'. "\n";
+      //$google_cite .= '<meta name="citation_online_date" content="' . date('Y/m/d', $node->created) . '">' . "\n";
+      $google_cite .= '<meta name="citation_publication_date" content="' . date('Y/m/d', $node->created) . '">' . "\n";
+      $dublin_cite .= '<meta name="DC.Date" content="' . date('Y-m-d', $node->created) . '">' . "\n";
 
-      $google_cite .= '<meta name="citation_journal_title" content="CoMSES Computational Model Library">'. "\n";
+      $google_cite .= '<meta name="citation_journal_title" content="CoMSES Computational Model Library">' . "\n";
       $dublin_cite .= '<meta name="DC.bibliographicCitation" content="CoMSES Computational Model Library. Retrieved from: ';
-        if ($node->field_model_handle[0]['value'] > '') $dublin_cite .= 'http://hdl.handle.net/'. check_plain($node->field_model_handle[0]['value']);
-        else $dublin_cite .= 'http://www.openabm.org/model/'. $node->nid .'/version/'. arg(3) .'/view';
-      $dublin_cite .= '">'. "\n";
+        if ($node->field_model_handle[0]['value'] > '') $dublin_cite .= 'http://hdl.handle.net/' . check_plain($node->field_model_handle[0]['value']);
+        else $dublin_cite .= 'http://www.openabm.org/model/' . $node->nid . '/version/' . arg(3) . '/view';
+      $dublin_cite .= '">' . "\n";
 
-      $google_cite .= '<meta name="citation_publisher" content="CoMSES Network">'. "\n";
-      $dublin_cite .= '<meta name="DC.Publisher" content="CoMSES Network">'. "\n";
-      $dublin_cite .= '<meta name="DC.Type" content="Software">'. "\n";
-      $dublin_cite .= '<meta name="DC.Type" content="ABM">'. "\n";
-      $dublin_cite .= '<meta name="DC.Type" content="agent-based model">'. "\n";
-      $dublin_cite .= '<meta name="DC.Description" content="'. check_plain($node->body) .'">'. "\n";
+      $google_cite .= '<meta name="citation_publisher" content="CoMSES Network">' . "\n";
+      $dublin_cite .= '<meta name="DC.Publisher" content="CoMSES Network">' . "\n";
+      $dublin_cite .= '<meta name="DC.Type" content="Software">' . "\n";
+      $dublin_cite .= '<meta name="DC.Type" content="ABM">' . "\n";
+      $dublin_cite .= '<meta name="DC.Type" content="agent-based model">' . "\n";
+      $dublin_cite .= '<meta name="DC.Description" content="' . check_plain($node->body) . '">' . "\n";
 
       if ($node->field_model_handle[0]['value'] > '') {
-        $dublin_cite .= '<meta name="DC.Identifier" content="http://hdl.handle.net/'. check_plain($node->field_model_handle[0]['value']) .'">'. "\n";
-      } else {
-        $dublin_cite .= '<meta name="DC.Identifier" content="http://www.openabm.org/model/'. $node->nid .'/version/'. arg(3) .'/view">'. "\n";
+        $dublin_cite .= '<meta name="DC.Identifier" content="http://hdl.handle.net/' . check_plain($node->field_model_handle[0]['value']) . '">' . "\n";
+      } 
+      else {
+        $dublin_cite .= '<meta name="DC.Identifier" content="http://www.openabm.org/model/' . $node->nid . '/version/' . arg(3) . '/view">' . "\n";
       }
 
       drupal_set_html_head($google_cite);
@@ -242,17 +244,17 @@ function modellibrary_preprocess_page(&$variables) {
  */
 function modellibrary_imagecache_default_presets() {
   $presets = array();
-  $presets['Thumbnail'] = array (
+  $presets['Thumbnail'] = array(
     'presetname' => 'Thumbnail',
     'actions' => 
-    array (
+    array(
       0 => 
-      array (
+      array(
         'weight' => '0',
         'module' => 'imagecache_canvasactions',
         'action' => 'canvasactions_aspect',
         'data' => 
-        array (
+        array(
           'portrait' => '3',
           'landscape' => '2',
           'ratio_adjustment' => '1',
@@ -261,43 +263,43 @@ function modellibrary_imagecache_default_presets() {
     ),
   );
 
-  $presets['Thumbnail-Landscape'] = array (
+  $presets['Thumbnail-Landscape'] = array(
     'presetname' => 'Thumbnail-Landscape',
     'actions' => 
-    array (
+    array(
       0 => 
-      array (
+      array(
         'weight' => '0',
         'module' => 'imagecache',
         'action' => 'imagecache_scale',
         'data' => 
-        array (
+        array(
           'width' => '100',
           'height' => '',
           'upscale' => 0,
         ),
       ),
       1 => 
-      array (
+      array(
         'weight' => '0',
         'module' => 'imagecache_canvasactions',
         'action' => 'canvasactions_definecanvas',
         'data' => 
-        array (
+        array(
           'RGB' => 
-          array (
+          array(
             'HEX' => 'DDDDDD',
           ),
           'under' => 1,
           'exact' => 
-          array (
+          array(
             'width' => '100',
             'height' => '100',
             'xpos' => 'center',
             'ypos' => 'center',
           ),
           'relative' => 
-          array (
+          array(
             'leftdiff' => '',
             'rightdiff' => '',
             'topdiff' => '',
@@ -306,28 +308,28 @@ function modellibrary_imagecache_default_presets() {
         ),
       ),
       2 => 
-      array (
+      array(
         'weight' => '0',
         'module' => 'imagecache_coloractions',
         'action' => 'imagecache_convert',
         'data' => 
-        array (
+        array(
           'format' => 'image/png',
         ),
       ),
       3 => 
-      array (
+      array(
         'weight' => '0',
         'module' => 'imagecache_canvasactions',
         'action' => 'canvasactions_roundedcorners',
         'data' => 
-        array (
+        array(
           'radius' => '16',
           'independent_corners_set' => 
-          array (
+          array(
             'independent_corners' => 0,
             'radii' => 
-            array (
+            array(
               'tl' => '',
               'tr' => '',
               'bl' => '',
@@ -339,43 +341,43 @@ function modellibrary_imagecache_default_presets() {
     ),
   );
 
-  $presets['Thumbnail-Portrait'] = array (
+  $presets['Thumbnail-Portrait'] = array(
     'presetname' => 'Thumbnail-Portrait',
     'actions' => 
-    array (
+    array(
       0 => 
-      array (
+      array(
         'weight' => '-10',
         'module' => 'imagecache',
         'action' => 'imagecache_scale',
         'data' => 
-        array (
+        array(
           'width' => '',
           'height' => '100',
           'upscale' => 0,
         ),
       ),
       1 => 
-      array (
+      array(
         'weight' => '-9',
         'module' => 'imagecache_canvasactions',
         'action' => 'canvasactions_definecanvas',
         'data' => 
-        array (
+        array(
           'RGB' => 
-          array (
+          array(
             'HEX' => 'DDDDDD',
           ),
           'under' => 1,
           'exact' => 
-          array (
+          array(
             'width' => '100',
             'height' => '100',
             'xpos' => 'center',
             'ypos' => 'center',
           ),
           'relative' => 
-          array (
+          array(
             'leftdiff' => '',
             'rightdiff' => '',
             'topdiff' => '',
@@ -384,28 +386,28 @@ function modellibrary_imagecache_default_presets() {
         ),
       ),
       2 => 
-      array (
+      array(
         'weight' => '-8',
         'module' => 'imagecache_coloractions',
         'action' => 'imagecache_convert',
         'data' => 
-        array (
+        array(
           'format' => 'image/png',
         ),
       ),
       3 => 
-      array (
+      array(
         'weight' => '-7',
         'module' => 'imagecache_canvasactions',
         'action' => 'canvasactions_roundedcorners',
         'data' => 
-        array (
+        array(
           'radius' => '16',
           'independent_corners_set' => 
-          array (
+          array(
             'independent_corners' => 0,
             'radii' => 
-            array (
+            array(
               'tl' => '',
               'tr' => '',
               'bl' => '',
@@ -417,17 +419,17 @@ function modellibrary_imagecache_default_presets() {
     ),
   );
 
-  $presets['Preview'] = array (
+  $presets['Preview'] = array(
     'presetname' => 'Preview',
     'actions' => 
-    array (
+    array(
       0 => 
-      array (
+      array(
         'weight' => '0',
         'module' => 'imagecache_canvasactions',
         'action' => 'canvasactions_aspect',
         'data' => 
-        array (
+        array(
           'portrait' => '6',
           'landscape' => '5',
           'ratio_adjustment' => '1',
@@ -436,43 +438,43 @@ function modellibrary_imagecache_default_presets() {
     ),
   );
 
-  $presets['Preview-Landscape'] = array (
+  $presets['Preview-Landscape'] = array(
     'presetname' => 'Preview-Landscape',
     'actions' => 
-    array (
+    array(
       0 => 
-      array (
+      array(
         'weight' => '0',
         'module' => 'imagecache',
         'action' => 'imagecache_scale',
         'data' => 
-        array (
+        array(
           'width' => '250',
           'height' => '',
           'upscale' => 0,
         ),
       ),
       1 => 
-      array (
+      array(
         'weight' => '0',
         'module' => 'imagecache_canvasactions',
         'action' => 'canvasactions_definecanvas',
         'data' => 
-        array (
+        array(
           'RGB' => 
-          array (
+          array(
             'HEX' => 'DDDDDD',
           ),
           'under' => 1,
           'exact' => 
-          array (
+          array(
             'width' => '250',
             'height' => '250',
             'xpos' => 'center',
             'ypos' => 'center',
           ),
           'relative' => 
-          array (
+          array(
             'leftdiff' => '',
             'rightdiff' => '',
             'topdiff' => '',
@@ -481,28 +483,28 @@ function modellibrary_imagecache_default_presets() {
         ),
       ),
       2 => 
-      array (
+      array(
         'weight' => '0',
         'module' => 'imagecache_coloractions',
         'action' => 'imagecache_convert',
         'data' => 
-        array (
+        array(
           'format' => 'image/png',
         ),
       ),
       3 => 
-      array (
+      array(
         'weight' => '0',
         'module' => 'imagecache_canvasactions',
         'action' => 'canvasactions_roundedcorners',
         'data' => 
-        array (
+        array(
           'radius' => '16',
           'independent_corners_set' => 
-          array (
+          array(
             'independent_corners' => 0,
             'radii' => 
-            array (
+            array(
               'tl' => '',
               'tr' => '',
               'bl' => '',
@@ -514,43 +516,43 @@ function modellibrary_imagecache_default_presets() {
     ),
   );
 
-  $presets['Preview-Portrait'] = array (
+  $presets['Preview-Portrait'] = array(
     'presetname' => 'Preview-Portrait',
     'actions' => 
-    array (
+    array(
       0 => 
-      array (
+      array(
         'weight' => '0',
         'module' => 'imagecache',
         'action' => 'imagecache_scale',
         'data' => 
-        array (
+        array(
           'width' => '',
           'height' => '250',
           'upscale' => 1,
         ),
       ),
       1 => 
-      array (
+      array(
         'weight' => '0',
         'module' => 'imagecache_canvasactions',
         'action' => 'canvasactions_definecanvas',
         'data' => 
-        array (
+        array(
           'RGB' => 
-          array (
+          array(
             'HEX' => 'DDDDDD',
           ),
           'under' => 1,
           'exact' => 
-          array (
+          array(
             'width' => '250',
             'height' => '250',
             'xpos' => 'center',
             'ypos' => 'center',
           ),
           'relative' => 
-          array (
+          array(
             'leftdiff' => '',
             'rightdiff' => '',
             'topdiff' => '',
@@ -559,28 +561,28 @@ function modellibrary_imagecache_default_presets() {
         ),
       ),
       2 => 
-      array (
+      array(
         'weight' => '0',
         'module' => 'imagecache_coloractions',
         'action' => 'imagecache_convert',
         'data' => 
-        array (
+        array(
           'format' => 'image/png',
         ),
       ),
       3 => 
-      array (
+      array(
         'weight' => '0',
         'module' => 'imagecache_canvasactions',
         'action' => 'canvasactions_roundedcorners',
         'data' => 
-        array (
+        array(
           'radius' => '16',
           'independent_corners_set' => 
-          array (
+          array(
             'independent_corners' => 0,
             'radii' => 
-            array (
+            array(
               'tl' => '',
               'tr' => '',
               'bl' => '',
@@ -762,7 +764,7 @@ function modellibrary_menu_alter(&$items) {
   $items['user/%user/view']['title'] = 'Profile';
 
   $items['download_count']['file'] = 'download_count.pages.inc';
-  $items['download_count']['file path'] = drupal_get_path('module', 'modellibrary') .'/includes';
+  $items['download_count']['file path'] = drupal_get_path('module', 'modellibrary') . '/includes';
 
   // alter 'model' and 'modelversion' nodes
   $items['node/%node']['page callback'] = 'modellibrary_node_page_view';
@@ -780,9 +782,9 @@ function modellibrary_node_page_view($node) {
 
   if (($node->type == 'model' || $node->type == 'modelversion') && !($user->uid == 1 || user_access('administer models'))) {
     if ($node->type == 'model')
-      drupal_goto('model/'. $node->nid); // redirect to proper Model view page
+      drupal_goto('model/' . $node->nid); // redirect to proper Model view page
     else
-      drupal_goto('model/'. $node->field_modelversion_modelnid[0]['value']); // redirect to proper Model view page
+      drupal_goto('model/' . $node->field_modelversion_modelnid[0]['value']); // redirect to proper Model view page
   } 
   else {
     // return core node view. This code is adapted from the core Node module, node_page_view function.
@@ -795,7 +797,7 @@ function modellibrary_node_page_view($node) {
 /**
  * Implementation of hook_perm().
  */
-function modellibrary_perm() {
+function modellibrary_permission() {
   return array(
     'view model',
     'create model', 
@@ -834,7 +836,7 @@ function model_edit_access($op, $node, $account) {
 function modellibrary_apachesolr_search_result_alter(&$doc) {
   if ($doc->type == 'model') {
     // replace default node path with Model Library model URL
-    $doc->path = 'model/'. $doc->nid;
+    $doc->path = 'model/' . $doc->nid;
     // field_modelversion_modelnid
   }
 
@@ -857,7 +859,7 @@ function add_model_if_permitted() {
 function redirect_to_user_models() {
   global $user;
 
-  drupal_goto('user/'. $user->uid .'/models');
+  drupal_goto('user/' . $user->uid . '/models');
 }
 
 function enable_model() {
@@ -884,7 +886,7 @@ function enable_model() {
   if ($base_root != 'http://dev.comses.asu.edu') {
     modellibrary_post_twitter($model);
   }
-  drupal_goto('model/'. $modelnid);
+  drupal_goto('model/' . $modelnid);
 }
 
 function disable_model() {
@@ -895,7 +897,7 @@ function disable_model() {
   $model = node_submit($model);
   node_save($model);
 
-  drupal_goto('model/'. $modelnid);
+  drupal_goto('model/' . $modelnid);
 }
 
 /*
@@ -907,7 +909,7 @@ function modellibrary_post_twitter($node) {
   $openabm_twitter = 437897011; // uid for the openabm_comses Twitter account
   $twitter_account = twitter_account_load($openabm_twitter);
 
-  $status = 'New Model: '. $node->title .' '. twitter_shorten_url(url('model/'. $node->nid, array('absolute' => TRUE)));
+  $status = 'New Model: ' . $node->title . ' ' . twitter_shorten_url(url('model/' . $node->nid, array('absolute' => TRUE)));
 
   try {
     $result = twitter_set_status($twitter_account, $status);
@@ -929,7 +931,7 @@ function cleanmodels() {
     $model = node_load($modelnid);
     $version = load_modelversion($modelnid);
 
-watchdog('modellibrary', 'modellibrary.module (472): code_fid: '. $version->field_modelversion_code_fid, NULL, WACHDOG_INFO);
+watchdog('modellibrary', 'modellibrary.module (472): code_fid: ' . $version->field_modelversion_code_fid, NULL, WACHDOG_INFO);
 
     if (($model->field_model_replicated[0]['value'] == 1 && $model->field_model_reference[0]['value'] == "") || $version->field_modelversion_license[0]['value'] == '' || $version->field_modelversion_code_fid == '' || $version->field_modelversion_documentation_fid == '') {
       $model->status = 0;
@@ -978,7 +980,7 @@ function model_redirect_view() {
     // from within the View result, but for most purposes we don't want that
     // because that data hasn't been preprocessed, filtered, and doesn't provide
     // any widget functionality.
-    drupal_goto('model/'. $arg .'/version/'. $view->render_field('field_modelversion_number_value', 0) .'/view', NULL, NULL, 301);
+    drupal_goto('model/' . $arg . '/version/' . $view->render_field('field_modelversion_number_value', 0) . '/view', NULL, NULL, 301);
   }
 
   else {
@@ -991,13 +993,13 @@ function model_redirect_view() {
     $view->pre_execute(); // run any preprocessing
     $view->execute(); // then execute the view
 
-    drupal_goto('model/'. $view->render_field('field_modelversion_modelnid_value', 0) .'/version/'. $view->render_field('field_modelversion_number_value', 0) .'/view');
+    drupal_goto('model/' . $view->render_field('field_modelversion_modelnid_value', 0) . '/version/' . $view->render_field('field_modelversion_number_value', 0) . '/view');
   }
 }
 
 function model_redirect_edit() {
   $modelnid = arg(1);
-  drupal_goto('model/'. $modelnid .'/edit');
+  drupal_goto('model/' . $modelnid . '/edit');
 }
 
 /**
@@ -1010,6 +1012,6 @@ function model_redirect_edit() {
  * didn't want to create a new module *just* for this. (Comment added: 9/28/2012 NDR)
  */
 function modellibrary_form_alter(&$form, &$form_state, $form_id) {
-  #$form['title']['#description'] = '<p>' . t('Enter a title for the '. $form['type']['#value'] .' item.') . '</p>';
+  #$form['title']['#description'] = '<p>' . t('Enter a title for the ' . $form['type']['#value'] . ' item.') . '</p>';
   $form['body_field']['body']['#description'] = '<p>' . t('<p>Use Markdown syntax to easily format text.</p><p>Quick Tips:</p><ul><li>Two or more spaces at a line\'s end = Line break</li><li>Double returns = Paragraph</li><li>*Single asterisks* or _single underscores_ = <em>Emphasis</em></li><li>**Double** or __double__ = <strong>Strong</strong></li><li>This is [a link](http://the.link.example.com "The optional title text")</li><li>* Item = Unordered Lists</li><li>1. Item = Ordered Lists</li></ul><p>For complete details on the Markdown syntax, see the <a href="http://daringfireball.net/projects/markdown/basics">Markdown documentation</a> and <a href="http://michelf.com/projects/php-markdown/extra/">Markdown Extra documentation</a> for tables, footnotes, and more.</p>') . '</p>';
 }
