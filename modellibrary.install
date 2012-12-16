@@ -2,60 +2,9 @@
 // $Id: $
 
 /**
-* Implementation of hook_requirements()
-*/
-function modellibrary_requirements($phase) {
-    $requirements = array();
-    $t = get_t();
-
-    // an array of the dependencies
-    // where the array key is the module machine-readable name
-    // and the value is the module human-readable name
-    $dependencies = array(
-        'content' => 'Content',
-        'content_copy' => 'Content Copy',
-        'content_taxonomy' => 'Content Taxonomy',
-        'filefield' => 'FileField',
-        'imagefield' => 'ImageField',
-        'video' => 'Video',
-    );
-
-    switch ($phase) {
-        case 'install':
-            $error = FALSE;
-            $value = '';
-            foreach ($dependencies as $dependency => $module_nice_name) {
-                if (!module_exists($dependency)) {
-                    $error = TRUE;
-                    $value .= $t($module_nice_name . " to be pre-installed; ");
-                    $severity = REQUIREMENT_ERROR;
-                }
-            }
-
-            if ($error) {
-                $requirements['modellibrary'] = array(
-                  'title' => $t('NSF Model Library requires: '),
-                  'value' => $value . $t(' if the required modules are now installed, please enable this module again.'),
-                  'severity' => $severity,
-                );
-            }
-        break;
-    }
-
-    return $requirements;
-}
-
-/**
  * Implementation of hook_install
  */
 function modellibrary_install() {
-  _modellibrary_save_cck_node();
-  db_query("UPDATE {system} SET weight = 11 WHERE name = 'modellibrary'");
-
-  $add_permission_status = _add_permissions(1, 'view model, view field_model_featured, view field_model_image, view field_model_reference, view field_model_replicated, view field_model_tags, view field_model_teaser, view field_model_uri, view field_model_video, view field_modelversion_addfiles, view field_modelversion_code, view field_modelversion_dataset, view field_modelversion_documentation, view field_modelversion_language, view field_modelversion_langversion, view field_modelversion_license, view field_modelversion_modelnid, view field_modelversion_number, view field_modelversion_os, view field_modelversion_osversion, view field_modelversion_otherlang, view field_modelversion_platform, view field_modelversion_platformver, view field_modelversion_review, view field_modelversion_runconditions, view field_modelversion_sensitivity, view field_modelversion_uri, view imagecache Icon, view imagecache Preview'); // anonymous
-  $add_permission_status = _add_permissions(2, 'view model, create model, edit own model, view field_model_featured, view field_model_image, view field_model_reference, view field_model_replicated, view field_model_tags, view field_model_teaser, view field_model_uri, view field_model_video, view field_modelversion_addfiles, view field_modelversion_code, view field_modelversion_dataset, view field_modelversion_documentation, view field_modelversion_language, view field_modelversion_langversion, view field_modelversion_license, view field_modelversion_modelnid, view field_modelversion_number, view field_modelversion_os, view field_modelversion_osversion, view field_modelversion_otherlang, view field_modelversion_platform, view field_modelversion_platformver, view field_modelversion_review, view field_modelversion_runconditions, view field_modelversion_sensitivity, view field_modelversion_uri, edit field_model_featured, edit field_model_image, edit field_model_reference, edit field_model_replicated, edit field_model_tags, edit field_model_teaser, edit field_model_uri, edit field_model_video, edit field_modelversion_addfiles, edit field_modelversion_code, edit field_modelversion_dataset, edit field_modelversion_documentation, edit field_modelversion_language, edit field_modelversion_langversion, edit field_modelversion_license, edit field_modelversion_modelnid, edit field_modelversion_number, edit field_modelversion_os, edit field_modelversion_osversion, edit field_modelversion_otherlang, edit field_modelversion_platform, edit field_modelversion_platformver, edit field_modelversion_review, edit field_modelversion_runconditions, edit field_modelversion_sensitivity, edit field_modelversion_uri, view imagecache Icon, view imagecache Preview'); // authenticated users
-  //$add_permission_status = _add_permissions(8, 'view model'); // comses members
-  $add_permission_status = _add_permissions(4, 'view model, create model, edit any model, edit own model'); // administrators
 
 }
 
@@ -70,59 +19,3 @@ function modellibrary_uninstall() {
     node_type_delete('modelversion');
     menu_rebuild();
 }
-
-/**
- * _add_permissions() is a helper function to add permissions by role to the db
- */
-function _add_permissions($rid, $permissions) {
-  if (!is_array($permissions)) { 
-    $permissions = explode(', ', $permissions);
-  }
-  $current_perms = explode(', ', db_result(db_query("SELECT perm FROM {permission} WHERE rid=%d", $rid)));
-  foreach ($permissions as $permission) {
-    if (!in_array($permission, $current_perms)) {
-        $current_perms[] = $permission;
-      }
-    }
-  $current_perms = implode(', ', $current_perms);  
-  $return = db_query("UPDATE {permission} SET perm= '%s' WHERE rid=%d", $current_perms, $rid);
-  return $return;
-}
-
-function _modellibrary_save_cck_node() {
-    module_load_include('inc', 'modellibrary', 'includes/model.def');
-    module_load_include('inc', 'modellibrary', 'includes/modelversion.def');
-
-    $content = _model_cck_export();
-
-    // we do not want too many modules enabled - the content_copy and 
-    // alternate_content_copy modules are just needed in order to install the
-    // content type, so we just require them here (require_once prevent to
-    // include it more than once in case it is already enabled)
-    require_once './' . drupal_get_path('module', 'content') . '/modules/content_copy/content_copy.module';
-    require_once './' . drupal_get_path('module', 'alternate_content_copy') . '/alternate_content_copy.module';
-    alternate_content_copy_import_content($content);
-
-    $content = _modelversion_cck_export();
-    alternate_content_copy_import_content($content);
-}
-
-// EXAMPLE hook_update_N
-// every hook_update_N will look the same 
-// and you will need to write a new one 
-// every time you update the .def.inc file
-
-//function modellibrary_update_1() {
-//    _modellibrary_save_cck_node();
-//    return array();
-//}
-//
-//function modellibrary_update_2() {
-//    _modellibrary_save_cck_node();
-//    return array();
-//}
-//
-//function modellibrary_update_3() {
-//    _modellibrary_save_cck_node();
-//    return array();
-//}
