@@ -125,6 +125,12 @@ function modellibrary_theme($existing) {
       'original hook' => 'views_view_table',
       'path' => drupal_get_path('module', 'modellibrary') .'/tpl',
     ),
+    'views_view_table__model__page_8' => array(
+      'arguments' => array('view' => NULL, 'options' => NULL, 'rows' => NULL, 'title' => NULL),
+      'template' => 'views-view-table--model--page-8',
+      'original hook' => 'views_view_table',
+      'path' => drupal_get_path('module', 'modellibrary') .'/tpl',
+    ),
     'views_view_table__modelversion' => array(
       'arguments' => array('view' => NULL, 'options' => NULL, 'rows' => NULL, 'title' => NULL),
       'template' => 'views-view-table--modelversion',
@@ -155,75 +161,84 @@ function modellibrary_theme($existing) {
  * @param array $variables
  */
 function modellibrary_preprocess_page(&$variables) {
-    //using path
-    if(arg(0) == 'model' && arg(4) == 'view'){
+  //using path
+  if(arg(0) == 'model' && arg(4) == 'view'){
 
-      //load the node node
-      $node = node_load(arg(1));
+    //load the node node
+    $node = node_load(arg(1));
 
+    // Only add citation metadata on published models
+    if ($node->status == 1) {
+        // the meta content.
 
-      // the meta content.
+        $dublin_cite  = '<link rel="schema.DC" href="http://purl.org/DC/elements/1.0/" />'. "\n";
+        $dublin_cite .= '<link rel="schema.DCTERMS" href="http://purl.org/DC/terms/" />'. "\n";
 
-      $dublin_cite  = '<link rel="schema.DC" href="http://purl.org/DC/elements/1.0/" />'. "\n";
-      $dublin_cite .= '<link rel="schema.DCTERMS" href="http://purl.org/DC/terms/" />'. "\n";
+        $google_cite  = '<meta name="citation_title" content="'. check_plain($node->title .' (Version '. arg(3) .')') .'">'. "\n";
+        $dublin_cite .= '<meta name="DC.Title" content="'. check_plain($node->title .' (Version '. arg(3) .')') .'">'. "\n"; 
 
-      $google_cite  = '<meta name="citation_title" content="'. check_plain($node->title .' (Version '. arg(3) .')') .'">'. "\n";
-      $dublin_cite .= '<meta name="DC.Title" content="'. check_plain($node->title .' (Version '. arg(3) .')') .'">'. "\n"; 
+        if ($node->field_model_author1last[0]['value'] > '') {
+            $google_cite .= '<meta name="citation_author" content="'. check_plain($node->field_model_author1last[0]['value']) .', '. check_plain($node->field_model_author1first[0]['value']) .' '. check_plain($node->field_model_author1middle[0]['value']) .'">'. "\n";
+            $dublin_cite .= '<meta name="DC.Creator" content="'. check_plain($node->field_model_author1last[0]['value']) .', '. check_plain($node->field_model_author1first[0]['value']) .' '. check_plain($node->field_model_author1middle[0]['value']) .'">'. "\n";
+        } else {
+            $sql = 'SELECT name FROM {node} INNER JOIN {users} ON node.uid = users.uid WHERE node.type = "model" AND node.nid = %d';
+            $result = db_query($sql, arg(1));
+            $username = db_result($result);
 
-      if ($node->field_model_author1last[0]['value'] > '') {
-        $google_cite .= '<meta name="citation_author" content="'. check_plain($node->field_model_author1last[0]['value']) .', '. check_plain($node->field_model_author1first[0]['value']) .' '. check_plain($node->field_model_author1middle[0]['value']) .'">'. "\n";
-        $dublin_cite .= '<meta name="DC.Creator" content="'. check_plain($node->field_model_author1last[0]['value']) .', '. check_plain($node->field_model_author1first[0]['value']) .' '. check_plain($node->field_model_author1middle[0]['value']) .'">'. "\n";
-      } else {
-        $sql = 'SELECT name FROM {node} INNER JOIN {users} ON node.uid = users.uid WHERE node.type = "model" AND node.nid = %d';
-        $result = db_query($sql, arg(1));
-        $username = db_result($result);
+            $google_cite .= '<meta name="citation_author" content="'. $username .'">'. "\n";
+            $dublin_cite .= '<meta name="DC.Creator" content="'. $username .'">'. "\n";
+        }
+        if ($node->field_model_author2last[0]['value'] > '') {
+            $google_cite .= '<meta name="citation_author" content="'. check_plain($node->field_model_author2last[0]['value']) .', '. check_plain($node->field_model_author2first[0]['value']) .' '. check_plain($node->field_model_author2middle[0]['value']) .'">'. "\n";
+            $dublin_cite .= '<meta name="DC.Creator" content="'. check_plain($node->field_model_author2last[0]['value']) .', '. check_plain($node->field_model_author2first[0]['value']) .' '. check_plain($node->field_model_author2middle[0]['value']) .'">'. "\n";
+        } 
+        if ($node->field_model_author3last[0]['value'] > '') {
+            $google_cite .= '<meta name="citation_author" content="'. check_plain($node->field_model_author3last[0]['value']) .', '. check_plain($node->field_model_author3first[0]['value']) .' '. check_plain($node->field_model_author3middle[0]['value']) .'">'. "\n";
+            $dublin_cite .= '<meta name="DC.Creator" content="'. check_plain($node->field_model_author3last[0]['value']) .', '. check_plain($node->field_model_author3first[0]['value']) .' '. check_plain($node->field_model_author3middle[0]['value']) .'">'. "\n";
+        } 
+        if ($node->field_model_author4last[0]['value'] > '') {
+            $google_cite .= '<meta name="citation_author" content="'. check_plain($node->field_model_author4last[0]['value']) .', '. check_plain($node->field_model_author4first[0]['value']) .' '. check_plain($node->field_model_author4middle[0]['value']) .'">'. "\n";
+            $dublin_cite .= '<meta name="DC.Creator" content="'. check_plain($node->field_model_author4last[0]['value']) .', '. check_plain($node->field_model_author4first[0]['value']) .' '. check_plain($node->field_model_author4middle[0]['value']) .'">'. "\n";
+        } 
+        if ($node->field_model_author5last[0]['value'] > '') {
+            $google_cite .= '<meta name="citation_author" content="'. check_plain($node->field_model_author5last[0]['value']) .', '. check_plain($node->field_model_author5first[0]['value']) .' '. check_plain($node->field_model_author5middle[0]['value']) .'">'. "\n";
+            $dublin_cite .= '<meta name="DC.Creator" content="'. check_plain($node->field_model_author5last[0]['value']) .', '. check_plain($node->field_model_author5first[0]['value']) .' '. check_plain($node->field_model_author5middle[0]['value']) .'">'. "\n";
+        } 
 
-        $google_cite .= '<meta name="citation_author" content="'. $username .'">'. "\n";
-        $dublin_cite .= '<meta name="DC.Creator" content="'. $username .'">'. "\n";
-      }
-      if ($node->field_model_author2last[0]['value'] > '') {
-        $google_cite .= '<meta name="citation_author" content="'. check_plain($node->field_model_author2last[0]['value']) .', '. check_plain($node->field_model_author2first[0]['value']) .' '. check_plain($node->field_model_author2middle[0]['value']) .'">'. "\n";
-        $dublin_cite .= '<meta name="DC.Creator" content="'. check_plain($node->field_model_author2last[0]['value']) .', '. check_plain($node->field_model_author2first[0]['value']) .' '. check_plain($node->field_model_author2middle[0]['value']) .'">'. "\n";
-      } 
-      if ($node->field_model_author3last[0]['value'] > '') {
-        $google_cite .= '<meta name="citation_author" content="'. check_plain($node->field_model_author3last[0]['value']) .', '. check_plain($node->field_model_author3first[0]['value']) .' '. check_plain($node->field_model_author3middle[0]['value']) .'">'. "\n";
-        $dublin_cite .= '<meta name="DC.Creator" content="'. check_plain($node->field_model_author3last[0]['value']) .', '. check_plain($node->field_model_author3first[0]['value']) .' '. check_plain($node->field_model_author3middle[0]['value']) .'">'. "\n";
-      } 
-      if ($node->field_model_author4last[0]['value'] > '') {
-        $google_cite .= '<meta name="citation_author" content="'. check_plain($node->field_model_author4last[0]['value']) .', '. check_plain($node->field_model_author4first[0]['value']) .' '. check_plain($node->field_model_author4middle[0]['value']) .'">'. "\n";
-        $dublin_cite .= '<meta name="DC.Creator" content="'. check_plain($node->field_model_author4last[0]['value']) .', '. check_plain($node->field_model_author4first[0]['value']) .' '. check_plain($node->field_model_author4middle[0]['value']) .'">'. "\n";
-      } 
-      if ($node->field_model_author5last[0]['value'] > '') {
-        $google_cite .= '<meta name="citation_author" content="'. check_plain($node->field_model_author5last[0]['value']) .', '. check_plain($node->field_model_author5first[0]['value']) .' '. check_plain($node->field_model_author5middle[0]['value']) .'">'. "\n";
-        $dublin_cite .= '<meta name="DC.Creator" content="'. check_plain($node->field_model_author5last[0]['value']) .', '. check_plain($node->field_model_author5first[0]['value']) .' '. check_plain($node->field_model_author5middle[0]['value']) .'">'. "\n";
-      } 
+        //$google_cite .= '<meta name="citation_online_date" content="'. date('Y/m/d', $node->created) .'">'. "\n";
+        $google_cite .= '<meta name="citation_publication_date" content="'. date('Y/m/d', $node->created) .'">'. "\n";
+        $dublin_cite .= '<meta name="DC.Date" content="'. date('Y-m-d', $node->created) .'">'. "\n";
 
-      //$google_cite .= '<meta name="citation_online_date" content="'. date('Y/m/d', $node->created) .'">'. "\n";
-      $google_cite .= '<meta name="citation_publication_date" content="'. date('Y/m/d', $node->created) .'">'. "\n";
-      $dublin_cite .= '<meta name="DC.Date" content="'. date('Y-m-d', $node->created) .'">'. "\n";
+        $google_cite .= '<meta name="citation_journal_title" content="CoMSES Computational Model Library">'. "\n";
+        $dublin_cite .= '<meta name="DC.bibliographicCitation" content="CoMSES Computational Model Library. Retrieved from: ';
+            if ($node->field_model_handle[0]['value'] > '') $dublin_cite .= 'http://hdl.handle.net/'. check_plain($node->field_model_handle[0]['value']);
+            else $dublin_cite .= 'http://www.openabm.org/model/'. $node->nid .'/version/'. arg(3) .'/view';
+        $dublin_cite .= '">'. "\n";
 
-      $google_cite .= '<meta name="citation_journal_title" content="CoMSES Computational Model Library">'. "\n";
-      $dublin_cite .= '<meta name="DC.bibliographicCitation" content="CoMSES Computational Model Library. Retrieved from: ';
-        if ($node->field_model_handle[0]['value'] > '') $dublin_cite .= 'http://hdl.handle.net/'. check_plain($node->field_model_handle[0]['value']);
-        else $dublin_cite .= 'http://www.openabm.org/model/'. $node->nid .'/version/'. arg(3) .'/view';
-      $dublin_cite .= '">'. "\n";
+        $google_cite .= '<meta name="citation_publisher" content="CoMSES Network">'. "\n";
+        $dublin_cite .= '<meta name="DC.Publisher" content="CoMSES Network">'. "\n";
+        $dublin_cite .= '<meta name="DC.Type" content="Software">'. "\n";
+        $dublin_cite .= '<meta name="DC.Type" content="ABM">'. "\n";
+        $dublin_cite .= '<meta name="DC.Type" content="agent-based model">'. "\n";
+        $dublin_cite .= '<meta name="DC.Description" content="'. check_plain($node->body) .'">'. "\n";
 
-      $google_cite .= '<meta name="citation_publisher" content="CoMSES Network">'. "\n";
-      $dublin_cite .= '<meta name="DC.Publisher" content="CoMSES Network">'. "\n";
-      $dublin_cite .= '<meta name="DC.Type" content="Software">'. "\n";
-      $dublin_cite .= '<meta name="DC.Type" content="ABM">'. "\n";
-      $dublin_cite .= '<meta name="DC.Type" content="agent-based model">'. "\n";
-      $dublin_cite .= '<meta name="DC.Description" content="'. check_plain($node->body) .'">'. "\n";
+        if ($node->field_model_handle[0]['value'] > '') {
+            $dublin_cite .= '<meta name="DC.Identifier" content="http://hdl.handle.net/'. check_plain($node->field_model_handle[0]['value']) .'">'. "\n";
+        } else {
+            $dublin_cite .= '<meta name="DC.Identifier" content="http://www.openabm.org/model/'. $node->nid .'/version/'. arg(3) .'/view">'. "\n";
+        }
 
-      if ($node->field_model_handle[0]['value'] > '') {
-        $dublin_cite .= '<meta name="DC.Identifier" content="http://hdl.handle.net/'. check_plain($node->field_model_handle[0]['value']) .'">'. "\n";
-      } else {
-        $dublin_cite .= '<meta name="DC.Identifier" content="http://www.openabm.org/model/'. $node->nid .'/version/'. arg(3) .'/view">'. "\n";
-      }
+        drupal_set_html_head($google_cite);
+        drupal_set_html_head($dublin_cite);
+    } // end add citation metadata to published models
 
-      drupal_set_html_head($google_cite);
-      drupal_set_html_head($dublin_cite);
-      $variables['head'] = drupal_get_html_head();
+    else {
+        // instruct search bots to not index, follow links, or archive this model (because it is unpublished)
+        $noindex = '<meta name="robots" content="noindex,nofollow,noarchive" >';
+        drupal_set_html_head($noindex);
+    }
+
+    $variables['head'] = drupal_get_html_head();
   }
 }
 
@@ -725,7 +740,7 @@ function modellibrary_menu() {
     'description' => 'Click to search for a model.',
     'type' => MENU_LOCAL_TASK,
     'page callback' => 'drupal_goto',
-    'page arguments' => array('search/apachesolr_search/', 'filters=type%3Amodel&retain-filters=1'),
+    'page arguments' => array('search/models'),
     'access callback' => TRUE,
     'weight' => 3,
   );
@@ -832,10 +847,18 @@ function model_edit_access($op, $node, $account) {
  * hook_apachesolr_process_results().
  */
 function modellibrary_apachesolr_search_result_alter(&$doc) {
-  if ($doc->type == 'model') {
+  if ($doc->bundle == 'model') {
     // replace default node path with Model Library model URL
-    $doc->path = 'model/'. $doc->nid;
-    // field_modelversion_modelnid
+    $doc->path = 'model/'. $doc->entity_id;
+    $doc->url = '/model/'. $doc->entity_id;
+  }
+
+  // Alter profile nodes to direct to User Account
+  if ($doc->bundle == 'profile') {
+    $doc->bundle = 'user';
+    $doc->bundle_name = 'User';
+    $doc->path = 'user/'. $doc->is_uid;
+    $doc->url = '/user/'. $doc->is_uid;
   }
 
   return $doc;

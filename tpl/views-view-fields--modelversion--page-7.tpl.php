@@ -40,6 +40,7 @@
 
 ?>
 <table style="margin: 0;" border="0" width="100%">
+<?php if ($model_view->render_field('status', 0) == 1) : ?>
   <tr>
     <td colspan=3>
       <div class="model-authors">
@@ -52,14 +53,15 @@
       if ($model_view->render_field('field_model_author4last_value', 0) > "") print ', '. $model_view->render_field('field_model_author4first_value', 0) ." ". $model_view->render_field('field_model_author4middle_value', 0) ." ". $model_view->render_field('field_model_author4last_value', 0);
 
       if ($model_view->render_field('field_model_author5last_value', 0) > "") print ', '. $model_view->render_field('field_model_author5first_value', 0) ." ". $model_view->render_field('field_model_author5middle_value', 0) ." ". $model_view->render_field('field_model_author5last_value', 0);
-       
 ?>
       </div>
     </td>
   </tr>
+<?php endif; ?>
   <tr>
     <td>
       <div class="model-block">
+<?php if ($model_view->render_field('status', 0) == 1) : ?>
       <div class="model-author1">Submitted By: <?php 
         if ($model_view->render_field('field_profile_lastname_value', 0) > "") 
           print $model_view->render_field('field_profile_firstname_value', 0) ." ". $model_view->render_field('field_profile_middlename_value', 0) ." ". $model_view->render_field('field_profile_lastname_value', 0); 
@@ -67,6 +69,7 @@
           print $model_view->render_field('name', 0);
   if (in_array('comses member', array_values($user->roles)) || in_array('administrator', array_values($user->roles))) print ' ('. l($model_view->render_field('name', 0), 'user/'. $model_view->render_field('uid', 0)) .')'; ?>
       </div>
+<?php endif; ?>
       <div class="model-date">Submitted: <?php print $model_view->render_field('created', 0); ?></div>
       <div class="model-date model-updated-date">Last Updated: <?php print $model_view->render_field('last_updated', 0); ?></div>
 
@@ -169,12 +172,14 @@ print '      <div class="model-badge"><img src="/files/images/certified-badge-bi
           print '</div>';
         }
         ?>
+<?php if ($model_view->render_field('status', 0) == 1) : ?>
         <div class="model-block model-citation-block">
           <div class="model-block-title model-citation-title">Cite This Model:</div>
           <div class="model-citation-text"><p>
             <?php if ($model_view->render_field('field_model_author1last_value', 0) > "") { print $model_view->render_field('field_model_author1last_value', 0) .', '. $model_view->render_field('field_model_author1first_value', 0); if ($model_view->render_field('field_model_author1middle_value', 0) > "") print ' '. $model_view->render_field('field_model_author1middle_value', 0); } else print $model_view->render_field('name', 0); if ($model_view->render_field('field_model_author2last_value', 0) > "") { print ', '. $model_view->render_field('field_model_author2last_value', 0) .', '. $model_view->render_field('field_model_author2first_value', 0); if ($model_view->render_field('field_model_author2middle_value', 0) > "") print ' '. $model_view->render_field('field_model_author2middle_value', 0); } if ($model_view->render_field('field_model_author3last_value', 0) > "") { print ', '. $model_view->render_field('field_model_author3last_value', 0) .', '. $model_view->render_field('field_model_author3first_value', 0); if ($model_view->render_field('field_model_author3middle_value', 0) > "") print ' '. $model_view->render_field('field_model_author3middle_value', 0); } if ($model_view->render_field('field_model_author4last_value', 0) > "") { print ', '. $model_view->render_field('field_model_author4last_value', 0) .', '. $model_view->render_field('field_model_author4first_value', 0); if ($model_view->render_field('field_model_author4middle_value', 0) > "") print ' '. $model_view->render_field('field_model_author4middle_value', 0); } ?> (<?php print $fields['created']->content; ?>). "<?php print $model_view->render_field('title', 0); ?>" (Version <?php print $fields['field_modelversion_number_value']->content; ?>). <em>CoMSES Computational Model Library</em>. Retrieved from: <?php if ($model_view->render_field('field_model_handle_value', 0) > "") { print $model_view->render_field('field_model_handle_value', 0); } else { print $base_url . $base_path .'model/'. $modelnid .'/version/'. $fields['field_modelversion_number_value']->content; } ?>
           </p></div>
         </div>
+<?php endif; ?>
       </div>
     </td>
     <td width=175>

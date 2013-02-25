@@ -1,5 +1,4 @@
 <?php
-// $Id: views-view-fields.tpl.php,v 1.6 2008/09/24 22:48:21 merlinofchaos Exp $
 /**
  * @file views-view-fields.tpl.php
  * Default simple view template to all the fields as a row.
@@ -18,11 +17,9 @@
  *
  * @ingroup views_templates
  */
-?>
-<? if($fields["field_model_image_fid"]->content) : ?>
-  <?php print $fields["field_model_image_fid"]->content; ?>
-<? endif; ?>
-<? if($fields["field_model_teaser_value"]->content) : ?>
-  <?php print $fields["field_model_teaser_value"]->content; ?>
-<? endif; ?>
+
+if ($fields["field_model_image_fid"]->content > '')
+  print $fields["field_model_image_fid"]->content;
+if ($fields["field_model_teaser_value"]->content > '')
+  print $fields["field_model_teaser_value"]->content; ?>
 <p class="seemore">more &rarr; <?php print $fields["title"]->content; ?></p>
