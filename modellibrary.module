@@ -754,6 +754,15 @@ function modellibrary_menu() {
     'weight' => 1,
   );
 
+  $items['models/years'] = array(
+    'title' => 'Model Publication Years',
+    'description' => '',
+    'type' => MENU_CALLBACK,
+    'page callback' => 'modellibrary_display_model_years',
+    'access callback' => TRUE,
+    'weight' => 1,
+  );
+
   /*
   $items['models/add/biblio'] = array(
     'title' => 'Add Biblio Reference',
@@ -876,6 +885,21 @@ function add_model_if_permitted() {
     drupal_goto('models/browse');
   }
 }
+
+function modellibrary_display_model_years() {
+  // Lookup the publication years in the model library
+  $sql = "SELECT DISTINCT year(from_unixtime(created)) AS `year` FROM `node` WHERE type = 'model' AND status = 1 ORDER BY year";
+  $results = db_query($sql);
+
+  $content = '<div>';
+  while ($item = db_fetch_object($results)) {
+   $content .= '<div><a href="/models/' . $item->year . '/year">' . $item->year . '</a></div>'; 
+  }
+  $content .= '</div>';
+
+  return $content;
+}
+
 
 function redirect_to_user_models() {
   global $user;
