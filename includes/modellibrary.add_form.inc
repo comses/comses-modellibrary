@@ -132,6 +132,18 @@ function model_add_form($form_state) {
       break; */
 
     case 1: // page 1
+      $form['help'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Help'),
+        '#collapsible' => FALSE, 
+        '#collapsed' => FALSE,
+      );
+
+      $form['help']['info'] = array(
+        '#type' => 'item',
+        '#value' => t('A tutorial on adding models to the library is available (opens in new window/tab): ') . l('Model Library Tutorial', 'page/model-library-tutorial', array('attributes' => array('target' => '_blank'))),
+      );
+
       $form['title'] = array(
         '#type' => 'textfield',
         '#title' => t('Title'),

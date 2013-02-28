@@ -40,7 +40,7 @@
 
 ?>
 <table style="margin: 0;" border="0" width="100%">
-<?php if ($model_view->render_field('status', 0) == 1) : ?>
+<?php if ($model_view->render_field('status', 0) == "True") : ?>
   <tr>
     <td colspan=3>
       <div class="model-authors">
@@ -61,7 +61,7 @@
   <tr>
     <td>
       <div class="model-block">
-<?php if ($model_view->render_field('status', 0) == 1) : ?>
+<?php if ($model_view->render_field('status', 0) == "True") : ?>
       <div class="model-author1">Submitted By: <?php 
         if ($model_view->render_field('field_profile_lastname_value', 0) > "") 
           print $model_view->render_field('field_profile_firstname_value', 0) ." ". $model_view->render_field('field_profile_middlename_value', 0) ." ". $model_view->render_field('field_profile_lastname_value', 0); 
@@ -172,7 +172,7 @@ print '      <div class="model-badge"><img src="/files/images/certified-badge-bi
           print '</div>';
         }
         ?>
-<?php if ($model_view->render_field('status', 0) == 1) : ?>
+<?php if ($model_view->render_field('status', 0) == "True") : ?>
         <div class="model-block model-citation-block">
           <div class="model-block-title model-citation-title">Cite This Model:</div>
           <div class="model-citation-text"><p>

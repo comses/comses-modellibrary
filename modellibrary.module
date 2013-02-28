@@ -754,6 +754,16 @@ function modellibrary_menu() {
     'weight' => 1,
   );
 
+  $items['models/help'] = array(
+    'title' => 'Help',
+    'description' => '',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'drupal_goto',
+    'page arguments' => array('page/model-library-tutorial'),
+    'access callback' => TRUE,
+    'weight' => 20,
+  );
+
   $items['models/years'] = array(
     'title' => 'Model Publication Years',
     'description' => '',
