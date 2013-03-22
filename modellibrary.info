@@ -1,12 +1,13 @@
-;Id$
-
 name = "CoMSES Computational Model Library"
-description = "The NSF Model Library for OpenABM.org"
+description = "The CoMSES Model Library for OpenABM.org"
 package = OpenABM
-version = 7.x-0.1-dev
+version = 7.x-2.0-dev
 core = 7.x
 php = 5.2
 
-files[] = download_count.pages.inc
-files[] = modellibrary.add_form.inc
-files[] = modellibrary.helper.functions.inc
+stylesheets[all][] = includes/modellibrary.css
+
+files[] = includes/download_count.pages.inc
+files[] = includes/modellibrary.add_form.inc
+files[] = includes/modellibrary.helper.functions.inc
+
