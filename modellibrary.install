@@ -1131,7 +1131,6 @@ function modellibrary_update_7008(&$sandbox) {
 function modellibrary_update_7009(&$sandbox) {
   $fields = array(
     'field_model_locked',
-    'field_model_teaser',
     'field_model_enabled',
     'field_model_tags',
     'field_modelversion_locked',

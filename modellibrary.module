@@ -221,15 +221,15 @@ function modellibrary_menu() {
     'weight' => 2,
   );
 
-  $items['models/search'] = array(
-    'title' => 'Search',
-    'description' => 'Click to search for a model. ',
-    'type' => MENU_LOCAL_TASK,
-    'page callback' => 'drupal_goto',
-    'page arguments' => array('search/models'),
-    'access callback' => TRUE,
-    'weight' => 3,
-  );
+#  $items['models/search'] = array(
+#    'title' => 'Search',
+#    'description' => 'Click to search for a model. ',
+#    'type' => MENU_LOCAL_TASK,
+#    'page callback' => 'drupal_goto',
+#    'page arguments' => array('search/models'),
+#    'access callback' => TRUE,
+#    'weight' => 3,
+#  );
 
   $items['models/add'] = array(
     'title' => 'Add',
@@ -351,6 +351,9 @@ function modellibrary_menu_alter(&$items) {
 
   // alter 'model' and 'modelversion' nodes
   $items['node/%node']['page callback'] = 'modellibrary_node_page_view';
+
+  // alter the model search menu to be a menu tab
+  #$items['models/search']['type'] = MENU_LOCAL_TASK;
   
 }
 
@@ -604,9 +607,8 @@ function modellibrary_preprocess_page(&$variables) {
  * We want to make the summary edit field always visible.
  */
 function modellibrary_js_alter(&$javascript) {
-  #dpm($javascript);
   // remove the JS that does the show/hide summary
-  #unset($javascript['modules/field/modules/text/text.js']);
+  unset($javascript['modules/field/modules/text/text.js']);
 }
 
 /**
@@ -673,15 +675,14 @@ function enable_model() {
   $model = node_load($modelnid);
 
   $model->status = 1;
-  #$model = node_submit($model);
   node_save($model);
 
   // Make sure this isn't occurring on the Dev server, before we post to Twitter
   // TODO: perhaps change to a system variable that we toggle, Enable/Disable Twitter
-#  global $base_root;
-#  if ($base_root != 'http://dev.comses.asu.edu') {
-#    modellibrary_post_twitter($model);
-#  }
+  global $base_root;
+  if ($base_root != 'http://dev.comses.asu.edu' || $base_root != 'http://dev.openabm.org') {
+    modellibrary_post_twitter($model);
+  }
   drupal_goto('model/' . $modelnid);
 }
 
@@ -765,44 +766,38 @@ function modellibrary_views_pre_render(&$view) {
  * Solr search engine. Changes made here occur prior to final processing by
  * hook_apachesolr_process_results().
  */
-#function modellibrary_apachesolr_search_result_alter(&$doc) {
-#  if ($doc->bundle == 'model') {
-#    // replace default node path with Model Library model URL
-#    $doc->path = 'model/' . $doc->entity_id;
-#    $doc->url = '/model/' . $doc->entity_id;
-#  }
-#
-#  // Alter profile nodes to direct to User Account
-#  if ($doc->bundle == 'profile') {
-#    $doc->bundle = 'user';
-#    $doc->bundle_name = 'User';
-#    $doc->path = 'user/' . $doc->is_uid;
-#    $doc->url = '/user/' . $doc->is_uid;
-#  }
-#
-#  return $doc;
-#}
+function modellibrary_apachesolr_search_result_alter(&$doc) {
+  if ($doc->bundle == 'model') {
+    // replace default node path with Model Library model URL
+    $doc->path = 'model/' . $doc->entity_id;
+    $doc->url = '/model/' . $doc->entity_id;
+  }
+
+  // Alter profile nodes to direct to User Account
+  if ($doc->bundle == 'profile') {
+    $doc->bundle = 'user';
+    $doc->bundle_name = 'User';
+    $doc->path = 'user/' . $doc->is_uid;
+    $doc->url = '/user/' . $doc->is_uid;
+  }
+
+  return $doc;
+}
 
 /*
  * Function for posting models to OpenABM-CoMSES Twitter account.
  * This code is adapted from the Twitter Post module
  */
-#function modellibrary_post_twitter($node) {
-#  module_load_include('inc', 'twitter');
-#  $openabm_twitter = 437897011; // uid for the openabm_comses Twitter account
-#  $twitter_account = twitter_account_load($openabm_twitter);
-#
-#  $status = 'New Model: ' . $node->title . ' ' . twitter_shorten_url(url('model/' . $node->nid, array('absolute' => TRUE)));
-#
-#  try {
-#    $result = twitter_set_status($twitter_account, $status);
-#    drupal_set_message(t('Successfully posted to Twitter'));
-#  }
-#  catch (TwitterException $e) {
-#    drupal_set_message(t('An error occurred when posting to twitter: %code %error',
-#      array('%code' => $result->code, '%error' => $result->error)), 'warning');
-#  }
-#}
+function modellibrary_post_twitter($node) {
+  module_load_include('inc', 'twitter');
+
+  $openabm_twitter = 437897011; // uid for the openabm_comses Twitter account
+  $twitter_account = twitter_account_load($openabm_twitter);
+  $status = 'New Model: ' . $node->title . ' ' . twitter_shorten_url(url('model/' . $node->nid, array('absolute' => TRUE)));
+  if (twitter_set_status($twitter_account, $status)) {
+    drupal_set_message(t('Successfully posted to Twitter'));
+  }
+}
 
 /**
  * Implementation of hook_form_alter

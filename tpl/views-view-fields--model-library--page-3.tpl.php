@@ -104,8 +104,8 @@ if ($fields['status']->raw == 1) {
           print ' ('. $fields['name']->content .')'; ?>
         </div>
 <?php endif; ?>
-        <div class="model-date">Submitted: <?php print $fields['created']->content; ?></div>
-        <div class="model-date model-updated-date">Last Updated: <?php print $fields['changed']->content; ?></div>
+        <div class="model-date">Submitted: <?php print date('M j, Y', $node->created); ?></div>
+        <div class="model-date model-updated-date">Last Updated: <?php print date('M j, Y', $node->changed); ?></div>
 <?php
       // Code file download count, all-time
 #      $sql = "SELECT SUM(downloads) AS downloads FROM (SELECT COUNT(dc.fid) AS downloads FROM files files LEFT JOIN download_count dc ON files.fid = dc.fid WHERE dc.fid = files.fid AND (files.fid IN (SELECT DISTINCT n_mv.field_modelversion_code_fid AS code_fid FROM node n LEFT JOIN content_type_modelversion n_mv ON n.vid = n_mv.vid WHERE (n.type in ('modelversion')) AND (n.status = 1) AND (n_mv.field_modelversion_modelnid_value = :nid )))) dl";
@@ -136,7 +136,7 @@ if ($fields['status']->raw == 1) {
         }
 
         if ($fields['status']->raw == 1 && (in_array('administrator', array_values($user->roles)) || $user->uid == $fields['uid']->raw)) {
-          echo '<a class="model-button" href="'. url('model/'. $modelnid .'/disable') .'">Unpublish</a>';
+          echo '<a class="model-button" href="'. url('model/'. $modelnid .'/disable') .'">Unpublish Model</a>';
         }
 
         if ($fields['field_modelversion_number']->content != modellibrary_helper_get_max_versionnum($modelnid)) {
@@ -441,13 +441,14 @@ if (count($nids) > 1): ?>
 <?php foreach ($nids as $index => $nid):
   $node = node_load($nid);
 
-  $version_number = field_get_items('node', $node, 'field_modelversion_number');
+  $object = entity_metadata_wrapper('node', $node);
+  $version_number = $object->field_modelversion_number->value();
   $body = field_get_items('node', $node, 'body');
 ?>
       <tr class="<?php print $index + 1; ?> <?php print (($index + 1) % 2 == 0 ? 'even' : 'odd');  ?>">
-        <td class="field-modelversion-number"><?php print $version_number[0]['value']; ?></td>
-        <td class="field-modelversion-created"><?php print date('m/j/Y', $node->created); ?></td>
-        <td class="field-body"><?php print check_plain($body[0]['value']); ?></td>
+        <td <?php print 'onclick="DoNav(\'/model/'. $modelnid .'/version/'. $version_number .'/view\');"'; ?>class="field-modelversion-number"><?php print $version_number; ?></td>
+        <td <?php print 'onclick="DoNav(\'/model/'. $modelnid .'/version/'. $version_number .'/view\');"'; ?>class="field-modelversion-created"><?php print date('m/j/Y', $node->created); ?></td>
+        <td <?php print 'onclick="DoNav(\'/model/'. $modelnid .'/version/'. $version_number .'/view\');"'; ?>class="field-body"><?php print check_plain($body[0]['value']); ?></td>
       </tr>
 <?php endforeach; ?>
     </tbody>

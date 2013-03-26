@@ -748,8 +748,6 @@ function modellibrary_wizard_step5($form, &$form_state) {
     '#format' => NULL,
   );
 
-  dpm($form_state);
-
   return $form;
 }
 
@@ -848,7 +846,7 @@ function modellibrary_get_result($object) {
 
     // if form count <= node count, then update the node with the form items and delete the excess
     if ($form_count <= $node_count) {
-      foreach ($object->taxonomy_vocabulary_6[LANGUAGE_NONE] as $index => $item) {
+      foreach ($object->taxonomy_vocabulary_6[LANGUAGE_NONE] as $index => $tag) {
         // if tag is new, then add to vocab
         if ($tag['tid'] == 'autocreate') {
             $term = new stdClass();
@@ -863,8 +861,8 @@ function modellibrary_get_result($object) {
         // like if the user removed multiple tags and then re-added in different order
         // we aren't going to towrry about this. If the terms don't match, then
         // we will replace the node term with the form term.
-        elseif ($model->taxonomy_vocabulary_6[$model->language][$index]['tid'] != $item['tid']) 
-          $model->taxonomy_vocabulary_6[$model->language][$index]['tid'] = $item['tid'];
+        elseif ($model->taxonomy_vocabulary_6[$model->language][$index]['tid'] != $tag['tid']) 
+          $model->taxonomy_vocabulary_6[$model->language][$index]['tid'] = $tag['tid'];
       }
 
       // remove extra items in node taxonomy field
@@ -1103,6 +1101,8 @@ function modellibrary_get_result($object) {
         $field_collection_id = $model->field_model_author[LANGUAGE_NONE][$index]['value'];
         // and load the model author field collection
         $field_model_author = entity_load('field_collection_item', array($field_collection_id));
+
+        $save_field = FALSE;
 
         // test each name field, if form is different than stored value, then update field
         if ($field_model_author[$field_collection_id]->field_model_authorfirst[LANGUAGE_NONE][0]['value'] != $author['firstname']) {
