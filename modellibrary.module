@@ -402,6 +402,7 @@ function modellibrary_preprocess_page(&$variables) {
           'name' => 'citation_title',
           'content' => check_plain($node->title) .' (Version '. arg(3) .')',
         ),
+        '#weight' => 10,
       );
       $dublin_cite_element[] = array(
         '#tag' => 'meta',
@@ -409,6 +410,7 @@ function modellibrary_preprocess_page(&$variables) {
           'name' => 'DC.Title',
           'content' => check_plain($node->title) .' (Version '. arg(3) .')',
         ),
+        '#weight' => 20,
       );
 
       if (isset($node->field_model_author[LANGUAGE_NONE])) {
@@ -434,6 +436,7 @@ function modellibrary_preprocess_page(&$variables) {
               'name' => 'citation_author',
               'content' => $author_text,
             ),
+            '#weight' => 11,
           );
           $dublin_cite_element[] = array(
             '#tag' => 'meta',
@@ -441,6 +444,7 @@ function modellibrary_preprocess_page(&$variables) {
               'name' => 'DC.Creator',
               'content' => $author_text,
             ),
+            '#weight' => 21,
           );
           $i++;
         }
@@ -455,6 +459,7 @@ function modellibrary_preprocess_page(&$variables) {
             'name' => 'citation_author',
             'content' => $username,
           ),
+          '#weight' => 12,
         );
         $dublin_cite_element[] = array(
           '#tag' => 'meta',
@@ -462,6 +467,7 @@ function modellibrary_preprocess_page(&$variables) {
             'name' => 'DC.Creator',
             'content' => $username,
           ),
+          '#weight' => 22,
         );
       }
 
@@ -472,6 +478,7 @@ function modellibrary_preprocess_page(&$variables) {
           'name' => 'citation_publication_date',
           'content' => date('Y/m/d', $node->created),
         ),
+        '#weight' => 13,
       );
       $dublin_cite_element[] = array(
         '#tag' => 'meta',
@@ -479,6 +486,7 @@ function modellibrary_preprocess_page(&$variables) {
           'name' => 'DC.Date',
           'content' => date('Y/m/d', $node->created),
         ),
+        '#weight' => 23,
       );
 
       $google_cite_element[] = array(
@@ -487,6 +495,7 @@ function modellibrary_preprocess_page(&$variables) {
           'name' => 'citation_journal_title',
           'content' => 'CoMSES Computational Model Library',
         ),
+        '#weight' => 14,
       );
       $dublin_cite = 'CoMSES Computational Model Library. Retrieved from: ';
       if (isset($node->field_model_handle[LANGUAGE_NONE][0]['safe_value'])) $dublin_cite .= 'http://hdl.handle.net/'. $node->field_model_handle[LANGUAGE_NONE][0]['safe_value'];
@@ -497,6 +506,7 @@ function modellibrary_preprocess_page(&$variables) {
           'name' => 'DC.bibliographicCitation',
           'content' => $dublin_cite,
         ),
+        '#weight' => 24,
       );
 
       $google_cite_element[] = array(
@@ -505,6 +515,7 @@ function modellibrary_preprocess_page(&$variables) {
           'name' => 'citation_publisher',
           'content' => 'CoMSES Network',
         ),
+        '#weight' => 15,
       );
       $dublin_cite_element[] = array(
         '#tag' => 'meta',
@@ -512,6 +523,7 @@ function modellibrary_preprocess_page(&$variables) {
           'name' => 'DC.Publisher',
           'content' => 'CoMSES Network',
         ),
+        '#weight' => 25,
       );
       $dublin_cite_element[] = array(
         '#tag' => 'meta',
@@ -519,6 +531,7 @@ function modellibrary_preprocess_page(&$variables) {
           'name' => 'DC.Type',
           'content' => 'Software',
         ),
+        '#weight' => 26,
       );
       $dublin_cite_element[] = array(
         '#tag' => 'meta',
@@ -526,6 +539,7 @@ function modellibrary_preprocess_page(&$variables) {
           'name' => 'DC.Type',
           'content' => 'ABM',
         ),
+        '#weight' => 26,
       );
       $dublin_cite_element[] = array(
         '#tag' => 'meta',
@@ -533,6 +547,7 @@ function modellibrary_preprocess_page(&$variables) {
           'name' => 'DC.Type',
           'content' => 'agent-based model',
         ),
+        '#weight' => 26,
       );
       $dublin_cite_element[] = array(
         '#tag' => 'meta',
@@ -540,6 +555,7 @@ function modellibrary_preprocess_page(&$variables) {
           'name' => 'DC.Description',
           'content' => strip_tags($node->body[LANGUAGE_NONE][0]['safe_value']),
         ),
+        '#weight' => 27,
       );
 
       if (isset($node->field_model_handle[LANGUAGE_NONE][0]['safe_value'])) {
@@ -549,6 +565,7 @@ function modellibrary_preprocess_page(&$variables) {
             'name' => 'DC.Identifier',
             'content' => 'http://hdl.handle.net/'. $node->field_model_handle[LANGUAGE_NONE][0]['safe_value'],
           ),
+          '#weight' => 28,
         );
       } else {
         $dublin_cite_element[] = array(
@@ -557,6 +574,7 @@ function modellibrary_preprocess_page(&$variables) {
             'name' => 'DC.Identifier',
             'content' => 'http://www.openabm.org/model/'. $node->nid .'/version/'. arg(3) .'/view',
           ),
+          '#weight' => 28,
         );
       }
 
@@ -569,6 +587,7 @@ function modellibrary_preprocess_page(&$variables) {
           'rel' => 'schema.DC',
           'href' => 'http://purl.org/DC/elements/1.0/',
         ),
+        '#weight' => 18,
       );
       drupal_add_html_head($element, $element['#attributes']['rel']);
 
@@ -578,6 +597,7 @@ function modellibrary_preprocess_page(&$variables) {
           'rel' => 'schema.DCTERMS',
           'href' => 'http://purl.org/DC/terms/',
         ),
+        '#weight' => 19,
       );
       drupal_add_html_head($element, $element['#attributes']['rel']);
 
