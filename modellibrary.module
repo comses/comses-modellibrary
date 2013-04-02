@@ -304,40 +304,37 @@ function modellibrary_edit_access_callback($perms) {
     return TRUE;
   }
 
-  // Flag to indicate access permitted or denied
-  $flag = FALSE;
-
   foreach ($perms as $item) {
     switch ($item) {
       case 'view model':
         if (user_access($item))
-          $flag = TRUE;
+          return TRUE;
         break;
 
       case 'create model':
         if (user_access($item))
-          $flag = TRUE;
+          return TRUE;
         break;
 
       case 'edit own model':
         $node = node_load(arg(1));
         if (user_access($item) && $user->uid == $node->uid)
-          $flag = TRUE;
+          return TRUE;
         break;
 
       case 'edit any model':
         if (user_access($item))
-          $flag = TRUE;
+          return TRUE;
         break;
 
       case 'administer models':
         if (user_access($item))
-          $flag = TRUE;
+          return TRUE;
         break;
     }
   }
 
-  return $flag;
+  return FALSE;
 }
 
 /**
