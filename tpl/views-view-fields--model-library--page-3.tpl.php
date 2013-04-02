@@ -328,11 +328,11 @@ endif; // if authors
         <div class="model-version-item">
           <span class="model-block-title">Platform:</span>
           <span class="model-block-text"> <?php 
-            if ($fields['field_modelversion_platform']->content == "Other") {
-              print $fields['field_modelversion_platform_oth']->content ." ". $fields['field_modelversion_platform_ver']->content;
+            if ($fields['field_modelversion_platform']->content == 0) {
+              print (isset($fields['field_modelversion_platform_oth']) ? $fields['field_modelversion_platform_oth']->content : '') . " " . (isset($fields['field_modelversion_platform_ver']) ? $fields['field_modelversion_platform_ver']->content : '');
             }
             else {
-              print $result->name ." ". $fields['field_modelversion_platform_ver']->content;
+              print (isset($result->name) ? $result->name : '') . " " . (isset($fields['field_modelversion_platform_ver']) ? $fields['field_modelversion_platform_ver']->content : '');
             } ?></span>
         </div>
 
@@ -343,11 +343,11 @@ endif; // if authors
         <div class="model-version-item">
           <span class="model-block-title">Programming Language:</span>
           <span class="model-block-text"> <?php
-            if ($fields['field_modelversion_language']->content == "Other") {
-              print $fields['field_modelversion_language_oth']->content ." ". $fields['field_modelversion_language_ver']->content;
+            if ($fields['field_modelversion_language']->content == 0) {
+              print (isset($fields['field_modelversion_language_oth']) ? $fields['field_modelversion_language_oth']->content : '') ." ". (isset($fields['field_modelversion_language_ver']) ? $fields['field_modelversion_language_ver']->content : '');
             }
             else {
-              print $result->name ." ". $fields['field_modelversion_language_ver']->content;
+              print (isset($result->name) ? $result->name : '') . " " . (isset($fields['field_modelversion_language_ver']) ? $fields['field_modelversion_language_ver']->content : '');
             } ?></span>
         </div>
 
@@ -357,7 +357,13 @@ endif; // if authors
 ?>
         <div class="model-version-item">
           <span class="model-block-title">Operating System:</span>
-          <span class="model-block-text"> <?php print $result->name .' '. $fields['field_modelversion_os_version']->content; ?></span>
+          <span class="model-block-text"> <?php
+            if ($fields['field_modelversion_os']->content == 0) {
+              print (isset($fields['field_modelversion_os_oth']) ? $fields['field_modelversion_os_oth']->content : '') ." ". (isset($fields['field_modelversion_os_ver']) ? $fields['field_modelversion_os_ver']->content : '');
+            }
+            else {
+              print (isset($result->name) ? $result->name : '') . " " . (isset($fields['field_modelversion_os_ver']) ? $fields['field_modelversion_os_ver']->content : '');
+            } ?></span>
         </div>
 
 <?php
