@@ -43,11 +43,11 @@ print '<div class="modellibrary modellibrary-results-count">'. $out .'</div>';
             print $label;
             print '</th>';
           }
-          #elseif (substr($fields[$field], 0, 8) == 'statusid') {
-          #  print '<th class="modellibrary views-field views-field-'. $fields[$field] .'">';
-          #  print $label;
-          #  print '</th>';
-          #}
+          elseif (substr($fields[$field], 0, 8) == 'statusid') {
+            print '<th class="modellibrary views-field views-field-'. $fields[$field] .'">';
+            print $label;
+            print '</th>';
+          }
           else {
             if (substr($fields[$field], 0, 23) == 'field-profile2-lastname') {
               print '<th class="modellibrary views-field views-field-'. $fields[$field] .'">';
@@ -91,13 +91,13 @@ print '<div class="modellibrary modellibrary-results-count">'. $out .'</div>';
             print '</span>';
             print '</td>';
           }
-          #elseif ($fields[$field] == 'statusid' || $fields[$field] == 'statusid active') {
-          #  print '<td class="modellibrary views-field views-field-'. $fields[$field] .'">';
-          #  if ($content == 60 && (in_array('openabm manager', array_values($user->roles)) || in_array('administrator', array_values($user->roles)))) {
-          #    print '<img src="sites/all/modules/comses-modelreview/images/certified-badge-small.png" />';
-          #  }
-          #  print '</td>';
-          #}
+          elseif ($fields[$field] == 'statusid' || $fields[$field] == 'statusid active') {
+            print '<td class="modellibrary views-field views-field-'. $fields[$field] .'">';
+            if ($content == 60 && (in_array('openabm manager', array_values($user->roles)) || in_array('administrator', array_values($user->roles)))) {
+              print '<img src="/files/images/certified-badge-small.png" />';
+            }
+            print '</td>';
+          }
           elseif (substr($fields[$field], 0, 23) == 'field-profile2-lastname') {
             print '<td class="modellibrary views-field views-field-name">';
             print '<div class="modellibrary views-field views-field-'. $fields[$field] .'">';
