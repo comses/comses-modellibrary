@@ -99,6 +99,18 @@ function modellibrary_theme($existing, $type, $theme, $path) {
     ),
   );
 
+  $themes['views_view_table__model_library__page_1'] = array(
+    'template' => 'views-view-table--model-library--page-1',
+    'path' => $module_path . '/tpl',
+    'base hook' => 'views_view_table',
+    'type' => 'module',
+    'theme_path' => $module_path,
+    'preprocess functions' => array(
+      'template_preprocess',
+      'template_preprocess_views_view_table',
+    ),
+  );
+
   return $themes;
 }
 
@@ -652,7 +664,7 @@ function modellibrary_display_model_years() {
   $results = db_query($sql);
 
   $content = '<div>';
-  while ($item = db_fetch_object($results)) {
+  while ($item = $results->fetchObject()) {
    $content .= '<div><a href="/models/' . $item->year . '/year">' . $item->year . '</a></div>'; 
   }
   $content .= '</div>';

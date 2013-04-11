@@ -214,6 +214,7 @@ function modellibrary_wizard_step1($form, &$form_state) {
     $node = node_load(arg(1));
 
     // Count the number of authors in the model
+    $node_count = 0;
     if (isset($node->field_model_author[LANGUAGE_NONE]))
       $node_count = count($node->field_model_author[LANGUAGE_NONE]);
   }
@@ -225,7 +226,10 @@ function modellibrary_wizard_step1($form, &$form_state) {
 
   if (empty($form_state['num_authors'])) {
     if ($action == 'edit')
-      $form_state['num_authors'] = $node_count;
+      if ($node_count == 0)
+        $form_state['num_authors'] = 1;
+      else
+        $form_state['num_authors'] = $node_count;
     else
       $form_state['num_authors'] = 1;
   }
