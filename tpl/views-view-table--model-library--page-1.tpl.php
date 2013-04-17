@@ -86,7 +86,7 @@ print '<div class="modellibrary modellibrary-results-count">'. $out .'</div>';
           }
           elseif ($fields[$field] == 'statusid' || $fields[$field] == 'statusid active') {
             print '<td class="modellibrary views-field views-field-'. $fields[$field] .'">';
-            if ($content == 60 && (in_array('openabm manager', array_values($user->roles)) || in_array('administrator', array_values($user->roles)))) {
+            if ($content == 60) {
               print '<img src="/files/images/certified-badge-small.png" />';
             }
             print '</td>';

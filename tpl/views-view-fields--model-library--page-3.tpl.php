@@ -125,7 +125,7 @@ if ($fields['status']->raw == 1) {
           ."WHERE mr.model_nid = :nid";
     $statusid = db_query($sql, array(':nid' => $modelnid))->fetchField();
 
-    if ($statusid == 60 && (in_array('openabm manager', array_values($user->roles)) || in_array('administrator', array_values($user->roles))))
+    if ($statusid == 60)
       print '      <div class="model-badge"><img src="/files/images/certified-badge-big.png" /></div>';
 ?>
     </td>
@@ -226,7 +226,6 @@ endif; // if authors
     </td>
   </tr>
 <?php
-  if (in_array('administrator', array_values($user->roles)) || in_array('openabm manager', array_values($user->roles))) { // also if Certified
     // Generate Model Review status info. Determine the current Review Status Code
     // Lookup the Review
     $sql = "SELECT mra.statusid "
@@ -241,22 +240,24 @@ endif; // if authors
       case 40:
       case 50:
 
-        $message = '<div class="model-certification-text"><p>This model is currently under review. To view the review status page, click "Review Status" below.</p></div>';
-        $message .= '<div class="model-block"><a class="model-submit-button" href="'. $base_url . $base_path .'model/'. $modelnid .'/review/status">Review Status</a></div>';
+        if (in_array('administrator', array_values($user->roles)) || $user->uid == $fields['uid']->raw) { // also if Certified
+          $message = '<div class="model-certification-text"><p>This model is currently under review. To view the review status page, click "Review Status" below.</p></div>';
+          $message .= '<div class="model-block"><a class="model-submit-button" href="'. $base_url . $base_path .'model/'. $modelnid .'/review/status">Review Status</a></div>';
+        }
         break;
 
       case 60:
         $message = '<div class="model-certification-text"><p>This model has been Certified that it meets the CoMSES Guidelines for Modeling Best-Practices. Certification involves a review process by which a model is examined to ensure it has been coded and documented according to the community\'s best-practices.</p></div>';
-        //$message .= '<div class="model-block"><a class="model-submit-button" href="'. $base_url . $base_path .'model/'. $modelnid .'/review/status">Review Status</a></div>';
         break;
 
       case 70:
         break;
 
       default:
-        $message = '<div class="model-certification-text"><p>This model can be reviewed for CoMSES Certification. Certification involves a review process by which a model is examined to ensure it has been coded and documented according to the community\'s best-practices. Click the "Request Review" button below for more information on the Model Certification process.</p></div>';
-        $message .= '<div class="model-block"><a class="model-submit-button" href="'. $base_url . $base_path .'model/'. $modelnid .'/review/info">Request Review</a></div>';
-
+        if (in_array('administrator', array_values($user->roles)) || $user->uid == $fields['uid']->raw) { // also if Certified
+          $message = '<div class="model-certification-text"><p>This model can be reviewed for CoMSES Certification. Certification involves a review process by which a model is examined to ensure it has been coded and documented according to the community\'s best-practices. Click the "Request Review" button below for more information on the Model Certification process.</p></div>';
+          $message .= '<div class="model-block"><a class="model-submit-button" href="'. $base_url . $base_path .'model/'. $modelnid .'/review/info">Request Review</a></div>';
+        }
     }
 
     if ($message > "") {
