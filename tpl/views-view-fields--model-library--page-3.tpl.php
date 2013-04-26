@@ -107,6 +107,10 @@ if ($fields['status']->raw == 1) {
         <div class="model-date">Submitted: <?php print date('M j, Y', $node->created); ?></div>
         <div class="model-date model-updated-date">Last Updated: <?php print date('M j, Y', $node->changed); ?></div>
 <?php
+/** 
+ * Download counting disabled. Module is not stable in D7, 
+ * so this funcitonality must remain opffline for the time being. 
+ **/
       // Code file download count, all-time
 #      $sql = "SELECT SUM(downloads) AS downloads FROM (SELECT COUNT(dc.fid) AS downloads FROM files files LEFT JOIN download_count dc ON files.fid = dc.fid WHERE dc.fid = files.fid AND (files.fid IN (SELECT DISTINCT n_mv.field_modelversion_code_fid AS code_fid FROM node n LEFT JOIN content_type_modelversion n_mv ON n.vid = n_mv.vid WHERE (n.type in ('modelversion')) AND (n.status = 1) AND (n_mv.field_modelversion_modelnid_value = :nid )))) dl";
 #      $all_dls = db_query($sql, array(':nid' => $modelnid))->fetchField(); 
@@ -143,6 +147,17 @@ if ($fields['status']->raw == 1) {
           print '<a class="model-button" href="'. url('model/'. $modelnid) .'">Latest Version</a>';
         }
       ?>
+    </td>
+  </tr>
+  <tr>
+    <td colspan=4>
+      <div>
+<?php 
+  // Render the Model Average Rating
+  $argument = $modelnid;
+  print views_embed_view('model_comments', 'panel_pane_3', $argument);
+?>
+      </div>
     </td>
   </tr>
 </table>
@@ -247,7 +262,7 @@ endif; // if authors
         break;
 
       case 60:
-        $message = '<div class="model-certification-text"><p>This model has been Certified that it meets the CoMSES Guidelines for Modeling Best-Practices. Certification involves a review process by which a model is examined to ensure it has been coded and documented according to the community\'s best-practices.</p></div>';
+        $message = '<div class="model-certification-text"><p>This model has been Certified that it meets the CoMSES Guidelines for Modeling Best-Practices. Certification involves a review process by which a model is examined to ensure it has been coded and documented according to the community\'s best-practices. For more information on the Model Review process and Certification: <div class="more-link"><a href="/models/reviews/info">Read more</a></div></p></div>';
         break;
 
       case 70:
@@ -260,7 +275,7 @@ endif; // if authors
         }
     }
 
-    if ($message > "") {
+    if (isset($message)) {
       print '  <tr>';
       print '    <td colspan=2>';
       print '      <div style="margin: 0;" class="hrline"/>';
@@ -275,7 +290,6 @@ endif; // if authors
       print '    </td>';
       print '  </tr>';
     }
-  }
 ?>
 <?php if ($fields['status']->raw == 0 || $fields['field_modelversion_number']->content != modellibrary_helper_get_max_versionnum($modelnid)): ?>
   <tr>
@@ -313,7 +327,14 @@ endif; // if authors
           Model Version: <?php print $fields['field_modelversion_number']->content; 
           if ($fields['field_modelversion_number']->content == modellibrary_helper_get_max_versionnum($fields['field_modelversion_model']->content)) print '  [Latest]'; ?>
         </div>
-
+        <div>
+<?php
+  // Render the Model Average Rating
+  $argument1 = $modelnid;
+  $argument2 = $fields['field_modelversion_number']->content;
+  print views_embed_view('model_comments', 'panel_pane_4', $argument1, $argument2);
+?>
+        </div>
         <?php if ($fields['body_1']->content > ''): ?>
         <div class="model-block">
           <span class="model-block-title">Version Notes:</span>
@@ -463,3 +484,76 @@ if (count($nids) > 1): ?>
 </div>
 <?php endif; ?>
 </div> <!-- div.model-nid -->
+<div class="hrline" style="margin: 5px 0 0 0;"></div>
+<div class="model-region model-region6">
+  <div class="model-section-title">Comments & Ratings</div>
+  <div class="model-review-form">
+<?php
+  /**
+   * Determine if current user has already posted a review for this model version, and generate the Review form if needed
+   */
+  $sql = "SELECT COUNT(comment.uid) AS comment_count FROM {comment} INNER JOIN {node} node_comment ON comment.nid = node_comment.nid "
+         ."LEFT JOIN {field_data_field_modelversion_model} node_comment_modelversion_model ON node_comment.nid = node_comment_modelversion_model.entity_id AND (node_comment_modelversion_model.entity_type = 'node' AND node_comment_modelversion_model.deleted = '0') "
+         ."INNER JOIN {node} modelversion_model ON node_comment_modelversion_model.field_modelversion_model_nid = modelversion_model.nid "
+         ."LEFT JOIN {field_data_field_modelversion_number} modelversion_number ON node_comment.nid = modelversion_number.entity_id AND (modelversion_number.entity_type = 'node' AND modelversion_number.deleted = '0') "
+         ."WHERE (( (modelversion_model.nid = :modelnid ) AND (modelversion_number.field_modelversion_number_value = :versionnum) AND (comment.uid = :uid) )AND(( (comment.status <> '0') AND (node_comment.status = '1') )))";
+
+  $comment_count = db_query($sql, array(':modelnid' => $modelnid, ':uid' => $user->uid, ':versionnum' => $fields['field_modelversion_number']->content))->fetchField();
+
+
+  if ($comment_count == 0) {
+    $version_node = load_modelversion($modelnid);
+    $comment_form = modellibrary_static_comments($fields['field_modelversion_number']->content, false, $version_node);
+
+    print drupal_render($comment_form);
+  }
+?>
+  </div>
+
+<?php
+  /**
+   * Count comments for the current (viewed) model version, and generate the HTML and comments if needed
+   */
+  $sql = "SELECT COUNT(comment.cid) AS comment_count FROM {comment} INNER JOIN {node} node_comment ON comment.nid = node_comment.nid "
+         ."LEFT JOIN {field_data_field_modelversion_model} node_comment_modelversion_model ON node_comment.nid = node_comment_modelversion_model.entity_id AND (node_comment_modelversion_model.entity_type = 'node' AND node_comment_modelversion_model.deleted = '0') "
+         ."INNER JOIN {node} modelversion_model ON node_comment_modelversion_model.field_modelversion_model_nid = modelversion_model.nid "
+         ."LEFT JOIN {field_data_field_modelversion_number} modelversion_number ON node_comment.nid = modelversion_number.entity_id AND (modelversion_number.entity_type = 'node' AND modelversion_number.deleted = '0') "
+         ."WHERE (( (modelversion_model.nid = :modelnid ) AND (modelversion_number.field_modelversion_number_value = :versionnum) )AND(( (comment.status <> '0') AND (node_comment.status = '1') )))";
+
+  $comment_count = db_query($sql, array(':modelnid' => $modelnid, ':versionnum' => $fields['field_modelversion_number']->content))->fetchField();
+?>
+  <?php if ($comment_count > 0) : ?>
+  <div class="model-review-group model-review-group-current">
+    <h2 class="model-section-title">Current Version</h2>
+<?php
+// Render the Comments for current model version
+$argument1 = $modelnid;
+$argument2 = $fields['field_modelversion_number']->content;
+print views_embed_view('model_comments', 'panel_pane_1', $argument1, $argument2);
+?>
+  </div>
+  <?php endif; ?>
+<?php
+  /**
+   * Count comments for the other model versions not being viewed, and generate the HTML and comments if needed
+   */
+  $sql = "SELECT COUNT(comment.cid) AS comment_count FROM {comment} INNER JOIN {node} node_comment ON comment.nid = node_comment.nid "
+         ."LEFT JOIN {field_data_field_modelversion_model} node_comment_modelversion_model ON node_comment.nid = node_comment_modelversion_model.entity_id AND (node_comment_modelversion_model.entity_type = 'node' AND node_comment_modelversion_model.deleted = '0') "
+         ."INNER JOIN {node} modelversion_model ON node_comment_modelversion_model.field_modelversion_model_nid = modelversion_model.nid "
+         ."LEFT JOIN {field_data_field_modelversion_number} modelversion_number ON node_comment.nid = modelversion_number.entity_id AND (modelversion_number.entity_type = 'node' AND modelversion_number.deleted = '0') "
+         ."WHERE (( (modelversion_model.nid = :modelnid ) AND (modelversion_number.field_modelversion_number_value <> :versionnum) )AND(( (comment.status <> '0') AND (node_comment.status = '1') )))";
+
+  $comment_count = db_query($sql, array(':modelnid' => $modelnid, ':versionnum' => $fields['field_modelversion_number']->content))->fetchField();
+?>
+  <?php if ($comment_count > 0) : ?>
+  <div class="model-review-group model-review-group-other">
+    <h2 class="model-section-title">Other Versions</h2>
+<?php
+// Render the Comments for other model versions
+$argument1 = $modelnid;
+$argument2 = $fields['field_modelversion_number']->content;
+print views_embed_view('model_comments', 'panel_pane_4', $argument1, $argument2);
+?>
+  </div>
+  <?php endif; ?>
+</div>

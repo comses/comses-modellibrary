@@ -125,8 +125,8 @@ function modellibrary_menu() {
   $items['model/%'] = array(
     'title' => 'View Model',
     'description' => "",
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('modellibrary_redirect_view', array(1)),
+    'page callback' => 'modellibrary_redirect_view',
+    'page arguments' => array(array(1)),
     'access callback' => 'modellibrary_edit_access_callback',
     'access arguments' => array(array('view model')),
     'type' => MENU_CALLBACK,
@@ -136,8 +136,8 @@ function modellibrary_menu() {
   $items['model-archive/%'] = array(
     'title' => 'View Model',
     'description' => "",
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('modellibrary_redirect_view', array(1)),
+    'page callback' => 'modellibrary_redirect_view',
+    'page arguments' => array(array(1)),
     'access callback' => 'modellibrary_edit_access_callback',
     'access arguments' => array(array('view model')),
     'type' => MENU_CALLBACK,
@@ -296,6 +296,10 @@ function modellibrary_permission() {
       'title' => t('Edit Any Model'),
       'description' => t('Edit any model in the Model Library'),
     ), 
+    'rate model' => array(
+      'title' => t('Rate Model'),
+      'description' => t('Rate any model in the Model Library'),
+    ), 
     'administer models' => array(
       'title' => t('Administer Model Library Settings'),
       'description' => t('Administer the model library settings'),
@@ -337,6 +341,11 @@ function modellibrary_edit_access_callback($perms) {
       case 'edit any model':
         if (user_access($item))
           return TRUE;
+        break;
+
+      case 'rate model':
+        if (user_access($item))
+          $flag = TRUE;
         break;
 
       case 'administer models':
@@ -385,6 +394,42 @@ function modellibrary_node_page_view($node) {
     // return core node view. This code is adapted from the core Node module, node_page_view function.
     drupal_set_title($node->title);
     return node_show($node, NULL);
+  }
+}
+
+/**
+ * Implements hook_node_view_alter()
+ *
+ * Store the Model comment form in a static variable, so we can embed in the Model view page.
+ * Storing a form in a static variable is a cringe-worthy, crude solution, but the Drupal 7 core just
+ * doesn't permit manipulating comment forms the way we need.
+ */
+function modellibrary_node_view_alter(&$build){
+  if (in_array($build['#node']->type, array('modelversion'))) {
+    modellibrary_static_comments($build['#node']->nid, $build);
+  }
+}
+
+/*
+ * This breaks just about every rule in the book, but we really don't have any other choice. 
+ * This solution is adapted from the Node Comment Block module (http://drupal.org/project/node_comment_block).
+ */
+function modellibrary_static_comments($nid, $build = false, $node = false) {
+  $comments = &drupal_static(__FUNCTION__);
+
+  if ($build) {
+  } 
+  else {
+    #normal behavior will be that the node calls this function before
+    if (!isset($comments[$nid])) {
+      $comments[$nid]['links'] = '';
+      $comments[$nid]['comments'] = comment_node_page_additions($node);
+      // add redirect destiantion to the comment form action. submitting comment now returns to the model page.
+      $comments[$nid]['comments']['comment_form']['#action'] = $comments[$nid]['comments']['comment_form']['#action'] .'?destination=/model/' . $comments[$nid]['comments']['comment_form']['#node']->field_modelversion_model['und'][0]['nid'];
+    }
+
+    unset($comments[$nid]['comments']['comments']);
+    return $comments[$nid];
   }
 }
 
@@ -707,7 +752,7 @@ function enable_model() {
   node_save($model);
 
   // Make sure this isn't occurring on the Dev server, before we post to Twitter
-  // TODO: perhaps change to a system variable that we toggle, Enable/Disable Twitter
+  // @TODO: perhaps change to a system variable that we toggle, Enable/Disable Twitter
   global $base_root;
   if ($base_root != 'http://dev.comses.asu.edu' || $base_root != 'http://dev.openabm.org') {
     modellibrary_post_twitter($model);
@@ -828,16 +873,3 @@ function modellibrary_post_twitter($node) {
   }
 }
 
-/**
- * Implementation of hook_form_alter
- *
- * This alters the Body field on all site forms so when the field is selected, a
- * tooltip is displayed with information on using Markdown for formatting content.
- * The goal was to make Markdown more visible as an option to the site users.
- * This isn't Model Library specific, so really doesn't belong here, but I
- * didn't want to create a new module *just* for this. (Comment added: 9/28/2012 NDR)
- */
-#function modellibrary_form_alter(&$form, &$form_state, $form_id) {
-#  #$form['title']['#description'] = '<p>' . t('Enter a title for the ' . $form['type']['#value'] . ' item.') . '</p>';
-#  $form['body_field']['body']['#description'] = '<p>' . t('<p>Use Markdown syntax to easily format text.</p><p>Quick Tips:</p><ul><li>Two or more spaces at a line\'s end = Line break</li><li>Double returns = Paragraph</li><li>*Single asterisks* or _single underscores_ = <em>Emphasis</em></li><li>**Double** or __double__ = <strong>Strong</strong></li><li>This is [a link](http://the.link.example.com "The optional title text")</li><li>* Item = Unordered Lists</li><li>1. Item = Ordered Lists</li></ul><p>For complete details on the Markdown syntax, see the <a href="http://daringfireball.net/projects/markdown/basics">Markdown documentation</a> and <a href="http://michelf.com/projects/php-markdown/extra/">Markdown Extra documentation</a> for tables, footnotes, and more.</p>') . '</p>';
-#}
