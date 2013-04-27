@@ -24,7 +24,6 @@
 module_load_include('inc', 'modellibrary', 'includes/modellibrary.add_form');
 module_load_include('inc', 'modellibrary', 'includes/modellibrary.helper.functions');
 
-
 /**
  * Implementation of hook_help()
  */
@@ -126,7 +125,7 @@ function modellibrary_menu() {
     'title' => 'View Model',
     'description' => "",
     'page callback' => 'modellibrary_redirect_view',
-    'page arguments' => array(array(1)),
+    'page arguments' => array(1),
     'access callback' => 'modellibrary_edit_access_callback',
     'access arguments' => array(array('view model')),
     'type' => MENU_CALLBACK,
@@ -137,7 +136,7 @@ function modellibrary_menu() {
     'title' => 'View Model',
     'description' => "",
     'page callback' => 'modellibrary_redirect_view',
-    'page arguments' => array(array(1)),
+    'page arguments' => array(1),
     'access callback' => 'modellibrary_edit_access_callback',
     'access arguments' => array(array('view model')),
     'type' => MENU_CALLBACK,
@@ -166,26 +165,26 @@ function modellibrary_menu() {
   );
 
   // This is the link for enabling (publishing) a model.
-  $items['model/%/enable'] = array(
+  $items['model/%/%ctools_js/publish'] = array(
     'title' => 'Publish',
     'description' => "",
-    'page callback' => 'enable_model',
-    'page arguments' => array(array(1)),
+    'page callback' => 'modellibrary_publish_confirm',
+    'page arguments' => array(1, 2),
     'access callback' => 'modellibrary_edit_access_callback',
     'access arguments' => array(array('edit any model', 'edit own model')),
     'type' => MENU_CALLBACK,
   );
 
   // This is the link for disabling a model.
-  $items['model/%/disable'] = array(
-    'title' => 'Disable',
-    'description' => "",
-    'page callback' => 'disable_model',
-    'page arguments' => array(array(1)),
-    'access callback' => 'modellibrary_edit_access_callback',
-    'access arguments' => array(array('edit any model', 'edit own model')),
-    'type' => MENU_CALLBACK,
-  );
+#  $items['model/%/disable'] = array(
+#    'title' => 'Disable',
+#    'description' => "",
+#    'page callback' => 'disable_model',
+#    'page arguments' => array(array(1)),
+#    'access callback' => 'modellibrary_edit_access_callback',
+#    'access arguments' => array(array('edit any model', 'edit own model')),
+#    'type' => MENU_CALLBACK,
+#  );
 
   /*
    * Menu: model/%nid/version/%num/view
@@ -197,7 +196,7 @@ function modellibrary_menu() {
     'title' => 'Edit',
     'description' => "",
     'page callback' => 'modellibrary_redirect_edit',
-    'page arguments' => array(array(1, 3)),
+    'page arguments' => array(1, 3),
     'access callback' => 'modellibrary_edit_access_callback',
     'access arguments' => array(array('edit any model', 'edit own model')),
     'type' => MENU_LOCAL_TASK,
@@ -741,10 +740,78 @@ function redirect_to_user_models() {
   drupal_goto('user/' . $user->uid . '/models');
 }
 
+
+/**
+ * Implementation of modellibrary_publish_confirm_form()
+ */
+function modellibrary_publish_confirm_form($form, &$form_state) {
+  $output = t('<h2>WAIT!</h2>');
+  $output .= t('<p>You can publish your model, but be aware that this is a one-direction procedure. Right now your model is hidden from public view. Public search engines will not index this model so long as it remains unpublished. If you are going to submit this model as a part of a publication to a journal, you may want to keep the model unpublished until the journal review is completed.</p>');
+  $output .= t('<p>When you publish this model, it will be public in the Model Library and indexed by public search engines. It will also be announced on the CoMSES Twitter account. Like journal publications, once a model has been published, it is Published and a part of the public record.</p>');
+  $output .= t('<p>If you are ready to proceed and publish your model, click the button below.</p>');
+  $output .= t('<p>I understand and wish to publish my model:</p>');
+
+  $form['message'] = array(
+    '#markup' => $output,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Publish Model'),
+  );
+
+  return $form;
+}
+
+/**
+ * Implementation of hook_form_submit()
+ */
+function modellibrary_publish_confirm_form_submit($form, &$form_state) {
+  modellibrary_publish_model();
+}
+
+/**
+ * Implementation of modellibrary_publish_confirm()
+ */
+function modellibrary_publish_confirm($nid, $js = FALSE) {
+  $title = t('Publish This Model?');
+
+  // Fall back if $js is not set.
+  if (!$js) {
+    return drupal_render(drupal_get_form('modellibrary_publish_confirm_form'));
+  }
+
+  // Include the CTools tools that we need.
+  ctools_include('ajax');
+  ctools_include('modal');
+
+  $form_state = array(
+    #'title' => t($title),
+    'ajax' => TRUE,
+  );
+
+  $output = ctools_modal_form_wrapper('modellibrary_publish_confirm_form', $form_state);
+
+  if (!empty($form_state['executed'])) {
+    // We'll just overwrite the form output if it was successful.
+    $output = array();
+    ctools_add_js('ajax-responder');
+    $output[] = ctools_modal_command_dismiss(t('Success'));
+    if (isset($_GET['destination'])) {
+      $output[] = ctools_ajax_command_redirect($_GET['destination']);
+    }
+    else {
+      $output[] = ctools_ajax_command_reload();
+    }
+  }
+
+  print ajax_render($output);
+}
+
 /**
  * Publish model so it is publicly visible
  */
-function enable_model() {
+function modellibrary_publish_model() {
   $modelnid = arg(1);
   $model = node_load($modelnid);
 
@@ -755,22 +822,8 @@ function enable_model() {
   // @TODO: perhaps change to a system variable that we toggle, Enable/Disable Twitter
   global $base_root;
   if ($base_root != 'http://dev.comses.asu.edu' || $base_root != 'http://dev.openabm.org') {
-    modellibrary_post_twitter($model);
+    #modellibrary_post_twitter($model);
   }
-  drupal_goto('model/' . $modelnid);
-}
-
-/**
- * Unpublish model so it is hidden from the public
- */
-function disable_model() {
-  $model = node_load(arg(1));
-
-  $model->status = 0;
-  #$model->changed = time();
-  node_save($model);
-
-  drupal_goto('model/' . arg(1));
 }
 
 /**
@@ -826,10 +879,64 @@ function modellibrary_redirect_edit() {
   drupal_goto('model/' . $modelnid . '/nojs/edit');
 }
 
+/**
+ * Implements hook_views_pre_render()
+ * Insert the modal js and css for the Model Library view
+ */
 function modellibrary_views_pre_render(&$view) {
   if ($view->name == 'model_library' && $view->current_display == 'page_3') {
     // Here you can do any php you want to get the title you need for your view.
     $view->build_info['title'] = $view->result[0]->node_field_data_field_modelversion_model_title;
+  
+    // ** Insert modal setup **
+
+    // Include the CTools tools that we need.
+    ctools_include('ajax');
+    ctools_include('modal');
+
+    // Add CTools' javascript to the page.
+    ctools_modal_add_js();
+
+    // define our modal styling
+    $throbber = theme('image', array('path' => ctools_image_path('loading_animation.gif', 'modellibrary'), 'alt' => t('Loading...'), 'title' => t('Loading')));
+    $js_settings = array(
+      'modellibrary-modal-medium' => array(
+        'modalSize' => array(
+          'type' => variable_get('modellibrary_modal_popup_medium_type', 'fixed'),
+          'width' => floatval(variable_get('modellibrary_modal_popup_medium_width', 550)),
+          'height' => floatval(variable_get('modellibrary_modal_popup_medium_height', 450)),
+        ),
+        'modalOptions' => array(
+          'opacity' => floatval(variable_get('modellibrary_modal_opacity', 0.85)),
+          'background' => variable_get('modellibrary_modal_background_color', '#000'),
+        ),
+        'animation' => 'fadeIn',
+        'modalTheme' => 'ModelLibraryModal',
+        'throbber' => $throbber,
+        'closeText' => t('Close'),
+      ),
+      'modellibrary-modal-large' => array(
+        'modalSize' => array(
+          'type' => variable_get('modellibrary_modal_popup_large_type', 'scale'),
+          'width' => floatval(variable_get('modellibrary_modal_popup_large_width', 0.8)),
+          'height' => floatval(variable_get('modellibrary_modal_popup_large_height', 0.8)),
+        ),
+        'modalOptions' => array(
+          'opacity' => floatval(variable_get('modellibrary_modal_opacity', 0.85)),
+          'background' => variable_get('modellibrary_modal_background_color', '#000'),
+        ),
+        'animation' => 'fadeIn',
+        'modalTheme' => 'ModelLibraryModal',
+        'throbber' => $throbber,
+        'closeText' => t('Close'),
+      ),
+    );
+
+    drupal_add_js($js_settings, 'setting');
+
+    // Add our own js and CSS for the modal.
+    ctools_add_css('modellibrary_modal', 'modellibrary', 'includes');
+    ctools_add_js('modellibrary_modal', 'modellibrary', 'includes');
   }
 }
 

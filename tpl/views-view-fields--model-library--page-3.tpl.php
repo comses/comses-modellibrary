@@ -29,6 +29,10 @@ global $base_path;
 
 $modelnid = arg(1);
 $version = arg(3);
+
+// Include the CTools tools that we need.
+ctools_include('ajax');
+ctools_include('modal');
 ?>
 
 <div class="model-<?php print $modelnid; if ($fields['status']->raw == 0) print ' node-unpublished'; ?>">
@@ -151,11 +155,7 @@ if ($fields['status']->raw == 1) {
     <td>
       <?php
         if ($fields['status']->raw == 0 && (in_array('administrator', array_values($user->roles)) || $user->uid == $fields['uid']->raw)) {
-          echo '<a class="model-button" href="'. url('model/'. $modelnid .'/enable') .'">Publish<br />Model</a>';
-        }
-
-        if ($fields['status']->raw == 1 && (in_array('administrator', array_values($user->roles)) || $user->uid == $fields['uid']->raw)) {
-          echo '<a class="model-button" href="'. url('model/'. $modelnid .'/disable') .'">Unpublish Model</a>';
+          print ctools_modal_text_button('Publish Model', 'model/'. $modelnid .'/nojs/publish', 'Publish model', 'ctools-modal-modellibrary-modal-medium model-button');
         }
 
         if ($fields['field_modelversion_number']->content != modellibrary_helper_get_max_versionnum($modelnid)) {
