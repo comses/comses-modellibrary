@@ -486,7 +486,7 @@ if (count($nids) > 1): ?>
 </div> <!-- div.model-nid -->
 <div class="hrline" style="margin: 5px 0 0 0;"></div>
 <div class="model-region model-region6">
-  <div class="model-section-title">Comments & Ratings</div>
+  <div class="model-section-title">Community Comments</div>
   <div class="model-review-form">
 <?php
   /**
