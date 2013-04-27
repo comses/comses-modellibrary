@@ -41,6 +41,7 @@ ctools_include('modal');
     <td colspan=3>
 <?php 
 $node = node_load($modelnid);
+$uid = $fields['uid']->raw;
 
 if ($fields['status']->raw == 1) {
   print '      <div class="model-authors">';
@@ -67,7 +68,6 @@ if ($fields['status']->raw == 1) {
   }
   else {
     // Load Profile
-    $uid = $fields['uid']->raw;
     $profile2 = profile2_load_by_user($uid, 'main');
 
     if (isset($profile2->field_profile2_lastname[LANGUAGE_NONE][0])) {
@@ -118,7 +118,7 @@ if ($fields['status']->raw == 1) {
         }
 
         if (in_array('comses member', array_values($user->roles)) || in_array('administrator', array_values($user->roles))) 
-          $output = '<a href="/user/' . $uid . '">' . $output . '</a>';
+          $output = '<a href="/user/' . $fields['uid']->raw . '">' . $output . '</a>';
 
         print $output; ?>
         </div>

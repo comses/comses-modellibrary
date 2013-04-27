@@ -354,7 +354,7 @@ function modellibrary_edit_access_callback($perms) {
 
       case 'rate model':
         if (user_access($item))
-          return = TRUE;
+          return TRUE;
         break;
 
       case 'administer models':
@@ -832,7 +832,7 @@ function modellibrary_publish_model() {
   // @TODO: perhaps change to a system variable that we toggle, Enable/Disable Twitter
   global $base_root;
   if ($base_root != 'http://dev.comses.asu.edu' || $base_root != 'http://dev.openabm.org') {
-    #modellibrary_post_twitter($model);
+    modellibrary_post_twitter($model);
   }
 }
 
