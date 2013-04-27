@@ -870,10 +870,8 @@ function modellibrary_publish_model() {
   $model->status = 1;
   node_save($model);
 
-  // Make sure this isn't occurring on the Dev server, before we post to Twitter
-  // @TODO: perhaps change to a system variable that we toggle, Enable/Disable Twitter
-  global $base_root;
-  if ($base_root != 'http://dev.comses.asu.edu' || $base_root != 'http://dev.openabm.org') {
+  // Post to twitter if twitter posts are enabled
+  if (variable_get('modellibrary_twitter_enabled', 0) == 1) {
     modellibrary_post_twitter($model);
   }
 }
