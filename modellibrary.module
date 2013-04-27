@@ -169,7 +169,7 @@ function modellibrary_menu() {
     'title' => 'Publish',
     'description' => "",
     'page callback' => 'modellibrary_publish_confirm',
-    'page arguments' => array(1, 2),
+    'page arguments' => array(1,2),
     'access callback' => 'modellibrary_edit_access_callback',
     'access arguments' => array(array('edit any model', 'edit own model')),
     'type' => MENU_CALLBACK,
@@ -186,22 +186,6 @@ function modellibrary_menu() {
 #    'type' => MENU_CALLBACK,
 #  );
 
-  /*
-   * Menu: model/%nid/version/%num/view
-   * The default menu tab is provided by Views.
-   */
-
-  // This is the Edit model tab which redirects to the official edit address.
-  $items['model/%/version/%/edit'] = array(
-    'title' => 'Edit',
-    'description' => "",
-    'page callback' => 'modellibrary_redirect_edit',
-    'page arguments' => array(1, 3),
-    'access callback' => 'modellibrary_edit_access_callback',
-    'access arguments' => array(array('edit any model', 'edit own model')),
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 1,
-  );
 
  /* The following menu items are generated as menu tabs 
   * (type = MENU_LOCAL_TASK). Tabs require a base menu item or page
@@ -215,13 +199,39 @@ function modellibrary_menu() {
   * default tab (MENU_DEFAULT_LOCAL_TASK). Any additional tabs to be
   * displayed on the page are then created.
   */
-  $items['models/browse'] = array(
-    'title' => 'Browse',
-    'description' => 'Click to browse the model archive. ',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'access callback' => TRUE,
-    'weight' => 0,
+  
+  /*
+   * Menu: model/%nid/version/%num/view
+   * The default menu tab is provided by Views.
+   */
+
+  // This is the Edit model tab which redirects to the official edit address.
+  $items['model/%/version/%/edit'] = array(
+    'title' => 'Edit',
+    'description' => "",
+    'page callback' => 'modellibrary_redirect_edit',
+    'page arguments' => array(1,3),
+    'access callback' => 'modellibrary_edit_access_callback',
+    'access arguments' => array(array('edit any model', 'edit own model')),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
   );
+
+  /*
+   * Menu: models/
+   * The parent menu is provided by Views.
+   * 
+   * Menu: models/browse
+   * Is provided by Views in the Browse Models display.
+   */
+
+  #$items['models/browse'] = array(
+  #  'title' => 'Browse',
+  #  'description' => 'Click to browse the model archive. ',
+  #  'type' => MENU_DEFAULT_LOCAL_TASK,
+  #  'access callback' => TRUE,
+  #  'weight' => 0,
+  #);
 
   $items['models/mymodels'] = array(
     'title' => 'My Models',
@@ -344,7 +354,7 @@ function modellibrary_edit_access_callback($perms) {
 
       case 'rate model':
         if (user_access($item))
-          $flag = TRUE;
+          return = TRUE;
         break;
 
       case 'administer models':
