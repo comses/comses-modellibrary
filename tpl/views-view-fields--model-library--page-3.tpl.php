@@ -79,29 +79,28 @@ if ($fields['status']->raw == 1) {
         $uid = $fields['uid']->raw;
         $profile2 = profile2_load_by_user($uid, 'main');
 
-        #print '<pre>';
-        #print_r(drupal_render(field_view_value('profile2', $profile2, 'field_profile2_lastname', $profile2->field_profile2_lastname[LANGUAGE_NONE][0])));
-        #print '</pre>';
         if (isset($profile2->field_profile2_lastname[LANGUAGE_NONE][0])) {
           $field = field_view_value('profile2', $profile2, 'field_profile2_firstname', $profile2->field_profile2_firstname[LANGUAGE_NONE][0]);
-          $output = drupal_render($field) . ' ';
+          $output = substr(drupal_render($field), 0, 1);
 
           if (isset($profile->field_profile2_middlename[LANGUAGE_NONE][0])) {
             $field = field_view_value('profile2', $profile2, 'field_profile2_middlename', $profile2->field_profile2_middlename[LANGUAGE_NONE][0]);
-            $output .= drupal_render($field) . ' ';
+            $output .= substr(drupal_render($field), 0, 1);
           }
 
+          $output .= ' ';
           $field = field_view_value('profile2', $profile2, 'field_profile2_lastname', $profile2->field_profile2_lastname[LANGUAGE_NONE][0]);
           $output .= drupal_render($field);
 
-          print $output;
         }
         else {
-          print $fields['name']->content;
+          $output = $fields['name']->content;
         }
 
         if (in_array('comses member', array_values($user->roles)) || in_array('administrator', array_values($user->roles))) 
-          print ' ('. $fields['name']->content .')'; ?>
+          $output = '<a href="/user/' . $uid . '">' . $output . '</a>';
+
+        print $output; ?>
         </div>
 <?php endif; ?>
         <div class="model-date">Submitted: <?php print date('M j, Y', $node->created); ?></div>
