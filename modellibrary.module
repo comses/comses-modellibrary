@@ -119,6 +119,15 @@ function modellibrary_theme($existing, $type, $theme, $path) {
 function modellibrary_menu() {
   global $user;
 
+  // Admin configuration pages
+  $items['admin/config/comses_settings/modellibrary'] = array(
+    'title' => 'Model Library Settings',
+    'description' => "Configuration settings for the Model Library",
+    'page callback' => 'modellibrary_admin',
+    'access arguments' => array('administer models'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
   // This item provides a default menu URL that redirects to the latest
   // model version.
   $items['model/%'] = array(
@@ -224,14 +233,6 @@ function modellibrary_menu() {
    * Menu: models/browse
    * Is provided by Views in the Browse Models display.
    */
-
-  #$items['models/browse'] = array(
-  #  'title' => 'Browse',
-  #  'description' => 'Click to browse the model archive. ',
-  #  'type' => MENU_DEFAULT_LOCAL_TASK,
-  #  'access callback' => TRUE,
-  #  'weight' => 0,
-  #);
 
   $items['models/mymodels'] = array(
     'title' => 'My Models',
@@ -365,6 +366,47 @@ function modellibrary_edit_access_callback($perms) {
   }
 
   return FALSE;
+}
+
+/**
+ * Implementation of admin callback
+ */
+function modellibrary_admin() {
+  $build = array();
+  
+  $build['content'] = array(
+    'section1' => drupal_get_form('modellibrary_admin_twitter_settings_form'),
+  );
+  
+  $build['pager'] = array(
+    '#theme' => 'pager',
+    '#weight' => 5,
+  );
+
+  return $build;
+}
+
+/**
+ * Admin settings page
+ */
+function modellibrary_admin_twitter_settings_form() {
+  $form = array();
+
+  $form['twitter'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Twitter Posts'),
+    '#collapsible' => FALSE, 
+    '#collapsed' => FALSE,
+  );
+
+  $form['twitter']['modellibrary_twitter_enabled'] = array(
+    '#type' => 'radios', 
+    '#title' => t('Enable/Disable Twitter Postings'), 
+    '#default_value' => variable_get('modellibrary_twitter_enabled', 0), 
+    '#options' => array(t('Disabled'), t('Enabled')),
+  );
+
+  return system_settings_form($form);
 }
 
 /**

@@ -3,7 +3,6 @@ description = "The CoMSES Model Library for OpenABM.org"
 package = OpenABM
 version = 7.x-2.0
 core = 7.x
-php = 5.2
 
 stylesheets[all][] = includes/modellibrary.css
 

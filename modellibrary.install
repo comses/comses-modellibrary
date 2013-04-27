@@ -59,14 +59,8 @@ function modellibrary_install() {
  * Implementation of hook_uninstall
  */
 function modellibrary_uninstall() {
-    // the type_name must be the type_name
-    // as specified in the .def.inc file
-
-    // Delete model and modelversion nodes first.
-
-    #node_type_delete('model');
-    #node_type_delete('modelversion');
-    menu_rebuild();
+  variable_del('modellibrary_twitter_enabled');
+  menu_rebuild();
 }
 
 function modellibrary_schema() {
