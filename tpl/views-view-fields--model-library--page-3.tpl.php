@@ -61,6 +61,26 @@ if ($fields['status']->raw == 1) {
       $i++;
     }
   }
+  else {
+    // Load Profile
+    $uid = $fields['uid']->raw;
+    $profile2 = profile2_load_by_user($uid, 'main');
+
+    if (isset($profile2->field_profile2_lastname[LANGUAGE_NONE][0])) {
+        $field = field_view_value('profile2', $profile2, 'field_profile2_firstname', $profile2->field_profile2_firstname[LANGUAGE_NONE][0]);
+        $output = drupal_render($field);
+
+        if (isset($profile->field_profile2_middlename[LANGUAGE_NONE][0])) {
+          $field = field_view_value('profile2', $profile2, 'field_profile2_middlename', $profile2->field_profile2_middlename[LANGUAGE_NONE][0]);
+          $output .= ' ' . drupal_render($field);
+        }
+
+        $field = field_view_value('profile2', $profile2, 'field_profile2_lastname', $profile2->field_profile2_lastname[LANGUAGE_NONE][0]);
+        $output .= ' ' . drupal_render($field);
+    }
+    print $output;
+  }
+
   print '      </div>';
 }
 ?>
@@ -74,10 +94,6 @@ if ($fields['status']->raw == 1) {
 <?php endif; ?>
 <?php if ($fields['status']->raw == 1): ?>
         <div class="model-author1">Submitted By: <?php 
-
-        // Load Profile
-        $uid = $fields['uid']->raw;
-        $profile2 = profile2_load_by_user($uid, 'main');
 
         if (isset($profile2->field_profile2_lastname[LANGUAGE_NONE][0])) {
           $field = field_view_value('profile2', $profile2, 'field_profile2_firstname', $profile2->field_profile2_firstname[LANGUAGE_NONE][0]);
@@ -217,6 +233,23 @@ if (isset($authors)) :
     if ($i > 0) print ', '; print check_plain($authorlast) . ', ' . check_plain($authorfirst); if ($authormiddle > '') print ' ' . check_plain($authormiddle);
     $i++;
   endforeach;
+else: // if authors
+    if (isset($profile2->field_profile2_lastname[LANGUAGE_NONE][0])) {
+        $field = field_view_value('profile2', $profile2, 'field_profile2_lastname', $profile2->field_profile2_lastname[LANGUAGE_NONE][0]);
+        $output = drupal_render($field) . ', ';
+
+        $field = field_view_value('profile2', $profile2, 'field_profile2_firstname', $profile2->field_profile2_firstname[LANGUAGE_NONE][0]);
+        $output .= drupal_render($field);
+
+        if (isset($profile->field_profile2_middlename[LANGUAGE_NONE][0])) {
+        $field = field_view_value('profile2', $profile2, 'field_profile2_middlename', $profile2->field_profile2_middlename[LANGUAGE_NONE][0]);
+        $output .= ' ' . drupal_render($field);
+        }
+    }
+    else {
+        $output = $fields['name']->content;
+    }
+    print $output;
 endif; // if authors
 ?> (<?php print date('Y, F j', $fields['created']->raw); ?>). "<?php print $fields['title']->content; ?>" (Version <?php print $fields['field_modelversion_number']->content; ?>). <em>CoMSES Computational Model Library</em>. Retrieved from: <?php if ($fields['field_model_handle']->content > "") print $fields['field_model_handle']->content; else print $base_url . $base_path .'model/'. $modelnid .'/version/'. $fields['field_modelversion_number']->content; ?>
           </div>
