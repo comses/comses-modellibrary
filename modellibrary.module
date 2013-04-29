@@ -121,7 +121,7 @@ function modellibrary_menu() {
 
   // Admin configuration pages
   $items['admin/config/comses_settings/modellibrary'] = array(
-    'title' => 'Model Library Settings',
+    'title' => 'Model Library',
     'description' => "Configuration settings for the Model Library",
     'page callback' => 'modellibrary_admin',
     'access arguments' => array('administer models'),
@@ -472,7 +472,7 @@ function modellibrary_static_comments($nid, $build = false, $node = false) {
   } 
   else {
     #normal behavior will be that the node calls this function before
-    if (!isset($comments[$nid])) {
+    if (!isset($comments[$nid]) && $GLOBALS['user']->uid > 0) {
       $comments[$nid]['links'] = '';
       $comments[$nid]['comments'] = comment_node_page_additions($node);
       // add redirect destiantion to the comment form action. submitting comment now returns to the model page.

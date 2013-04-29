@@ -554,7 +554,7 @@ if (count($nids) > 1): ?>
 
   $comment_count = db_query($sql, array(':modelnid' => $modelnid, ':versionnum' => $fields['field_modelversion_number']->content))->fetchField();
 ?>
-  <?php if ($comment_count > 0) : ?>
+<?php if ($comment_count > 0) : ?>
   <div class="model-review-group model-review-group-current">
     <h2 class="model-section-title">Current Version</h2>
 <?php
@@ -564,7 +564,13 @@ $argument2 = $fields['field_modelversion_number']->content;
 print views_embed_view('model_comments', 'panel_pane_1', $argument1, $argument2);
 ?>
   </div>
-  <?php endif; ?>
+<?php else : ?>
+    <div class="">
+      <p>
+        No comments have been posted yet for this version. <?php ($user->uid > 0 ? print 'Click \'Add a comment\' above to add your comments on this model. ' : print 'You must be logged in to post a comment: <a href="/user">Log In</a>.') ?>
+      </p>
+    </div>
+<?php endif; ?>
 <?php
   /**
    * Count comments for the other model versions not being viewed, and generate the HTML and comments if needed
