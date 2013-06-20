@@ -243,15 +243,15 @@ function modellibrary_menu() {
     'weight' => 2,
   );
 
-  $items['models/search'] = array(
-    'title' => 'Search',
-    'description' => 'Click to search for a model. ',
-    'type' => MENU_LOCAL_TASK,
-    'page callback' => 'drupal_goto',
-    'page arguments' => array('search/models'),
-    'access callback' => TRUE,
-    'weight' => 3,
-  );
+#  $items['models/search'] = array(
+#    'title' => 'Search',
+#    'description' => 'Click to search for a model. ',
+#    'type' => MENU_LOCAL_TASK,
+#    'page callback' => 'drupal_goto',
+#    'page arguments' => array('search/models'),
+#    'access callback' => TRUE,
+#    'weight' => 3,
+#  );
 
   $items['models/add'] = array(
     'title' => 'Add',
