@@ -126,10 +126,6 @@ if ($fields['status']->raw == 1) {
         <div class="model-date">Submitted: <?php print date('M j, Y', $node->created); ?></div>
         <div class="model-date model-updated-date">Last Updated: <?php print date('M j, Y', $node->changed); ?></div>
 <?php
-/** 
- * Download counting disabled. Module is not stable in D7, 
- * so this funcitonality must remain opffline for the time being. 
- **/
       // Code file download count, all-time
       $sql = "SELECT SUM(downloads) AS downloads FROM (SELECT COUNT(dc.fid) AS downloads FROM files files LEFT JOIN download_count dc ON files.fid = dc.fid WHERE dc.fid = files.fid AND (files.fid IN (SELECT DISTINCT n_mv.field_modelversion_code_fid AS code_fid FROM node n LEFT JOIN content_type_modelversion n_mv ON n.vid = n_mv.vid WHERE (n.type in ('modelversion')) AND (n.status = 1) AND (n_mv.field_modelversion_modelnid_value = :nid )))) dl";
       $all_dls = db_query($sql, array(':nid' => $modelnid))->fetchField(); 
@@ -479,6 +475,7 @@ endif; // if authors
 $query = new EntityFieldQuery();
 $query->entityCondition('entity_type','node')
       ->entityCondition('bundle','modelversion')
+      ->propertyCondition('status', 1)
       ->fieldCondition('field_modelversion_model', 'nid', $modelnid, '=');
 $result = $query->execute();
 

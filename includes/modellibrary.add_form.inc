@@ -27,7 +27,7 @@ function modellibrary_wizard($js = NULL, $step = NULL) {
     'path' => "model/" . ($action == 'add' ? (($js ? 'ajax' : 'nojs') . '/add/%step') : $modelnid . '/' . ($js ? 'ajax' : 'nojs') . '/edit/%step'),
     'action' => $action, // custom addition
     'show trail' => TRUE,
-    'show back' => FALSE,
+    'show back' => TRUE,
     'show cancel' => TRUE,
     'show return' => FALSE,
     'next callback' =>  'modellibrary_wizard_next',
@@ -249,12 +249,18 @@ function modellibrary_wizard_step1($form, &$form_state) {
     #'#weight' => 0,
   );
 
+  $form['instructions'] = array(
+    '#markup' => t('<div class="setoff"><p>You must provide a short summary, 2-3 sentences about the model and a brief abstract of the model. Please do not attempt to provide a detailed ODD of the program code. That should be provided in the full documentation in the files downloads later in this process. The model summary, used in search results listings, is limited to 250 characters. The model abstract is limited to 2,000 characters.</p></div>'),
+    #'#weight' => 5,
+  );
+
   $form['summary'] = array(
     '#type' => 'textarea',
     '#title' => t('Summary'),
-    '#description' => t('You must provide a short summary of the model.  This teaser is displayed in the library model listings and must not exceed 250 characters. [REQUIRED]'),
+    '#description' => t('<strong>You must provide a short summary of the model.  This teaser is displayed in the library model listings and must not exceed 250 characters. [REQUIRED]</strong>'),
     '#cols' => 50,
     '#rows' => 3,
+    '#maxlength' => 250,
     '#required' => TRUE,
     '#default_value' => $action == 'edit' ? $node->body[LANGUAGE_NONE][0]['summary'] : (isset($form_state['object']->summary) ? $form_state['object']->summary : NULL),
     #'#weight' => 5,
@@ -262,12 +268,13 @@ function modellibrary_wizard_step1($form, &$form_state) {
 
   $form['description'] = array(
     '#type' => 'text_format',
-    '#title' => t('Description'),
-    '#description' => t('This field contains the model\'s full description.  Please be clear about the model\'s purpose and design. [REQUIRED]'),
+    '#title' => t('Model Abstract'),
+    '#description' => t('<strong>This field contains the model\'s abstract. Please be clear and concise about the model\'s purpose and design. This description is limited to 2,000 caracters. [REQUIRED]</strong>'),
     '#cols' => 50,
     '#rows' => 10,
+    '#maxlength' => 2000,
     '#required' => TRUE,
-    '#default_value' => $action == 'edit' ? $node->body[LANGUAGE_NONE][0]['value'] : (isset($form_state['object']->description) ? $form_state['object']->description : ''),
+    '#default_value' => $action == 'edit' ? $node->body[LANGUAGE_NONE][0]['value'] : (isset($form_state['object']->description) ? $form_state['object']->description['value'] : ''),
     #'#format' => $form_state['form_info']['action'] == 'edit' ? $node->body[LANGUAGE_NONE][0]['format'] : (isset($form_state['object']->description['format']) ? $form_state['object']->description['format'] : ''),
     '#format' => NULL,
     #'#weight' => 6,
@@ -499,7 +506,7 @@ function modellibrary_wizard_step3($form, &$form_state) {
     '#description' => t('If you have specific notes about this version of the model, distinct from the general model details, enter that information here.'),
     '#cols' => 50,
     '#rows' => 5,
-    '#default_value' => $form_state['form_info']['action'] == 'edit' && isset($node->body[LANGUAGE_NONE][0]['value']) ? $node->body[LANGUAGE_NONE][0]['value'] : (isset($form_state['object']->notes) ? $form_state['object']->notes : ''),
+    '#default_value' => $form_state['form_info']['action'] == 'edit' && isset($node->body[LANGUAGE_NONE][0]['value']) ? $node->body[LANGUAGE_NONE][0]['value'] : (isset($form_state['object']->notes) ? $form_state['object']->notes['value'] : ''),
   );
 
   $form['platform'] = array(
@@ -665,7 +672,7 @@ function modellibrary_wizard_step4($form, &$form_state) {
     '#default_value' => $form_state['form_info']['action'] == 'edit' && isset($node->field_modelversion_sensitivity[LANGUAGE_NONE][0]['fid']) ? $node->field_modelversion_sensitivity[LANGUAGE_NONE][0]['fid'] : (isset($form_state['object']->file_sensitivity_fid) ? $form_state['object']->file_sensitivity_fid : ''),
     '#progress_indicator' => 'bar',
     '#upload_validators' => array(
-      'file_validate_extensions' => array('pdf doc docx xls xlsx odt ods odp txt zip gz bz2'),
+      'file_validate_extensions' => array('pdf doc docx xls xlsx odt ods odp txt zip gz bz2 asc'),
     ),
   );
 
@@ -676,7 +683,7 @@ function modellibrary_wizard_step4($form, &$form_state) {
     '#default_value' => $form_state['form_info']['action'] == 'edit' && isset($node->field_modelversion_dataset[LANGUAGE_NONE][0]['fid']) ? $node->field_modelversion_dataset[LANGUAGE_NONE][0]['fid'] : (isset($form_state['object']->file_dataset_fid) ? $form_state['object']->file_dataset_fid : ''),
     '#progress_indicator' => 'bar',
     '#upload_validators' => array(
-      'file_validate_extensions' => array('pdf doc docx xls xlsx odt ods odp txt zip gz bz2'),
+      'file_validate_extensions' => array('pdf doc docx xls xlsx odt ods odp txt zip gz bz2 asc'),
     ),
   );
 
@@ -687,7 +694,7 @@ function modellibrary_wizard_step4($form, &$form_state) {
     '#default_value' => $form_state['form_info']['action'] == 'edit' && isset($node->field_modelversion_addfiles[LANGUAGE_NONE][0]['fid']) ? $node->field_modelversion_addfiles[LANGUAGE_NONE][0]['fid'] : (isset($form_state['object']->file_addfiles_fid) ? $form_state['object']->file_addfiles_fid : ''),
     '#progress_indicator' => 'bar',
     '#upload_validators' => array(
-      'file_validate_extensions' => array('pdf doc docx xls xlsx odt ods odp txt zip gz bz2'),
+      'file_validate_extensions' => array('pdf doc docx xls xlsx odt ods odp txt zip gz bz2 asc'),
     ),
   );
 
@@ -748,7 +755,7 @@ function modellibrary_wizard_step5($form, &$form_state) {
     '#cols' => 50,
     '#rows' => 5,
     '#weight' => 19,
-    '#default_value' => $form_state['form_info']['action'] == 'edit' && isset($node->field_modelversion_runconditions[LANGUAGE_NONE][0]['value']) ? $node->field_modelversion_runconditions[LANGUAGE_NONE][0]['value'] : (isset($form_state['object']->runconditions) ? $form_state['object']->runconditions : ''),
+    '#default_value' => $form_state['form_info']['action'] == 'edit' && isset($node->field_modelversion_runconditions[LANGUAGE_NONE][0]['value']) ? $node->field_modelversion_runconditions[LANGUAGE_NONE][0]['value'] : (isset($form_state['object']->runconditions) ? $form_state['object']->runconditions['value'] : ''),
     '#format' => NULL,
   );
 
@@ -773,7 +780,7 @@ function modellibrary_wizard_step6($form, &$form_state) {
     $node = node_load(arg(1));
 
   $form['help'] = array(
-    '#markup' => '<div class="setoff"><h3>Save Model.</h3><p>You may now save your model by clicking "Submit" or return to previous pages by clicking "Previous" to review your data entry and make changes.</p><p>This model will not be automatically visible to the public.  First, the Model Library will scan your model for any incomplete fields you may have overlooked.  If for any reason, the model is not ready to be published, the Model viewing page will display a notice for you, informing you of the reasons the model is not ready to be published.</p><p>Second, if there are no issues with the model itself, you must choose to Publish the model in order to make it publicly viewable and searchable.  You may choose to keep a model disabled, if for example it is associated with a publication under review, and you do not wish to make the model public until the paper has been published.</p><h3>Sharing your model with editors and reviewers.</h3><p>While a model is disabled, it will not appear in the Model Library listings nor in search results, but you can share your model with specific individuals by copying the URL on your model\'s page, and share that web address with others. You may email that information or include it in your article submission material so reviewers can include your model in their review process, if necessary.</p><p>Click "Submit" to save your model now and go to your new model.</p></div>',
+    '#markup' => '<div class="setoff"><h3>Save Model.</h3><p>You may now save your model by clicking "Finish" or return to previous pages by clicking "Back" to review your data entry and make changes.</p><p>This model will not be automatically visible to the public.  First, the Model Library will scan your model for any incomplete fields you may have overlooked.  If for any reason, the model is not ready to be published, the Model viewing page will display a notice for you, informing you of the reasons the model is not ready to be published.</p><p>Second, if there are no issues with the model itself, you must choose to Publish the model in order to make it publicly viewable and searchable.  You may choose to keep a model disabled, if for example it is associated with a publication under review, and you do not wish to make the model public until the paper has been published.</p><h3>Sharing your model with editors and reviewers.</h3><p>While a model is disabled, it will not appear in the Model Library listings nor in search results, but you can share your model with specific individuals by copying the URL on your model\'s page, and share that web address with others. You may email that information or include it in your article submission material so reviewers can include your model in their review process, if necessary.</p><p>Click "Finish" to save your model now and go to your new model.</p></div>',
     '#weight' => -20,
   );
 
