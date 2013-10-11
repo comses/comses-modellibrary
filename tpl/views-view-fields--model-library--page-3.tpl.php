@@ -127,11 +127,11 @@ if ($fields['status']->raw == 1) {
         <div class="model-date model-updated-date">Last Updated: <?php print date('M j, Y', $node->changed); ?></div>
 <?php
       // Code file download count, all-time
-      $sql = "SELECT SUM(downloads) AS downloads FROM (SELECT COUNT(dc.fid) AS downloads FROM files files LEFT JOIN download_count dc ON files.fid = dc.fid WHERE dc.fid = files.fid AND (files.fid IN (SELECT DISTINCT n_mv.field_modelversion_code_fid AS code_fid FROM node n LEFT JOIN content_type_modelversion n_mv ON n.vid = n_mv.vid WHERE (n.type in ('modelversion')) AND (n.status = 1) AND (n_mv.field_modelversion_modelnid_value = :nid )))) dl";
+      $sql = "SELECT SUM(downloads) AS downloads FROM (SELECT COUNT(dc.fid) AS downloads FROM download_count dc WHERE dc.fid IN (SELECT DISTINCT field_modelversion_code_fid AS code_fid FROM node n LEFT JOIN field_data_field_modelversion_code fmvc ON n.vid = fmvc.revision_id LEFT JOIN field_data_field_modelversion_model fmvm ON n.vid = fmvm.revision_id WHERE (n.type in ('modelversion')) AND (n.status = 1) AND (fmvm.field_modelversion_model_nid = :nid))) dl";
       $all_dls = db_query($sql, array(':nid' => $modelnid))->fetchField(); 
 
       // Code download count, last 3 months
-      $sql = "SELECT SUM(downloads) AS downloads FROM (SELECT COUNT(dc.fid) AS downloads FROM files files LEFT JOIN download_count dc ON files.fid = dc.fid WHERE dc.fid = files.fid AND (files.fid IN (SELECT DISTINCT n_mv.field_modelversion_code_fid AS code_fid FROM node n LEFT JOIN content_type_modelversion n_mv ON n.vid = n_mv.vid WHERE (n.type in ('modelversion')) AND (n.status = 1) AND (n_mv.field_modelversion_modelnid_value = :nid) AND (FROM_UNIXTIME(dc.timestamp) > (now() - INTERVAL 3 MONTH))))) dl";
+      $sql = "SELECT SUM(downloads) AS downloads FROM (SELECT COUNT(dc.fid) AS downloads FROM download_count dc WHERE dc.fid IN (SELECT DISTINCT field_modelversion_code_fid AS code_fid FROM node n LEFT JOIN field_data_field_modelversion_code fmvc ON n.vid = fmvc.revision_id LEFT JOIN field_data_field_modelversion_model fmvm ON n.vid = fmvm.revision_id WHERE (n.type in ('modelversion')) AND (n.status = 1) AND (fmvm.field_modelversion_model_nid = :nid) AND (FROM_UNIXTIME(dc.timestamp) > (now() - INTERVAL 3 MONTH)))) dl";
       $month_dls = db_query($sql, array(':nid' => $modelnid))->fetchField(); 
 ?>
   <div class="model-downloads"><?php print $all_dls; if ($all_dls == 1) print ' Download'; else print ' Downloads'; print ' ('. $month_dls; if ($month_dls == 1) print ' Download in the last 3 months)'; else print ' Downloads in the last 3 months)'; ?></div>
