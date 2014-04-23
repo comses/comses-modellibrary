@@ -24,6 +24,8 @@
 module_load_include('inc', 'modellibrary', 'includes/modellibrary.add_form');
 module_load_include('inc', 'modellibrary', 'includes/modellibrary.helper.functions');
 
+global $base_url;
+
 /**
  * Implementation of hook_help()
  */
@@ -604,7 +606,7 @@ function modellibrary_preprocess_page(&$variables) {
       );
       $dublin_cite = 'CoMSES Computational Model Library. Retrieved from: ';
       if (isset($node->field_model_handle[LANGUAGE_NONE][0]['safe_value'])) $dublin_cite .= 'http://hdl.handle.net/'. $node->field_model_handle[LANGUAGE_NONE][0]['safe_value'];
-      else $dublin_cite .= 'http://www.openabm.org/model/'. $node->nid .'/version/'. arg(3) .'/view';
+      else $dublin_cite .= $base_url.'/model/'. $node->nid .'/version/'. arg(3) .'/view';
       $dublin_cite_element[] = array(
         '#tag' => 'meta',
         '#attributes' => array(
@@ -677,7 +679,7 @@ function modellibrary_preprocess_page(&$variables) {
           '#tag' => 'meta',
           '#attributes' => array(
             'name' => 'DC.Identifier',
-            'content' => 'http://www.openabm.org/model/'. $node->nid .'/version/'. arg(3) .'/view',
+            'content' => $base_url.'/model/'. $node->nid .'/version/'. arg(3) .'/view',
           ),
           '#weight' => 28,
         );
